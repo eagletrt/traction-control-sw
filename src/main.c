@@ -2,8 +2,15 @@
 
 int main(void) {
 
-    model.dwork = &rtDW;
-    Velocity_Estimation_initialize(&model);
+	model_init();
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
+}
+
+bool model_init(void) {
+	// Velocity Estimation
+	model.dwork = &rtDW;
+	Velocity_Estimation_initialize(&model);
+
+	return true;
 }

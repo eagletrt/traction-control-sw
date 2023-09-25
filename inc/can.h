@@ -1,32 +1,23 @@
-#ifndef CAN_H
-#define CAN_H
+#ifndef __CAN_H__
+#define __CAN_H__
 
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
-#include <net/if.h>
-#include <unistd.h>
 #include <stdbool.h>
 #include <inttypes.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-
 
 // CAN libraries (can_utils)
 #include <linux/can.h>
 #include <linux/can/raw.h>
 
+typedef struct can_t {
+	int sock;										 // socket fd
+	char device[255];						 // name of device
+	struct sockaddr_can address; // address of device
 
-typedef struct can_t
-{
-  int sock;// socket fd
-  const char *device;          // name of device
-  struct sockaddr_can address; // address of device
-
-  uint64_t bytes_exchanged;
-  bool opened;
-}can_t;
-
+	uint64_t bytes_exchanged;
+	bool opened;
+} can_t;
 
 /**
  * Sets device string (can0, vcan0)
@@ -34,16 +25,15 @@ typedef struct can_t
  */
 void can_init(can_t *can, const char *device);
 
-
 /**
  * Returns if the socket is opened
  */
-int can_is_open(can_t *can);
+bool can_is_open(can_t *can);
 
 /**
  * Opens device updating address,
  *
- * return socket fd
+ * return socket fd, -1 if error
  */
 int can_open_socket(can_t *can);
 
@@ -52,7 +42,7 @@ int can_open_socket(can_t *can);
  *
  * return true if close was successfull
  */
-int can_close_socket(can_t *can);
+bool can_close_socket(can_t *can);
 
 /**
  * Returns device name
@@ -61,7 +51,7 @@ const char *can_get_device(can_t *can);
 
 /**
  * @brief Get the Bytes Sent and received
- * 
+ *
  */
 uint64_t can_get_bytes_exchanged(can_t *can);
 
@@ -74,7 +64,7 @@ uint64_t can_get_bytes_exchanged(can_t *can);
  * @param len num of bytes to be sent (0~8)
  * return success
  */
-int can_send(can_t *can, int id, char *data, int len);
+int can_send(can_t *can, uint8_t id, uint8_t *data, uint8_t len);
 
 /**
  * Receive a can frame from device
@@ -92,4 +82,4 @@ int can_receive(can_t *can, struct can_frame *frame);
  */
 int can_set_filters(can_t *can, struct can_filter *filter);
 
-#endif
+#endif // __CAN_H__
