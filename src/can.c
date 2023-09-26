@@ -9,7 +9,7 @@
 void can_init(can_t *can, const char *device) {
 	assert(can && device);
 
-	strncpy(can->device, device, sizeof(can->device));
+	strncpy(can->device, device, sizeof(can->device) - 1);
 	can->opened = false;
 	can->bytes_exchanged = 0;
 }

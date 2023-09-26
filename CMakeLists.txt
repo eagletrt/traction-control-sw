@@ -1,9 +1,11 @@
 project(traction-control)
 
 set(CMAKE_CXX_STANDARD 17)
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+add_compile_options(-Wall -Wextra -Werror -O0 -g)
+add_compile_definitions(CANLIB_TIMESTAMP)
 
 file(GLOB traction-control-lib-src ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
+file(GLOB can-lib-src ${CMAKE_CURRENT_LIST_DIR}/lib/can/**/**/*.c)
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}
@@ -24,10 +26,19 @@ add_library(
 )
 
 add_library(
+    can-lib
+    STATIC
+    ${can-lib-src}
+)
+target_compile_definitions(can-lib PUBLIC CANLIB_TIMESTAMP)
+target_compile_options(can-lib PRIVATE -w)
+
+add_library(
     traction-control-lib
     SHARED
     ${traction-control-lib-src}
 )
+target_link_libraries(traction-control-lib can-lib)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
 

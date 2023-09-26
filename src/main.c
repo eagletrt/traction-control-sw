@@ -7,6 +7,7 @@
 
 int main(void) {
 
+	can_messages_init();
 	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
 	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
 
@@ -27,8 +28,12 @@ int main(void) {
 	kill_can_thread = false;
 	pthread_mutex_init(&model_mutex, NULL);
 
+	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_PRIMARY);
+	pthread_create(&can_threads[CAN_SOCKET_SECONDARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_SECONDARY);
+
 	while (true) {
 		pthread_mutex_lock(&model_mutex);
+		model_set_data(&ve_data);
 		Velocity_Estimation_step(&model);
 		pthread_mutex_unlock(&model_mutex);
 
@@ -50,9 +55,9 @@ void can_thread(can_socket_t socket) {
 			continue;
 		}
 		message.frame = frame;
-		// Add message to queue
+
 		pthread_mutex_lock(&model_mutex);
-		can_messages_parse(&message, &model);
+		can_messages_parse(&message, &ve_data);
 		pthread_mutex_unlock(&model_mutex);
 	}
 }
@@ -63,4 +68,17 @@ bool init_model(void) {
 	Velocity_Estimation_initialize(&model);
 
 	return true;
+}
+
+void model_set_data(ve_data_t *data) {
+	// Velocity Estimation Data
+	rtTmax_rl = data->rtTmax_rl;
+	rtTmax_rr = data->rtTmax_rr;
+	rtaxG = data->rtaxG;
+	rtmap_motor = data->rtmap_motor;
+	rtomega_fl = data->rtomega_fl;
+	rtomega_fr = data->rtomega_fr;
+	rtomega_rl = data->rtomega_rl;
+	rtomega_rr = data->rtomega_rr;
+	rtu_bar = data->rtu_bar;
 }

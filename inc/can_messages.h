@@ -1,10 +1,9 @@
 #ifndef __CAN_MESSAGES_H__
 #define __CAN_MESSAGES_H__
 
-#include "defines.h"
 #include "can.h"
-
-#include "exported/Velocity_Estimation_ert_rtw/Velocity_Estimation.h"
+#include "data.h"
+#include "defines.h"
 
 typedef enum {
 	NETWORK_PRIMARY,
@@ -29,6 +28,7 @@ typedef struct {
 	struct can_frame frame;
 } can_message_t;
 
-void can_messages_parse(can_message_t *message, RT_MODEL *model);
+void can_messages_init();
+void can_messages_parse(can_message_t *message, ve_data_t *ve_data);
 
 #endif // __CAN_MESSAGES_H__

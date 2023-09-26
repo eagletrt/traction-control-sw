@@ -1,0 +1,4 @@
+[submodule "lib/can"]
+	path = lib/can
+	url = git@github.com:eagletrt/can.git
+	branch = build-evo
