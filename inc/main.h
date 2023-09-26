@@ -3,27 +3,25 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "inc/can.h"
+#include "inc/can_messages.h"
 
 #include "exported/Velocity_Estimation_ert_rtw/Velocity_Estimation.h"
 
-typedef enum {
-	CAN_PRIMARY,
-	CAN_SECONDARY,
-	CAN_INVERTERS,
-
-	CAN_NETWORK_COUNT
-} can_network_t;
-
-typedef struct {
-	can_network_t network;
-	struct can_frame frame;
-} can_message_t;
+can_t can[CAN_SOCKET_COUNT];
 
 DW rtDW;
 RT_MODEL model;
 
-bool model_init(void);
+bool init_model(void);
+
+// CAN thread
+bool kill_can_thread;
+pthread_mutex_t model_mutex;
+pthread_t can_thread_id[CAN_SOCKET_COUNT];
+
+void can_thread(can_socket_t socket);
 
 #endif // __MAIN_H__

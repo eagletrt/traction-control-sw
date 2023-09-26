@@ -1,6 +1,7 @@
 project(traction-control)
 
 set(CMAKE_CXX_STANDARD 17)
+add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
 file(GLOB traction-control-lib-src ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
 
