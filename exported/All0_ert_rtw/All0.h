@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'All0'.
  *
- * Model version                  : 6.11
+ * Model version                  : 6.6
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Mon Dec 12 11:45:34 2022
+ * C/C++ source code generated on : Tue Sep 26 16:59:25 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -40,127 +40,131 @@
 #endif
 
 /* Forward declaration for rtModel */
-typedef struct tag_RTM RT_MODEL;
+typedef struct tag_RTM_All0 RT_MODEL_All0;
 
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
-  real_T UnitDelay1_DSTATE;            /* '<S7>/Unit Delay1' */
-  real_T UD_DSTATE;                    /* '<S8>/UD' */
-  real_T UnitDelay_DSTATE;             /* '<S7>/Unit Delay' */
-  real_T DiscreteTimeIntegrator1_DSTATE;/* '<S27>/Discrete-Time Integrator1' */
-  real_T DiscreteTimeIntegrator1_DSTAT_e;/* '<S19>/Discrete-Time Integrator1' */
-  uint32_T m_bpIndex;                  /* '<S14>/1-D Lookup Table1' */
-  uint32_T m_bpIndex_h;                /* '<S13>/1-D Lookup Table1' */
-  uint32_T m_bpIndex_e;                /* '<S14>/1-D Lookup Table' */
-  uint32_T m_bpIndex_m;                /* '<S13>/1-D Lookup Table' */
-  int8_T DiscreteTimeIntegrator1_PrevRes;/* '<S27>/Discrete-Time Integrator1' */
-  int8_T DiscreteTimeIntegrator1_PrevR_p;/* '<S19>/Discrete-Time Integrator1' */
-} DW;
+  real_T Integrator_DSTATE;            /* '<S47>/Integrator' */
+  real_T DiscreteTimeIntegrator1_DSTATE;/* '<S79>/Discrete-Time Integrator1' */
+  real_T DiscreteTimeIntegrator1_DSTAT_e;/* '<S71>/Discrete-Time Integrator1' */
+  uint32_T m_bpIndex;                  /* '<S66>/1-D Lookup Table1' */
+  uint32_T m_bpIndex_h;                /* '<S65>/1-D Lookup Table1' */
+  uint32_T m_bpIndex_e;                /* '<S66>/1-D Lookup Table' */
+  uint32_T m_bpIndex_m;                /* '<S65>/1-D Lookup Table' */
+  int8_T DiscreteTimeIntegrator1_PrevRes;/* '<S79>/Discrete-Time Integrator1' */
+  int8_T DiscreteTimeIntegrator1_PrevR_p;/* '<S71>/Discrete-Time Integrator1' */
+} DW_All0;
 
 /* Constant parameters (default storage) */
 typedef struct {
   /* Pooled Parameter (Expression: [0 1])
    * Referenced by:
    *   '<S2>/1-D Lookup Table2'
-   *   '<S13>/1-D Lookup Table2'
-   *   '<S14>/1-D Lookup Table2'
+   *   '<S10>/1-D Lookup Table2'
+   *   '<S65>/1-D Lookup Table2'
+   *   '<S66>/1-D Lookup Table2'
    */
   real_T pooled2[2];
 
   /* Pooled Parameter (Expression: sc_sched.Kp)
    * Referenced by:
-   *   '<S13>/1-D Lookup Table'
-   *   '<S14>/1-D Lookup Table'
+   *   '<S65>/1-D Lookup Table'
+   *   '<S66>/1-D Lookup Table'
    */
   real_T pooled3[14];
 
   /* Pooled Parameter (Expression: sc_sched.speed)
    * Referenced by:
-   *   '<S13>/1-D Lookup Table'
-   *   '<S13>/1-D Lookup Table1'
-   *   '<S14>/1-D Lookup Table'
-   *   '<S14>/1-D Lookup Table1'
+   *   '<S65>/1-D Lookup Table'
+   *   '<S65>/1-D Lookup Table1'
+   *   '<S66>/1-D Lookup Table'
+   *   '<S66>/1-D Lookup Table1'
    */
   real_T pooled4[14];
 
   /* Expression: TV.KusT.K_us
-   * Referenced by: '<S11>/K_us_table'
+   * Referenced by: '<S9>/K_us_table'
    */
-  real_T K_us_table_tableData[10];
+  real_T K_us_table_tableData[6];
 
   /* Expression: TV.KusT.u_vals
-   * Referenced by: '<S11>/K_us_table'
+   * Referenced by: '<S9>/K_us_table'
    */
-  real_T K_us_table_bp01Data[10];
+  real_T K_us_table_bp01Data[6];
 
-  /* Expression: LookUpFuzzy
-   * Referenced by: '<S7>/2-D Lookup Table'
+  /* Expression: TV.PID.Kp_vals
+   * Referenced by: '<S10>/P_table'
    */
-  real_T uDLookupTable_tableData[441];
+  real_T P_table_tableData[8];
 
-  /* Pooled Parameter (Mixed Expressions)
-   * Referenced by: '<S7>/2-D Lookup Table'
+  /* Pooled Parameter (Expression: TV.PID.u_vals)
+   * Referenced by:
+   *   '<S10>/I_table'
+   *   '<S10>/P_table'
    */
-  real_T pooled10[21];
+  real_T pooled9[8];
+
+  /* Expression: TV.PID.Ki_vals
+   * Referenced by: '<S10>/I_table'
+   */
+  real_T I_table_tableData[8];
 
   /* Pooled Parameter (Expression: sc_sched.Ki)
    * Referenced by:
-   *   '<S13>/1-D Lookup Table1'
-   *   '<S14>/1-D Lookup Table1'
+   *   '<S65>/1-D Lookup Table1'
+   *   '<S66>/1-D Lookup Table1'
    */
   real_T pooled13[14];
-
-  /* Computed Parameter: uDLookupTable_maxIndex
-   * Referenced by: '<S7>/2-D Lookup Table'
-   */
-  uint32_T uDLookupTable_maxIndex[2];
-} ConstP;
+} ConstP_All0;
 
 /* Real-time Model Data Structure */
-struct tag_RTM {
+struct tag_RTM_All0 {
   const char_T * volatile errorStatus;
-  DW *dwork;
+  DW_All0 *dwork;
 };
 
 /* Constant parameters (default storage) */
-extern const ConstP rtConstP;
+extern const ConstP_All0 rtConstP_All0;
 
 /* Model entry point functions */
-extern void All0_initialize(RT_MODEL *const rtM);
-extern void All0_step(RT_MODEL *const rtM);
+extern void All0_initialize(RT_MODEL_All0 *const rtM_All0);
+extern void All0_step(RT_MODEL_All0 *const rtM_All0);
 
 /* Exported data declaration */
 
 /* Data with Exported storage */
-extern real_T rtDriver_req;            /* '<Root>/driver_request' */
-extern real_T rtSteeringangle;         /* '<Root>/delta' */
-extern real_T rtTm_rl;                 /* '<Root>/Tmax_rl' */
-extern real_T rtTm_rl_a;               /* '<Root>/Tm_rl' */
-extern real_T rtTm_rr;                 /* '<Root>/Tmax_rr' */
-extern real_T rtTm_rr_m;               /* '<Root>/Tm_rr' */
-extern real_T rtbrake;                 /* '<Root>/Brake' */
-extern real_T rtmap_sc;                /* '<Root>/map_sc' */
-extern real_T rtmap_tv;                /* '<Root>/map_tv' */
-extern real_T rtomega_rl;              /* '<Root>/omega_rl' */
-extern real_T rtomega_rr;              /* '<Root>/omega_rr' */
-extern real_T rtu_bar;                 /* '<Root>/u_bar' */
-extern real_T rtyaw_rate;              /* '<Root>/Omega' */
+extern real_T rtDriver_req_All0;       /* '<Root>/driver_request' */
+extern real_T rtSteeringangle_All0;    /* '<Root>/delta' */
+extern real_T rtTm_rl_All0;            /* '<Root>/Tmax_rl' */
+extern real_T rtTm_rl_a_All0;          /* '<Root>/Tm_rl' */
+extern real_T rtTm_rr_All0;            /* '<Root>/Tmax_rr' */
+extern real_T rtTm_rr_m_All0;          /* '<Root>/Tm_rr' */
+extern real_T rtbrake_All0;            /* '<Root>/Brake' */
+extern real_T rtmap_sc_All0;           /* '<Root>/map_sc' */
+extern real_T rtmap_tv_All0;           /* '<Root>/map_tv' */
+extern real_T rtomega_rl_All0;         /* '<Root>/omega_rl' */
+extern real_T rtomega_rr_All0;         /* '<Root>/omega_rr' */
+extern real_T rtu_bar_All0;            /* '<Root>/u_bar' */
+extern real_T rtyaw_rate_All0;         /* '<Root>/Omega' */
 
 /*-
  * These blocks were eliminated from the model due to optimizations:
  *
- * Block '<S8>/Data Type Duplicate' : Unused code path elimination
- * Block '<S7>/Scope' : Unused code path elimination
- * Block '<S7>/deltarad' : Unused code path elimination
+ * Block '<S55>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S55>/Data Type Propagation' : Unused code path elimination
+ * Block '<S2>/deltaT' : Unused code path elimination
+ * Block '<S2>/deltarad' : Unused code path elimination
+ * Block '<S2>/errore' : Unused code path elimination
+ * Block '<S2>/omega' : Unused code path elimination
  * Block '<S3>/Data Type Duplicate' : Unused code path elimination
  * Block '<S3>/Data Type Propagation' : Unused code path elimination
  * Block '<S4>/Data Type Duplicate' : Unused code path elimination
  * Block '<S4>/Data Type Propagation' : Unused code path elimination
- * Block '<S16>/Data Type Duplicate' : Unused code path elimination
- * Block '<S16>/Data Type Propagation' : Unused code path elimination
- * Block '<S23>/Scope' : Unused code path elimination
- * Block '<S24>/Data Type Duplicate' : Unused code path elimination
- * Block '<S24>/Data Type Propagation' : Unused code path elimination
+ * Block '<S68>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S68>/Data Type Propagation' : Unused code path elimination
+ * Block '<S75>/Scope' : Unused code path elimination
+ * Block '<S76>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S76>/Data Type Propagation' : Unused code path elimination
  */
 
 /*-
@@ -182,35 +186,87 @@ extern real_T rtyaw_rate;              /* '<Root>/Omega' */
  *
  * '<Root>' : 'Fenice_VehicleModel/Vehicle Controller'
  * '<S1>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active'
- * '<S2>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Fuzzy Control'
+ * '<S2>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control'
  * '<S3>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Saturation Dynamic'
  * '<S4>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Saturation Dynamic1'
  * '<S5>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Saturation block'
  * '<S6>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation'
- * '<S7>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Fuzzy Control/Yaw-Rate Controller'
- * '<S8>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Fuzzy Control/Yaw-Rate Controller/Discrete Derivative'
- * '<S9>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Fuzzy Control/Yaw-Rate Controller/MATLAB Function2'
- * '<S10>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Fuzzy Control/Yaw-Rate Controller/SteeringModel'
- * '<S11>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Fuzzy Control/Yaw-Rate Controller/Yaw-Rate estimator'
- * '<S12>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Fuzzy Control/Yaw-Rate Controller/Yaw-Rate estimator/Yaw-Rate'
- * '<S13>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1'
- * '<S14>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1'
- * '<S15>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/PI control'
- * '<S16>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/Saturation Dynamic'
- * '<S17>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/Slip_est1'
- * '<S18>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/control reset switch'
- * '<S19>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/PI control/Integral Part'
- * '<S20>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/PI control/Proportional Part'
- * '<S21>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/control reset switch/If Action Subsystem'
- * '<S22>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/control reset switch/If Action Subsystem1'
- * '<S23>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/PI control'
- * '<S24>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/Saturation Dynamic'
- * '<S25>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/Slip_est1'
- * '<S26>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/switching logic'
- * '<S27>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/PI control/Integral Part'
- * '<S28>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/PI control/Proportional Part'
- * '<S29>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/switching logic/If Action Subsystem'
- * '<S30>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/switching logic/If Action Subsystem1'
+ * '<S7>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Steering angle > 2deg'
+ * '<S8>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/SteeringModel'
+ * '<S9>'   : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate estimator '
+ * '<S10>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking'
+ * '<S11>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate estimator /Yaw-Rate'
+ * '<S12>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID'
+ * '<S13>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Anti-windup'
+ * '<S14>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/D Gain'
+ * '<S15>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Filter'
+ * '<S16>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Filter ICs'
+ * '<S17>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/I Gain'
+ * '<S18>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Ideal P Gain'
+ * '<S19>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Ideal P Gain Fdbk'
+ * '<S20>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Integrator'
+ * '<S21>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Integrator ICs'
+ * '<S22>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/N Copy'
+ * '<S23>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/N Gain'
+ * '<S24>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/P Copy'
+ * '<S25>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Parallel P Gain'
+ * '<S26>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Reset Signal'
+ * '<S27>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Saturation'
+ * '<S28>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Saturation Fdbk'
+ * '<S29>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Sum'
+ * '<S30>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Sum Fdbk'
+ * '<S31>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Tracking Mode'
+ * '<S32>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Tracking Mode Sum'
+ * '<S33>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Tsamp - Integral'
+ * '<S34>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Tsamp - Ngain'
+ * '<S35>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/postSat Signal'
+ * '<S36>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/preSat Signal'
+ * '<S37>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel'
+ * '<S38>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel/Dead Zone'
+ * '<S39>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel/Dead Zone/External'
+ * '<S40>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel/Dead Zone/External/Dead Zone Dynamic'
+ * '<S41>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/D Gain/Disabled'
+ * '<S42>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Filter/Disabled'
+ * '<S43>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Filter ICs/Disabled'
+ * '<S44>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/I Gain/External Parameters'
+ * '<S45>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Ideal P Gain/Passthrough'
+ * '<S46>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Ideal P Gain Fdbk/Passthrough'
+ * '<S47>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Integrator/Discrete'
+ * '<S48>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Integrator ICs/Internal IC'
+ * '<S49>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/N Copy/Disabled wSignal Specification'
+ * '<S50>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/N Gain/Disabled'
+ * '<S51>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/P Copy/Disabled'
+ * '<S52>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Parallel P Gain/External Parameters'
+ * '<S53>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Reset Signal/Disabled'
+ * '<S54>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Saturation/External'
+ * '<S55>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Saturation/External/Saturation Dynamic'
+ * '<S56>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Saturation Fdbk/Passthrough'
+ * '<S57>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Sum/Sum_PI'
+ * '<S58>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Sum Fdbk/Enabled'
+ * '<S59>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Tracking Mode/Disabled'
+ * '<S60>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Tracking Mode Sum/Passthrough'
+ * '<S61>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Tsamp - Integral/Passthrough'
+ * '<S62>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/Tsamp - Ngain/Passthrough'
+ * '<S63>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/postSat Signal/Feedback_Path'
+ * '<S64>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/PI Control/Yaw-Rate tracking/Discrete Varying PID/preSat Signal/Feedback_Path'
+ * '<S65>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1'
+ * '<S66>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1'
+ * '<S67>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/PI control'
+ * '<S68>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/Saturation Dynamic'
+ * '<S69>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/Slip_est1'
+ * '<S70>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/control reset switch'
+ * '<S71>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/PI control/Integral Part'
+ * '<S72>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/PI control/Proportional Part'
+ * '<S73>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/control reset switch/If Action Subsystem'
+ * '<S74>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Left Wheel1/control reset switch/If Action Subsystem1'
+ * '<S75>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/PI control'
+ * '<S76>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/Saturation Dynamic'
+ * '<S77>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/Slip_est1'
+ * '<S78>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/switching logic'
+ * '<S79>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/PI control/Integral Part'
+ * '<S80>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/PI control/Proportional Part'
+ * '<S81>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/switching logic/If Action Subsystem'
+ * '<S82>'  : 'Fenice_VehicleModel/Vehicle Controller/All Control Active/Slip for simulation/TCS Rear Right Wheel1/switching logic/If Action Subsystem1'
  */
 #endif                                 /* RTW_HEADER_All0_h_ */
 

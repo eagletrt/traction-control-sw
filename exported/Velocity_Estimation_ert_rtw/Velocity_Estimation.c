@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Velocity_Estimation'.
  *
- * Model version                  : 5.305
- * Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
- * C/C++ source code generated on : Mon Sep  5 11:19:11 2022
+ * Model version                  : 6.6
+ * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
+ * C/C++ source code generated on : Tue Sep 26 17:00:24 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -21,19 +21,20 @@
 
 #include "Velocity_Estimation.h"
 #include "rtwtypes.h"
+#include <string.h>
 
 /* Exported data definition */
 
 /* Data with Exported storage */
-real_T rtTmax_rl;                      /* '<Root>/Tmax_rl' */
-real_T rtTmax_rr;                      /* '<Root>/Tmax_rr' */
-real_T rtaxG;                          /* '<Root>/a_x' */
-real_T rtmap_motor;                    /* '<Root>/map' */
-real_T rtomega_fl;                     /* '<Root>/omega_fl' */
-real_T rtomega_fr;                     /* '<Root>/omega_fr' */
-real_T rtomega_rl;                     /* '<Root>/omega_rl' */
-real_T rtomega_rr;                     /* '<Root>/omega_rr' */
-real_T rtu_bar;                        /* '<Root>/u_bar' */
+real_T rtTmax_rl_Velocity_Estimation;  /* '<Root>/Tmax_rl' */
+real_T rtTmax_rr_Velocity_Estimation;  /* '<Root>/Tmax_rr' */
+real_T rtaxG_Velocity_Estimation;      /* '<Root>/a_x' */
+real_T rtmap_motor_Velocity_Estimation;/* '<Root>/map' */
+real_T rtomega_fl_Velocity_Estimation; /* '<Root>/omega_fl' */
+real_T rtomega_fr_Velocity_Estimation; /* '<Root>/omega_fr' */
+real_T rtomega_rl_Velocity_Estimation; /* '<Root>/omega_rl' */
+real_T rtomega_rr_Velocity_Estimation; /* '<Root>/omega_rr' */
+real_T rtu_bar_Velocity_Estimation;    /* '<Root>/u_bar' */
 static real_T look1_binlxpw(real_T u0, const real_T bp0[], const real_T table[],
   uint32_T maxIndex);
 static real_T look1_binlxpw(real_T u0, const real_T bp0[], const real_T table[],
@@ -95,140 +96,131 @@ static real_T look1_binlxpw(real_T u0, const real_T bp0[], const real_T table[],
 }
 
 /* Model step function */
-void Velocity_Estimation_step(RT_MODEL *const rtM)
+void Velocity_Estimation_step(RT_MODEL_Velocity_Estimation *const
+  rtM_Velocity_Estimation)
 {
-  DW *rtDW = rtM->dwork;
-  real_T rtb_DiscreteFilter1;
-  real_T rtb_DiscreteFilter2;
-  real_T w_mot;
+  DW_Velocity_Estimation *rtDW_Velocity_Estimation =
+    rtM_Velocity_Estimation->dwork;
+  real_T omega__mot_l;
+  real_T omega__mot_r;
+  real_T rtb_Tmax_rr;
+  real_T slopeTorqueCut;
 
-  /* MATLAB Function: '<S1>/MATLAB Function1' incorporates:
+  /* Product: '<S1>/Product' incorporates:
    *  Constant: '<S1>/Constant'
    *  Inport: '<Root>/map'
-   *  Inport: '<Root>/omega_rr'
    *  Lookup_n-D: '<S1>/1-D Lookup Table2'
-   *  MATLAB Function: '<S1>/MATLAB Function'
    */
-  rtb_DiscreteFilter1 = 55.0 * look1_binlxpw(rtmap_motor,
-    rtConstP.uDLookupTable2_bp01Data, rtConstP.uDLookupTable2_tableData, 5U);
-  w_mot = rtomega_rr * 4.5 * 60.0 / 6.2831853071795862;
-  if (w_mot <= 5000.0) {
-    w_mot = rtb_DiscreteFilter1;
+  rtb_Tmax_rr = 100.0 * look1_binlxpw(rtmap_motor_Velocity_Estimation,
+    rtConstP_Velocity_Estimation.uDLookupTable2_bp01Data,
+    rtConstP_Velocity_Estimation.uDLookupTable2_tableData, 5U);
+
+  /* MATLAB Function: '<S1>/MATLAB Function1' incorporates:
+   *  Inport: '<Root>/omega_rl'
+   *  Inport: '<Root>/omega_rr'
+   */
+  slopeTorqueCut = (rtb_Tmax_rr - 47.746482927568607) / -157.07963267948958;
+  omega__mot_r = rtomega_rr_Velocity_Estimation * 4.5;
+  omega__mot_l = rtomega_rl_Velocity_Estimation * 4.5;
+  if (omega__mot_r <= 680.67840827778855) {
+    /* Outport: '<Root>/Tmax_rr' */
+    rtTmax_rr_Velocity_Estimation = rtb_Tmax_rr;
   } else {
-    w_mot = rtb_DiscreteFilter1 / -1500.0 * (w_mot - 5000.0) +
-      rtb_DiscreteFilter1;
+    /* Outport: '<Root>/Tmax_rr' */
+    rtTmax_rr_Velocity_Estimation = (omega__mot_r - 680.67840827778855) *
+      slopeTorqueCut + rtb_Tmax_rr;
   }
 
-  if (rtb_DiscreteFilter1 > 55.0) {
-    w_mot = 55.0;
-  }
-
-  if (w_mot < 0.0) {
-    w_mot = 0.0;
+  if (omega__mot_l <= 680.67840827778855) {
+    /* Outport: '<Root>/Tmax_rl' */
+    rtTmax_rl_Velocity_Estimation = rtb_Tmax_rr;
+  } else {
+    /* Outport: '<Root>/Tmax_rl' */
+    rtTmax_rl_Velocity_Estimation = (omega__mot_l - 680.67840827778855) *
+      slopeTorqueCut + rtb_Tmax_rr;
   }
 
   /* End of MATLAB Function: '<S1>/MATLAB Function1' */
 
-  /* Outport: '<Root>/Tmax_rr' */
-  rtTmax_rr = w_mot;
-
-  /* MATLAB Function: '<S1>/MATLAB Function' incorporates:
-   *  Constant: '<S1>/Constant'
-   *  Inport: '<Root>/omega_rl'
-   */
-  w_mot = rtomega_rl * 4.5 * 60.0 / 6.2831853071795862;
-  if (w_mot <= 5000.0) {
-    w_mot = rtb_DiscreteFilter1;
-  } else {
-    w_mot = rtb_DiscreteFilter1 / -1500.0 * (w_mot - 5000.0) +
-      rtb_DiscreteFilter1;
-  }
-
-  if (rtb_DiscreteFilter1 > 55.0) {
-    w_mot = 55.0;
-  }
-
-  if (w_mot < 0.0) {
-    w_mot = 0.0;
-  }
-
-  /* Outport: '<Root>/Tmax_rl' */
-  rtTmax_rl = w_mot;
-
-  /* Product: '<S4>/Product' incorporates:
-   *  Constant: '<S4>/Constant'
-   *  Constant: '<S4>/Constant6'
+  /* Product: '<S3>/Product' incorporates:
+   *  Constant: '<S3>/Constant'
+   *  Constant: '<S3>/Constant6'
    *  Inport: '<Root>/omega_fl'
    *  Inport: '<Root>/omega_fr'
-   *  Product: '<S4>/Divide'
-   *  Sum: '<S4>/Sum1'
+   *  Product: '<S3>/Divide'
+   *  Sum: '<S3>/Sum1'
    */
-  w_mot = (rtomega_fl + rtomega_fr) / 2.0 * 0.203;
+  rtb_Tmax_rr = (rtomega_fl_Velocity_Estimation + rtomega_fr_Velocity_Estimation)
+    / 2.0 * 0.203;
 
-  /* DiscreteFilter: '<S4>/Discrete Filter1' */
-  rtb_DiscreteFilter1 = (0.0050000000000000027 * w_mot + -0.0050000000000000018 *
-    rtDW->DiscreteFilter1_states) - -0.99950012497916929 *
-    rtDW->DiscreteFilter1_denStates;
+  /* DiscreteFilter: '<S3>/Discrete Filter1' */
+  slopeTorqueCut = (0.0050000000000000027 * rtb_Tmax_rr + -0.0050000000000000018
+                    * rtDW_Velocity_Estimation->DiscreteFilter1_states) -
+    -0.99950012497916929 * rtDW_Velocity_Estimation->DiscreteFilter1_denStates;
 
   /* Outport: '<Root>/u_bar' incorporates:
-   *  Sum: '<S4>/Sum'
-   *  Sum: '<S4>/Sum2'
-   *  UnitDelay: '<S4>/Unit Delay'
+   *  Sum: '<S3>/Sum'
+   *  Sum: '<S3>/Sum2'
+   *  UnitDelay: '<S3>/Unit Delay'
    */
-  rtu_bar = (w_mot - rtb_DiscreteFilter1) + rtDW->UnitDelay_DSTATE;
+  rtu_bar_Velocity_Estimation = (rtb_Tmax_rr - slopeTorqueCut) +
+    rtDW_Velocity_Estimation->UnitDelay_DSTATE;
 
-  /* DiscreteFilter: '<S4>/Discrete Filter2' incorporates:
+  /* DiscreteFilter: '<S3>/Discrete Filter2' incorporates:
    *  Inport: '<Root>/a_x'
    */
-  rtb_DiscreteFilter2 = (0.0050000000000000027 * rtaxG + -0.0050000000000000018 *
-    rtDW->DiscreteFilter2_states) - -0.99950012497916929 *
-    rtDW->DiscreteFilter2_denStates;
+  omega__mot_r = (0.0050000000000000027 * rtaxG_Velocity_Estimation +
+                  -0.0050000000000000018 *
+                  rtDW_Velocity_Estimation->DiscreteFilter2_states) -
+    -0.99950012497916929 * rtDW_Velocity_Estimation->DiscreteFilter2_denStates;
 
-  /* Update for DiscreteFilter: '<S4>/Discrete Filter1' */
-  rtDW->DiscreteFilter1_states = w_mot;
-  rtDW->DiscreteFilter1_denStates = rtb_DiscreteFilter1;
+  /* Update for DiscreteFilter: '<S3>/Discrete Filter1' */
+  rtDW_Velocity_Estimation->DiscreteFilter1_states = rtb_Tmax_rr;
+  rtDW_Velocity_Estimation->DiscreteFilter1_denStates = slopeTorqueCut;
 
-  /* Update for UnitDelay: '<S4>/Unit Delay' */
-  rtDW->UnitDelay_DSTATE = rtb_DiscreteFilter2;
+  /* Update for UnitDelay: '<S3>/Unit Delay' */
+  rtDW_Velocity_Estimation->UnitDelay_DSTATE = omega__mot_r;
 
-  /* Update for DiscreteFilter: '<S4>/Discrete Filter2' incorporates:
+  /* Update for DiscreteFilter: '<S3>/Discrete Filter2' incorporates:
    *  Inport: '<Root>/a_x'
    */
-  rtDW->DiscreteFilter2_states = rtaxG;
-  rtDW->DiscreteFilter2_denStates = rtb_DiscreteFilter2;
+  rtDW_Velocity_Estimation->DiscreteFilter2_states = rtaxG_Velocity_Estimation;
+  rtDW_Velocity_Estimation->DiscreteFilter2_denStates = omega__mot_r;
 }
 
 /* Model initialize function */
-void Velocity_Estimation_initialize(RT_MODEL *const rtM)
+void Velocity_Estimation_initialize(RT_MODEL_Velocity_Estimation *const
+  rtM_Velocity_Estimation)
 {
-  DW *rtDW = rtM->dwork;
+  DW_Velocity_Estimation *rtDW_Velocity_Estimation =
+    rtM_Velocity_Estimation->dwork;
 
   /* Registration code */
 
   /* Storage classes */
-  rtu_bar = 0.0;
-  rtTmax_rr = 0.0;
-  rtTmax_rl = 0.0;
+  rtomega_fl_Velocity_Estimation = 0.0;
+  rtomega_fr_Velocity_Estimation = 0.0;
+  rtomega_rl_Velocity_Estimation = 0.0;
+  rtomega_rr_Velocity_Estimation = 0.0;
+  rtaxG_Velocity_Estimation = 0.0;
+  rtmap_motor_Velocity_Estimation = 0.0;
 
   /* Storage classes */
-  rtomega_fl = 0.0;
-  rtomega_fr = 0.0;
-  rtomega_rl = 0.0;
-  rtomega_rr = 0.0;
-  rtaxG = 0.0;
-  rtmap_motor = 0.0;
+  rtu_bar_Velocity_Estimation = 0.0;
+  rtTmax_rr_Velocity_Estimation = 0.0;
+  rtTmax_rl_Velocity_Estimation = 0.0;
 
   /* states (dwork) */
-  (void) memset((void *)rtDW, 0,
-                sizeof(DW));
+  (void) memset((void *)rtDW_Velocity_Estimation, 0,
+                sizeof(DW_Velocity_Estimation));
 
-  /* InitializeConditions for DiscreteFilter: '<S4>/Discrete Filter1' */
-  rtDW->DiscreteFilter1_states = 0.0;
-  rtDW->DiscreteFilter1_denStates = 0.0;
+  /* InitializeConditions for DiscreteFilter: '<S3>/Discrete Filter1' */
+  rtDW_Velocity_Estimation->DiscreteFilter1_states = 0.0;
+  rtDW_Velocity_Estimation->DiscreteFilter1_denStates = 0.0;
 
-  /* InitializeConditions for DiscreteFilter: '<S4>/Discrete Filter2' */
-  rtDW->DiscreteFilter2_states = 0.0;
-  rtDW->DiscreteFilter2_denStates = 0.0;
+  /* InitializeConditions for DiscreteFilter: '<S3>/Discrete Filter2' */
+  rtDW_Velocity_Estimation->DiscreteFilter2_states = 0.0;
+  rtDW_Velocity_Estimation->DiscreteFilter2_denStates = 0.0;
 }
 
 /*

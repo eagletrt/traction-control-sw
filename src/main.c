@@ -72,13 +72,13 @@ bool init_model(void) {
 
 void model_set_data(ve_data_t *data) {
 	// Velocity Estimation Data
-	rtTmax_rl = data->rtTmax_rl;
-	rtTmax_rr = data->rtTmax_rr;
-	rtaxG = data->rtaxG;
-	rtmap_motor = data->rtmap_motor;
-	rtomega_fl = data->rtomega_fl;
-	rtomega_fr = data->rtomega_fr;
-	rtomega_rl = data->rtomega_rl;
-	rtomega_rr = data->rtomega_rr;
-	rtu_bar = data->rtu_bar;
+	rtTmax_rl_Velocity_Estimation = data->rtTmax_rl;
+	rtTmax_rr_Velocity_Estimation = data->rtTmax_rr;
+	rtaxG_Velocity_Estimation = data->rtaxG;
+	rtmap_motor_Velocity_Estimation = data->rtmap_motor;
+	rtomega_fl_Velocity_Estimation = data->rtomega_fl;
+	rtomega_fr_Velocity_Estimation = data->rtomega_fr;
+	rtomega_rl_Velocity_Estimation = data->rtomega_rl;
+	rtomega_rr_Velocity_Estimation = data->rtomega_rr;
+	rtu_bar_Velocity_Estimation = data->rtu_bar;
 }

@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'All0'.
  *
- * Model version                  : 6.11
+ * Model version                  : 6.6
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Mon Dec 12 11:45:34 2022
+ * C/C++ source code generated on : Tue Sep 26 16:59:25 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -23,9 +23,9 @@
 #include <stdio.h>            /* This example main program uses printf/fflush */
 #include "All0.h"                      /* Model header file */
 
-static RT_MODEL rtM_;
-static RT_MODEL *const rtMPtr = &rtM_; /* Real-time model */
-static DW rtDW;                        /* Observable states */
+static RT_MODEL_All0 rtM_All0_;
+static RT_MODEL_All0 *const rtMPtr_All0 = &rtM_All0_;/* Real-time model */
+static DW_All0 rtDW_All0;              /* Observable states */
 
 /*
  * Associating rt_OneStep with a real-time clock or interrupt service routine
@@ -38,8 +38,8 @@ static DW rtDW;                        /* Observable states */
  * your application needs.  This example simply sets an error status in the
  * real-time model and returns from rt_OneStep.
  */
-void rt_OneStep(RT_MODEL *const rtM);
-void rt_OneStep(RT_MODEL *const rtM)
+void rt_OneStep(RT_MODEL_All0 *const rtM_All0);
+void rt_OneStep(RT_MODEL_All0 *const rtM_All0)
 {
   static boolean_T OverrunFlag = false;
 
@@ -47,7 +47,7 @@ void rt_OneStep(RT_MODEL *const rtM)
 
   /* Check for overrun */
   if (OverrunFlag) {
-    rtmSetErrorStatus(rtM, "Overrun");
+    rtmSetErrorStatus(rtM_All0, "Overrun");
     return;
   }
 
@@ -58,7 +58,7 @@ void rt_OneStep(RT_MODEL *const rtM)
   /* Set model inputs here */
 
   /* Step the model */
-  All0_step(rtM);
+  All0_step(rtM_All0);
 
   /* Get model outputs here */
 
@@ -78,29 +78,29 @@ void rt_OneStep(RT_MODEL *const rtM)
  */
 int_T main(int_T argc, const char *argv[])
 {
-  RT_MODEL *const rtM = rtMPtr;
+  RT_MODEL_All0 *const rtM_All0 = rtMPtr_All0;
 
   /* Unused arguments */
   (void)(argc);
   (void)(argv);
 
   /* Pack model data into RTM */
-  rtM->dwork = &rtDW;
+  rtM_All0->dwork = &rtDW_All0;
 
   /* Initialize model */
-  All0_initialize(rtM);
+  All0_initialize(rtM_All0);
 
   /* Attach rt_OneStep to a timer or interrupt service routine with
    * period 0.0005 seconds (base rate of the model) here.
    * The call syntax for rt_OneStep is
    *
-   *  rt_OneStep(rtM);
+   *  rt_OneStep(rtM_All0);
    */
   printf("Warning: The simulation will run forever. "
          "Generated ERT main won't simulate model step behavior. "
          "To change this behavior select the 'MAT-file logging' option.\n");
   fflush((NULL));
-  while (rtmGetErrorStatus(rtM) == (NULL)) {
+  while (rtmGetErrorStatus(rtM_All0) == (NULL)) {
     /*  Perform application tasks here */
   }
 

@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Velocity_Estimation'.
  *
- * Model version                  : 5.305
- * Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
- * C/C++ source code generated on : Mon Sep  5 11:19:11 2022
+ * Model version                  : 6.6
+ * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
+ * C/C++ source code generated on : Tue Sep 26 17:00:24 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -23,9 +23,10 @@
 #include <stdio.h>            /* This example main program uses printf/fflush */
 #include "Velocity_Estimation.h"       /* Model header file */
 
-static RT_MODEL rtM_;
-static RT_MODEL *const rtMPtr = &rtM_; /* Real-time model */
-static DW rtDW;                        /* Observable states */
+static RT_MODEL_Velocity_Estimation rtM_Velocity_Estimation_;
+static RT_MODEL_Velocity_Estimation *const rtMPtr_Velocity_Estimation =
+  &rtM_Velocity_Estimation_;           /* Real-time model */
+static DW_Velocity_Estimation rtDW_Velocity_Estimation;/* Observable states */
 
 /*
  * Associating rt_OneStep with a real-time clock or interrupt service routine
@@ -38,8 +39,8 @@ static DW rtDW;                        /* Observable states */
  * your application needs.  This example simply sets an error status in the
  * real-time model and returns from rt_OneStep.
  */
-void rt_OneStep(RT_MODEL *const rtM);
-void rt_OneStep(RT_MODEL *const rtM)
+void rt_OneStep(RT_MODEL_Velocity_Estimation *const rtM_Velocity_Estimation);
+void rt_OneStep(RT_MODEL_Velocity_Estimation *const rtM_Velocity_Estimation)
 {
   static boolean_T OverrunFlag = false;
 
@@ -47,7 +48,7 @@ void rt_OneStep(RT_MODEL *const rtM)
 
   /* Check for overrun */
   if (OverrunFlag) {
-    rtmSetErrorStatus(rtM, "Overrun");
+    rtmSetErrorStatus(rtM_Velocity_Estimation, "Overrun");
     return;
   }
 
@@ -58,7 +59,7 @@ void rt_OneStep(RT_MODEL *const rtM)
   /* Set model inputs here */
 
   /* Step the model */
-  Velocity_Estimation_step(rtM);
+  Velocity_Estimation_step(rtM_Velocity_Estimation);
 
   /* Get model outputs here */
 
@@ -78,29 +79,30 @@ void rt_OneStep(RT_MODEL *const rtM)
  */
 int_T main(int_T argc, const char *argv[])
 {
-  RT_MODEL *const rtM = rtMPtr;
+  RT_MODEL_Velocity_Estimation *const rtM_Velocity_Estimation =
+    rtMPtr_Velocity_Estimation;
 
   /* Unused arguments */
   (void)(argc);
   (void)(argv);
 
   /* Pack model data into RTM */
-  rtM->dwork = &rtDW;
+  rtM_Velocity_Estimation->dwork = &rtDW_Velocity_Estimation;
 
   /* Initialize model */
-  Velocity_Estimation_initialize(rtM);
+  Velocity_Estimation_initialize(rtM_Velocity_Estimation);
 
   /* Attach rt_OneStep to a timer or interrupt service routine with
-   * period 0.001 seconds (base rate of the model) here.
+   * period 0.0005 seconds (base rate of the model) here.
    * The call syntax for rt_OneStep is
    *
-   *  rt_OneStep(rtM);
+   *  rt_OneStep(rtM_Velocity_Estimation);
    */
   printf("Warning: The simulation will run forever. "
          "Generated ERT main won't simulate model step behavior. "
          "To change this behavior select the 'MAT-file logging' option.\n");
   fflush((NULL));
-  while (rtmGetErrorStatus(rtM) == (NULL)) {
+  while (rtmGetErrorStatus(rtM_Velocity_Estimation) == (NULL)) {
     /*  Perform application tasks here */
   }
 

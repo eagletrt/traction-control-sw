@@ -1,6 +1,7 @@
 #ifndef __DATA_H__
 #define __DATA_H__
 
+#include "exported/All0_ert_rtw/All0.h"
 #include "exported/Velocity_Estimation_ert_rtw/Velocity_Estimation.h"
 
 typedef struct {

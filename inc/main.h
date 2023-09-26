@@ -13,8 +13,8 @@
 
 can_t can[CAN_SOCKET_COUNT];
 
-DW rtDW;
-RT_MODEL model;
+DW_Velocity_Estimation rtDW;
+RT_MODEL_Velocity_Estimation model;
 ve_data_t ve_data;
 
 bool init_model(void);

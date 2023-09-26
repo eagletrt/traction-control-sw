@@ -43,7 +43,9 @@ static inline void can_messages_parse_primary(can_message_t *message, ve_data_t 
 
 	switch (message->frame.can_id) {
 	case PRIMARY_SPEED_FRAME_ID: {
-
+		primary_speed_converted_t *speed = (primary_speed_converted_t *)can_devices.message;
+		ve_data->rtomega_fl = speed->encoder_l;
+		ve_data->rtomega_fr = speed->encoder_r;
 		break;
 	}
 	default:
