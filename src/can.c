@@ -60,7 +60,7 @@ bool can_close_socket(can_t *can) {
 	return true;
 }
 
-int can_send(can_t *can, uint8_t id, uint8_t *data, uint8_t len) {
+int can_send(can_t *can, uint16_t id, uint8_t *data, uint8_t len) {
 	assert(can);
 	if (!can->opened || len > 8)
 		return -1;

@@ -18,6 +18,7 @@ uint8_t converted_mem[512];
 device_t can_devices;
 
 void can_messages_init() {
+	get_timestamp_u();
 	device_init(&can_devices);
 	device_set_address(&can_devices, &raw_mem, sizeof(raw_mem), &converted_mem, sizeof(converted_mem));
 }
@@ -107,7 +108,7 @@ static inline void can_messages_parse_inverters(can_message_t *message, ve_data_
 		inverters_inv_l_rcv_converted_t *rcv = (inverters_inv_l_rcv_converted_t *)can_devices.message;
 		switch (rcv->rcv_mux) {
 		case INVERTERS_INV_L_RCV_RCV_MUX_ID_A8_N_ACTUAL_FILT_CHOICE:
-			ve_data->rtomega_rl_Velocity_Estimation = inverter_convert_speed(rcv->n_actual_filt);
+			ve_data->rtomega_rl_Velocity_Estimation = -inverter_convert_speed(rcv->n_actual_filt);
 			break;
 		default:
 			break;

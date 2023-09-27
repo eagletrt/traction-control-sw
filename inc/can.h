@@ -64,7 +64,7 @@ uint64_t can_get_bytes_exchanged(can_t *can);
  * @param len num of bytes to be sent (0~8)
  * return success
  */
-int can_send(can_t *can, uint8_t id, uint8_t *data, uint8_t len);
+int can_send(can_t *can, uint16_t id, uint8_t *data, uint8_t len);
 
 /**
  * Receive a can frame from device

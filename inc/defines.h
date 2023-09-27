@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <stdio.h>
+#include <sys/time.h>
 
 #ifdef SYSLOG
 #include <syslog.h>
@@ -98,5 +99,11 @@
 #define UNUSED(x) (void)(x)
 
 #define INV_MAX_SPEED 6500.f // MOT_RPM_LIMIT_REAL
+
+static uint64_t get_timestamp_u() {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return tv.tv_sec * (uint64_t)1000000 + tv.tv_usec;
+}
 
 #endif // DEFINES_H
