@@ -21,6 +21,9 @@ add_library(
     exported
     SHARED
 
+    ${CMAKE_CURRENT_LIST_DIR}/exported/All0_ert_rtw/All0.c
+    ${CMAKE_CURRENT_LIST_DIR}/exported/All0_ert_rtw/All0_data.c
+
     ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation_ert_rtw/Velocity_Estimation.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation_ert_rtw/Velocity_Estimation_data.c
 )
@@ -38,7 +41,7 @@ add_library(
     SHARED
     ${traction-control-lib-src}
 )
-target_link_libraries(traction-control-lib can-lib)
+target_link_libraries(traction-control-lib can-lib m)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
 

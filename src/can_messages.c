@@ -7,9 +7,11 @@
 
 #include <assert.h>
 
-static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data);
-static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data);
-static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data);
+static inline double inverter_convert_speed(double val);
+
+static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data);
+static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data);
+static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data);
 
 uint8_t raw_mem[512];
 uint8_t converted_mem[512];
@@ -20,23 +22,23 @@ void can_messages_init() {
 	device_set_address(&can_devices, &raw_mem, sizeof(raw_mem), &converted_mem, sizeof(converted_mem));
 }
 
-void can_messages_parse(can_message_t *message, ve_data_t *ve_data) {
+void can_messages_parse(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data) {
 	assert(message && ve_data);
 
 	if (message->socket == CAN_SOCKET_PRIMARY) {
 		if (primary_id_is_message(message->frame.can_id)) {
-			can_messages_parse_primary(message, ve_data);
+			can_messages_parse_primary(message, ve_data, all_data);
 		} else if (inverters_id_is_message(message->frame.can_id)) {
-			can_messages_parse_inverters(message, ve_data);
+			can_messages_parse_inverters(message, ve_data, all_data);
 		}
 	} else if (message->socket == CAN_SOCKET_SECONDARY) {
 		if (secondary_id_is_message(message->frame.can_id)) {
-			can_messages_parse_secondary(message, ve_data);
+			can_messages_parse_secondary(message, ve_data, all_data);
 		}
 	}
 }
 
-static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data) {
+static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data) {
 	assert(message && ve_data);
 
 	primary_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
@@ -44,15 +46,22 @@ static inline void can_messages_parse_primary(can_message_t *message, ve_data_t 
 	switch (message->frame.can_id) {
 	case PRIMARY_SPEED_FRAME_ID: {
 		primary_speed_converted_t *speed = (primary_speed_converted_t *)can_devices.message;
-		ve_data->rtomega_fl = speed->encoder_l;
-		ve_data->rtomega_fr = speed->encoder_r;
+		ve_data->rtomega_fl_Velocity_Estimation = speed->encoder_l;
+		ve_data->rtomega_fr_Velocity_Estimation = speed->encoder_r;
+		break;
+	}
+	case PRIMARY_STEER_STATUS_FRAME_ID: {
+		primary_steer_status_converted_t *steer_status = (primary_steer_status_converted_t *)can_devices.message;
+		ve_data->rtmap_motor_Velocity_Estimation = steer_status->map_pw;
+		all_data->rtmap_sc_All0 = steer_status->map_sc;
+		all_data->rtmap_tv_All0 = steer_status->map_tv;
 		break;
 	}
 	default:
 		break;
 	}
 }
-static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data) {
+static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data) {
 	assert(message && ve_data);
 
 	secondary_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
@@ -60,36 +69,36 @@ static inline void can_messages_parse_secondary(can_message_t *message, ve_data_
 	switch (message->frame.can_id) {
 	case SECONDARY_PEDALS_OUTPUT_FRAME_ID: {
 		secondary_pedals_output_converted_t *pedals_output = (secondary_pedals_output_converted_t *)can_devices.message;
-
+		all_data->rtbrake_All0 = (pedals_output->bse_rear + pedals_output->bse_front) / 2.0;
+		all_data->rtDriver_req_All0 = pedals_output->apps;
 		UNUSED(pedals_output);
 		break;
 	}
 	case SECONDARY_IMU_ACCELERATION_FRAME_ID: {
 		secondary_imu_acceleration_converted_t *acceleration =
 				(secondary_imu_acceleration_converted_t *)can_devices.message;
-
-		UNUSED(acceleration);
+		ve_data->rtaxG_Velocity_Estimation = acceleration->accel_x;
 		break;
 	}
 	case SECONDARY_IMU_ANGULAR_RATE_FRAME_ID: {
 		secondary_imu_angular_rate_converted_t *angular_rate =
 				(secondary_imu_angular_rate_converted_t *)can_devices.message;
-
-		UNUSED(angular_rate);
+		all_data->rtyaw_rate_All0 = angular_rate->ang_rate_z;
 		break;
 	}
 	case SECONDARY_STEERING_ANGLE_FRAME_ID: {
 		secondary_steering_angle_converted_t *steering_angle = (secondary_steering_angle_converted_t *)can_devices.message;
 
-		UNUSED(steering_angle);
+		all_data->rtSteeringangle_All0 = steering_angle->angle;
 		break;
 	}
 	default:
 		break;
 	}
 }
-static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data) {
+static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data) {
 	assert(message && ve_data);
+	UNUSED(all_data);
 
 	inverters_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
 
@@ -97,8 +106,8 @@ static inline void can_messages_parse_inverters(can_message_t *message, ve_data_
 	case INVERTERS_INV_L_RCV_FRAME_ID: {
 		inverters_inv_l_rcv_converted_t *rcv = (inverters_inv_l_rcv_converted_t *)can_devices.message;
 		switch (rcv->rcv_mux) {
-		case INVERTERS_INV_L_RCV_RCV_MUX_ID_27_IQ_ACTUAL_CHOICE:
-
+		case INVERTERS_INV_L_RCV_RCV_MUX_ID_A8_N_ACTUAL_FILT_CHOICE:
+			ve_data->rtomega_rl_Velocity_Estimation = inverter_convert_speed(rcv->n_actual_filt);
 			break;
 		default:
 			break;
@@ -108,8 +117,8 @@ static inline void can_messages_parse_inverters(can_message_t *message, ve_data_
 	case INVERTERS_INV_R_RCV_FRAME_ID: {
 		inverters_inv_r_rcv_converted_t *rcv = (inverters_inv_r_rcv_converted_t *)can_devices.message;
 		switch (rcv->rcv_mux) {
-		case INVERTERS_INV_R_RCV_RCV_MUX_ID_27_IQ_ACTUAL_CHOICE:
-
+		case INVERTERS_INV_R_RCV_RCV_MUX_ID_A8_N_ACTUAL_FILT_CHOICE:
+			ve_data->rtomega_rr_Velocity_Estimation = inverter_convert_speed(rcv->n_actual_filt);
 			break;
 		default:
 			break;
@@ -120,3 +129,5 @@ static inline void can_messages_parse_inverters(can_message_t *message, ve_data_
 		break;
 	}
 }
+
+static inline double inverter_convert_speed(double val) { return (val * 10.0f * INV_MAX_SPEED) / 32767.f; }

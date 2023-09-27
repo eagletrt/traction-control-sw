@@ -97,4 +97,6 @@
 
 #define UNUSED(x) (void)(x)
 
+#define INV_MAX_SPEED 6500.f // MOT_RPM_LIMIT_REAL
+
 #endif // DEFINES_H

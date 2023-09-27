@@ -29,6 +29,6 @@ typedef struct {
 } can_message_t;
 
 void can_messages_init();
-void can_messages_parse(can_message_t *message, ve_data_t *ve_data);
+void can_messages_parse(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data);
 
 #endif // __CAN_MESSAGES_H__

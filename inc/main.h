@@ -13,12 +13,16 @@
 
 can_t can[CAN_SOCKET_COUNT];
 
-DW_Velocity_Estimation rtDW;
-RT_MODEL_Velocity_Estimation model;
+DW_All0 all_rtDW;
+RT_MODEL_All0 all_model;
+DW_Velocity_Estimation ve_rtDW;
+RT_MODEL_Velocity_Estimation ve_model;
 ve_data_t ve_data;
+all_data_t all_data;
 
 bool init_model(void);
-void model_set_data(ve_data_t *data);
+void ve_model_set_data(ve_data_t *ve_d);
+void all_model_set_data(ve_data_t *ve_d, all_data_t *all_d);
 
 // CAN thread
 bool kill_can_thread;
