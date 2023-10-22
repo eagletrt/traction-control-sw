@@ -1,8 +1,13 @@
 
 .PHONY: all clean build run format
 
-build: format
+build:
 	mkdir -p build && cd build && cmake .. && make -j4
+
+bf: format build
+
+restart:
+	sudo systemctl restart traction-control.service
 
 clean:
 	rm -rf build

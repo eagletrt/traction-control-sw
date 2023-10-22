@@ -37,4 +37,22 @@ typedef struct {
 	real_T rtu_bar_All0;
 } all_data_t;
 
+typedef struct {
+	real_T rtDriver_req_SlipV2;
+	real_T rtSteeringangle_SlipV2;
+	
+	real_T rtTm_rl_SlipV2;
+	real_T rtTm_rr_SlipV2;
+	real_T rtTm_rl_a_SlipV2;
+	real_T rtTm_rr_m_SlipV2;
+
+	real_T rtbrake_SlipV2;
+	real_T rtmap_sc_SlipV2;
+	real_T rtmap_tv_SlipV2;
+	real_T rtomega_rl_SlipV2;
+	real_T rtomega_rr_SlipV2;
+	real_T rtu_bar_SlipV2;
+	real_T rtyaw_rate_SlipV2;
+}slip_data_t;
+
 #endif // __DATA_H__
