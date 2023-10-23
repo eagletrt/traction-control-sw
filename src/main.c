@@ -112,7 +112,7 @@ void all_model_set_data(all_data_t *all_d) {
 	rtSteeringangle_All0 = all_d->rtSteeringangle_All0 * (M_PI / 180.0);
 
 	rtmap_tv_All0 = all_d->rtmap_tv_All0;
-	if(rtmap_tv_All0 != 0.0) {
+	if(!equal_d(rtmap_tv_All0, 0.0)) {
 		rtmap_sc_All0 = 0.0;
 	} else {
 		rtmap_sc_All0 = all_d->rtmap_sc_All0;
@@ -134,13 +134,12 @@ void slip_model_set_data(slip_data_t *slip_d) {
 	rtDriver_req_SlipV2 = slip_d->rtDriver_req_SlipV2 / 100.0;
 	rtSteeringangle_SlipV2 = slip_d->rtSteeringangle_SlipV2 * (M_PI / 180.0);
 
-	if(slip_d->rtmap_tv_SlipV2 != 0.0) {
-		rtmap_tv_SlipV2 = 0.0;
+	if(!equal_d(slip_d->rtmap_tv_SlipV2, 0.0)) {
 		rtmap_sc_SlipV2 = 0.0;
-	}else {
-		rtmap_tv_SlipV2 = 0.0;
+	} else {
 		rtmap_sc_SlipV2 = slip_d->rtmap_sc_SlipV2;
 	}
+	rtmap_tv_SlipV2 = 0.0;
 
 	rtyaw_rate_SlipV2 = slip_d->rtyaw_rate_SlipV2 * (M_PI / 180.0);
 
@@ -164,7 +163,7 @@ void can_send_data() {
 		static primary_control_output_converted_t out_src;
 
 		out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
-		if(rtmap_tv_All0 != 0.0) {
+		if(!equal_d(rtmap_tv_All0, 0.0)) {
 			out_src.tmax_l = rtTm_rl_All0;
 			out_src.tmax_r = rtTm_rr_All0;
 			out_src.torque_l = rtTm_rl_a_All0;

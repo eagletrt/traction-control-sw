@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <sys/time.h>
+#include <math.h>
 
 #ifdef SYSLOG
 #include <syslog.h>
@@ -104,6 +105,10 @@ static uint64_t get_timestamp_u() {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * (uint64_t)1000000 + tv.tv_usec;
+}
+
+static bool equal_d(double a, double b) {
+	return fabs(a - b) < 0.0001;
 }
 
 #endif // DEFINES_H

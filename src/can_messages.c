@@ -18,6 +18,7 @@ uint8_t converted_mem[512];
 device_t can_devices;
 
 void can_messages_init() {
+	(void)equal_d;
 	get_timestamp_u();
 	device_init(&can_devices);
 	device_set_address(&can_devices, &raw_mem, sizeof(raw_mem), &converted_mem, sizeof(converted_mem));
