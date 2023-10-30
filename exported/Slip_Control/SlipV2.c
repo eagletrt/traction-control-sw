@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV2'.
  *
- * Model version                  : 6.12
+ * Model version                  : 6.13
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Thu Oct 19 11:53:57 2023
+ * C/C++ source code generated on : Mon Oct 23 15:25:25 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -100,40 +100,46 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
   Slip_est1(0.203 * rtomega_rr_SlipV2, rtu_bar_SlipV2 + 0.605 *
             rtyaw_rate_SlipV2, 1.0, &rtb_T_max);
 
+  /* Sum: '<S2>/Add' incorporates:
+   *  Constant: '<S2>/Constant1'
+   *  Inport: '<Root>/map_tv'
+   *  Product: '<S2>/Product1'
+   *  Sum: '<S3>/Add'
+   */
+  Integrator_a = 0.1 * rtmap_tv_SlipV2 + 0.1;
+
   /* Sum: '<S2>/Add1' incorporates:
-   *  Constant: '<S2>/Constant1'
+   *  Sum: '<S2>/Add'
    */
-  rtb_DeadZone = 0.136 - rtb_T_max;
+  rtb_DeadZone = Integrator_a - rtb_T_max;
 
-  /* Product: '<S46>/PProd Out' incorporates:
-   *  Constant: '<S2>/Constant1'
+  /* Product: '<S47>/PProd Out' incorporates:
    *  Constant: '<S2>/Constant5'
-   *  Sum: '<S2>/Add1'
    */
-  rtb_Sum = (0.136 - rtb_T_max) * 200.0;
+  rtb_Sum = rtb_DeadZone * 200.0;
 
-  /* Sum: '<S51>/Sum Fdbk' */
+  /* Sum: '<S52>/Sum Fdbk' */
   rtb_T_max = rtb_Sum + rtDW_SlipV2->Integrator_DSTATE;
 
-  /* DeadZone: '<S34>/DeadZone' */
+  /* DeadZone: '<S35>/DeadZone' */
   if (rtb_T_max > 100.0) {
     rtb_T_max -= 100.0;
   } else if (rtb_T_max >= 0.0) {
     rtb_T_max = 0.0;
   }
 
-  /* End of DeadZone: '<S34>/DeadZone' */
+  /* End of DeadZone: '<S35>/DeadZone' */
 
-  /* Product: '<S38>/IProd Out' incorporates:
+  /* Product: '<S39>/IProd Out' incorporates:
    *  Constant: '<S2>/Constant6'
    */
   rtb_DeadZone *= 850.0;
 
-  /* Switch: '<S32>/Switch1' incorporates:
-   *  Constant: '<S32>/Clamping_zero'
-   *  Constant: '<S32>/Constant'
-   *  Constant: '<S32>/Constant2'
-   *  RelationalOperator: '<S32>/fix for DT propagation issue'
+  /* Switch: '<S33>/Switch1' incorporates:
+   *  Constant: '<S33>/Clamping_zero'
+   *  Constant: '<S33>/Constant'
+   *  Constant: '<S33>/Constant2'
+   *  RelationalOperator: '<S33>/fix for DT propagation issue'
    */
   if (rtb_T_max > 0.0) {
     tmp = 1;
@@ -141,11 +147,11 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
     tmp = -1;
   }
 
-  /* Switch: '<S32>/Switch2' incorporates:
-   *  Constant: '<S32>/Clamping_zero'
-   *  Constant: '<S32>/Constant3'
-   *  Constant: '<S32>/Constant4'
-   *  RelationalOperator: '<S32>/fix for DT propagation issue1'
+  /* Switch: '<S33>/Switch2' incorporates:
+   *  Constant: '<S33>/Clamping_zero'
+   *  Constant: '<S33>/Constant3'
+   *  Constant: '<S33>/Constant4'
+   *  RelationalOperator: '<S33>/fix for DT propagation issue1'
    */
   if (rtb_DeadZone > 0.0) {
     tmp_0 = 1;
@@ -153,14 +159,14 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
     tmp_0 = -1;
   }
 
-  /* Switch: '<S32>/Switch' incorporates:
-   *  Constant: '<S32>/Clamping_zero'
-   *  Constant: '<S32>/Constant1'
-   *  Logic: '<S32>/AND3'
-   *  RelationalOperator: '<S32>/Equal1'
-   *  RelationalOperator: '<S32>/Relational Operator'
-   *  Switch: '<S32>/Switch1'
-   *  Switch: '<S32>/Switch2'
+  /* Switch: '<S33>/Switch' incorporates:
+   *  Constant: '<S33>/Clamping_zero'
+   *  Constant: '<S33>/Constant1'
+   *  Logic: '<S33>/AND3'
+   *  RelationalOperator: '<S33>/Equal1'
+   *  RelationalOperator: '<S33>/Relational Operator'
+   *  Switch: '<S33>/Switch1'
+   *  Switch: '<S33>/Switch2'
    */
   if ((rtb_T_max != 0.0) && (tmp == tmp_0)) {
     rtb_Switch = 0.0;
@@ -168,25 +174,38 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
     rtb_Switch = rtb_DeadZone;
   }
 
-  /* End of Switch: '<S32>/Switch' */
+  /* End of Switch: '<S33>/Switch' */
 
-  /* DiscreteIntegrator: '<S41>/Integrator' */
+  /* DiscreteIntegrator: '<S42>/Integrator' */
   Integrator = 0.00025 * rtb_Switch + rtDW_SlipV2->Integrator_DSTATE;
 
-  /* Sum: '<S50>/Sum' */
-  rtb_Sum += Integrator;
+  /* Sum: '<S51>/Sum' */
+  rtb_T_max = rtb_Sum + Integrator;
 
-  /* Saturate: '<S48>/Saturation' */
-  if (rtb_Sum > 100.0) {
-    rtb_Sum = 100.0;
-  } else if (rtb_Sum < 0.0) {
-    rtb_Sum = 0.0;
+  /* Saturate: '<S49>/Saturation' */
+  if (rtb_T_max > 100.0) {
+    rtb_T_max = 100.0;
+  } else if (rtb_T_max < 0.0) {
+    rtb_T_max = 0.0;
+  }
+
+  /* End of Saturate: '<S49>/Saturation' */
+
+  /* Switch: '<S6>/Switch2' incorporates:
+   *  Inport: '<Root>/Tmax_rr'
+   *  RelationalOperator: '<S6>/LowerRelop1'
+   *  Switch: '<S6>/Switch'
+   */
+  if (rtb_T_max > rtTm_rr_SlipV2) {
+    rtb_Sum = rtTm_rr_SlipV2;
+  } else {
+    rtb_Sum = rtb_T_max;
   }
 
   /* MATLAB Function: '<S2>/map' incorporates:
    *  Inport: '<Root>/Tmax_rr'
    *  Inport: '<Root>/map_sc'
-   *  Saturate: '<S48>/Saturation'
+   *  Switch: '<S6>/Switch2'
    */
   map(rtb_Sum, rtTm_rr_SlipV2, rtmap_sc_SlipV2, &rtb_T_max);
 
@@ -194,7 +213,7 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
    *  Inport: '<Root>/Tmax_rr'
    *  Inport: '<Root>/driver_request'
    */
-  rtb_Sum = rtDriver_req_SlipV2 * rtTm_rr_SlipV2;
+  rtb_DeadZone = rtDriver_req_SlipV2 * rtTm_rr_SlipV2;
 
   /* Switch: '<S5>/Switch2' incorporates:
    *  Constant: '<S2>/Constant2'
@@ -202,10 +221,10 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
    *  RelationalOperator: '<S5>/UpperRelop'
    *  Switch: '<S5>/Switch'
    */
-  if (rtb_Sum > rtb_T_max) {
+  if (rtb_DeadZone > rtb_T_max) {
     /* Outport: '<Root>/Tm_rr' */
     rtTm_rr_m_SlipV2 = rtb_T_max;
-  } else if (rtb_Sum < 0.0) {
+  } else if (rtb_DeadZone < 0.0) {
     /* Switch: '<S5>/Switch' incorporates:
      *  Constant: '<S2>/Constant2'
      *  Outport: '<Root>/Tm_rr'
@@ -215,7 +234,7 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
     /* Outport: '<Root>/Tm_rr' incorporates:
      *  Switch: '<S5>/Switch'
      */
-    rtTm_rr_m_SlipV2 = rtb_Sum;
+    rtTm_rr_m_SlipV2 = rtb_DeadZone;
   }
 
   /* End of Switch: '<S5>/Switch2' */
@@ -232,38 +251,36 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
   Slip_est1(0.203 * rtomega_rl_SlipV2, rtu_bar_SlipV2 + 0.605 *
             rtyaw_rate_SlipV2, 1.0, &rtb_T_max);
 
-  /* Sum: '<S3>/Add1' incorporates:
-   *  Constant: '<S3>/Constant1'
-   */
-  rtb_T_max = 0.136 - rtb_T_max;
+  /* Sum: '<S3>/Add1' */
+  rtb_T_max = Integrator_a - rtb_T_max;
 
-  /* Product: '<S100>/PProd Out' incorporates:
+  /* Product: '<S102>/PProd Out' incorporates:
    *  Constant: '<S3>/Constant5'
    */
   rtb_Sum = rtb_T_max * 200.0;
 
-  /* Sum: '<S105>/Sum Fdbk' */
+  /* Sum: '<S107>/Sum Fdbk' */
   rtb_DeadZone = rtb_Sum + rtDW_SlipV2->Integrator_DSTATE_o;
 
-  /* DeadZone: '<S88>/DeadZone' */
+  /* DeadZone: '<S90>/DeadZone' */
   if (rtb_DeadZone > 100.0) {
     rtb_DeadZone -= 100.0;
   } else if (rtb_DeadZone >= 0.0) {
     rtb_DeadZone = 0.0;
   }
 
-  /* End of DeadZone: '<S88>/DeadZone' */
+  /* End of DeadZone: '<S90>/DeadZone' */
 
-  /* Product: '<S92>/IProd Out' incorporates:
+  /* Product: '<S94>/IProd Out' incorporates:
    *  Constant: '<S3>/Constant6'
    */
   rtb_T_max *= 850.0;
 
-  /* Switch: '<S86>/Switch1' incorporates:
-   *  Constant: '<S86>/Clamping_zero'
-   *  Constant: '<S86>/Constant'
-   *  Constant: '<S86>/Constant2'
-   *  RelationalOperator: '<S86>/fix for DT propagation issue'
+  /* Switch: '<S88>/Switch1' incorporates:
+   *  Constant: '<S88>/Clamping_zero'
+   *  Constant: '<S88>/Constant'
+   *  Constant: '<S88>/Constant2'
+   *  RelationalOperator: '<S88>/fix for DT propagation issue'
    */
   if (rtb_DeadZone > 0.0) {
     tmp = 1;
@@ -271,11 +288,11 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
     tmp = -1;
   }
 
-  /* Switch: '<S86>/Switch2' incorporates:
-   *  Constant: '<S86>/Clamping_zero'
-   *  Constant: '<S86>/Constant3'
-   *  Constant: '<S86>/Constant4'
-   *  RelationalOperator: '<S86>/fix for DT propagation issue1'
+  /* Switch: '<S88>/Switch2' incorporates:
+   *  Constant: '<S88>/Clamping_zero'
+   *  Constant: '<S88>/Constant3'
+   *  Constant: '<S88>/Constant4'
+   *  RelationalOperator: '<S88>/fix for DT propagation issue1'
    */
   if (rtb_T_max > 0.0) {
     tmp_0 = 1;
@@ -283,14 +300,14 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
     tmp_0 = -1;
   }
 
-  /* Switch: '<S86>/Switch' incorporates:
-   *  Constant: '<S86>/Clamping_zero'
-   *  Constant: '<S86>/Constant1'
-   *  Logic: '<S86>/AND3'
-   *  RelationalOperator: '<S86>/Equal1'
-   *  RelationalOperator: '<S86>/Relational Operator'
-   *  Switch: '<S86>/Switch1'
-   *  Switch: '<S86>/Switch2'
+  /* Switch: '<S88>/Switch' incorporates:
+   *  Constant: '<S88>/Clamping_zero'
+   *  Constant: '<S88>/Constant1'
+   *  Logic: '<S88>/AND3'
+   *  RelationalOperator: '<S88>/Equal1'
+   *  RelationalOperator: '<S88>/Relational Operator'
+   *  Switch: '<S88>/Switch1'
+   *  Switch: '<S88>/Switch2'
    */
   if ((rtb_DeadZone != 0.0) && (tmp == tmp_0)) {
     rtb_DeadZone = 0.0;
@@ -298,25 +315,38 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
     rtb_DeadZone = rtb_T_max;
   }
 
-  /* End of Switch: '<S86>/Switch' */
+  /* End of Switch: '<S88>/Switch' */
 
-  /* DiscreteIntegrator: '<S95>/Integrator' */
+  /* DiscreteIntegrator: '<S97>/Integrator' */
   Integrator_a = 0.00025 * rtb_DeadZone + rtDW_SlipV2->Integrator_DSTATE_o;
 
-  /* Sum: '<S104>/Sum' */
-  rtb_Sum += Integrator_a;
+  /* Sum: '<S106>/Sum' */
+  rtb_T_max = rtb_Sum + Integrator_a;
 
-  /* Saturate: '<S102>/Saturation' */
-  if (rtb_Sum > 100.0) {
-    rtb_Sum = 100.0;
-  } else if (rtb_Sum < 0.0) {
-    rtb_Sum = 0.0;
+  /* Saturate: '<S104>/Saturation' */
+  if (rtb_T_max > 100.0) {
+    rtb_T_max = 100.0;
+  } else if (rtb_T_max < 0.0) {
+    rtb_T_max = 0.0;
+  }
+
+  /* End of Saturate: '<S104>/Saturation' */
+
+  /* Switch: '<S61>/Switch2' incorporates:
+   *  Inport: '<Root>/Tmax_rl'
+   *  RelationalOperator: '<S61>/LowerRelop1'
+   *  Switch: '<S61>/Switch'
+   */
+  if (rtb_T_max > rtTm_rl_SlipV2) {
+    rtb_Sum = rtTm_rl_SlipV2;
+  } else {
+    rtb_Sum = rtb_T_max;
   }
 
   /* MATLAB Function: '<S3>/map' incorporates:
    *  Inport: '<Root>/Tmax_rl'
    *  Inport: '<Root>/map_sc'
-   *  Saturate: '<S102>/Saturation'
+   *  Switch: '<S61>/Switch2'
    */
   map(rtb_Sum, rtTm_rl_SlipV2, rtmap_sc_SlipV2, &rtb_T_max);
 
@@ -326,34 +356,34 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
    */
   rtb_Sum = rtDriver_req_SlipV2 * rtTm_rl_SlipV2;
 
-  /* Switch: '<S59>/Switch2' incorporates:
+  /* Switch: '<S60>/Switch2' incorporates:
    *  Constant: '<S3>/Constant2'
-   *  RelationalOperator: '<S59>/LowerRelop1'
-   *  RelationalOperator: '<S59>/UpperRelop'
-   *  Switch: '<S59>/Switch'
+   *  RelationalOperator: '<S60>/LowerRelop1'
+   *  RelationalOperator: '<S60>/UpperRelop'
+   *  Switch: '<S60>/Switch'
    */
   if (rtb_Sum > rtb_T_max) {
     /* Outport: '<Root>/Tm_rl' */
     rtTm_rl_a_SlipV2 = rtb_T_max;
   } else if (rtb_Sum < 0.0) {
-    /* Switch: '<S59>/Switch' incorporates:
+    /* Switch: '<S60>/Switch' incorporates:
      *  Constant: '<S3>/Constant2'
      *  Outport: '<Root>/Tm_rl'
      */
     rtTm_rl_a_SlipV2 = 0.0;
   } else {
     /* Outport: '<Root>/Tm_rl' incorporates:
-     *  Switch: '<S59>/Switch'
+     *  Switch: '<S60>/Switch'
      */
     rtTm_rl_a_SlipV2 = rtb_Sum;
   }
 
-  /* End of Switch: '<S59>/Switch2' */
+  /* End of Switch: '<S60>/Switch2' */
 
-  /* Update for DiscreteIntegrator: '<S41>/Integrator' */
+  /* Update for DiscreteIntegrator: '<S42>/Integrator' */
   rtDW_SlipV2->Integrator_DSTATE = 0.00025 * rtb_Switch + Integrator;
 
-  /* Update for DiscreteIntegrator: '<S95>/Integrator' */
+  /* Update for DiscreteIntegrator: '<S97>/Integrator' */
   rtDW_SlipV2->Integrator_DSTATE_o = 0.00025 * rtb_DeadZone + Integrator_a;
 }
 
@@ -385,10 +415,10 @@ void SlipV2_initialize(RT_MODEL_SlipV2 *const rtM_SlipV2)
   (void) memset((void *)rtDW_SlipV2, 0,
                 sizeof(DW_SlipV2));
 
-  /* InitializeConditions for DiscreteIntegrator: '<S41>/Integrator' */
+  /* InitializeConditions for DiscreteIntegrator: '<S42>/Integrator' */
   rtDW_SlipV2->Integrator_DSTATE = 0.0;
 
-  /* InitializeConditions for DiscreteIntegrator: '<S95>/Integrator' */
+  /* InitializeConditions for DiscreteIntegrator: '<S97>/Integrator' */
   rtDW_SlipV2->Integrator_DSTATE_o = 0.0;
 }
 

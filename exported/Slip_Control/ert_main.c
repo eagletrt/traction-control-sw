@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV2'.
  *
- * Model version                  : 6.12
+ * Model version                  : 6.13
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Thu Oct 19 11:53:57 2023
+ * C/C++ source code generated on : Mon Oct 23 15:25:25 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
