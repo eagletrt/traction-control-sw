@@ -4,14 +4,20 @@
 #include "lib/can/lib/primary/primary_network.h"
 #include "lib/can/lib/secondary/secondary_network.h"
 #include "lib/can/lib/inverters/inverters_network.h"
+#include "lib/can/lib/simulator/simulator_network.h"
 
 #include <assert.h>
 
 static inline double inverter_convert_speed(double val);
 
-static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data, slip_data_t *slip_data);
-static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data, slip_data_t *slip_data);
-static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data, slip_data_t *slip_data);
+static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+																							slip_data_t *slip_data);
+static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+																								slip_data_t *slip_data);
+static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+																								slip_data_t *slip_data);
+static inline void can_messages_parse_simulator(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+																								slip_data_t *slip_data);
 
 uint8_t raw_mem[512];
 uint8_t converted_mem[512];
@@ -28,11 +34,17 @@ void can_messages_parse(can_message_t *message, ve_data_t *ve_data, all_data_t *
 	assert(message && ve_data);
 
 	if (message->socket == CAN_SOCKET_PRIMARY) {
+#ifdef SIMULATOR
 		if (primary_id_is_message(message->frame.can_id)) {
 			can_messages_parse_primary(message, ve_data, all_data, slip_data);
+		}
+#else	 // SIMULATOR
+		if (simulator_id_is_message(message->frame.can_id)) {
+			can_messages_parse_simulator(message, ve_data, all_data, slip_data);
 		} else if (inverters_id_is_message(message->frame.can_id)) {
 			can_messages_parse_inverters(message, ve_data, all_data, slip_data);
 		}
+#endif // SIMULATOR
 	} else if (message->socket == CAN_SOCKET_SECONDARY) {
 		if (secondary_id_is_message(message->frame.can_id)) {
 			can_messages_parse_secondary(message, ve_data, all_data, slip_data);
@@ -40,7 +52,49 @@ void can_messages_parse(can_message_t *message, ve_data_t *ve_data, all_data_t *
 	}
 }
 
-static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data, slip_data_t *slip_data) {
+static inline void can_messages_parse_simulator(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+																								slip_data_t *slip_data) {
+	assert(message && ve_data);
+
+	simulator_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
+
+	switch (message->frame.can_id) {
+	case SIMULATOR_ANGULAR_RATE_FRAME_ID: {
+		simulator_angular_rate_converted_t *angular_rate = (simulator_angular_rate_converted_t *)can_devices.message;
+		all_data->rtyaw_rate_All0 = angular_rate->z;
+		slip_data->rtyaw_rate_SlipV2 = all_data->rtyaw_rate_All0;
+		break;
+	}
+	case SIMULATOR_ACCELERATION_FRAME_ID: {
+		simulator_acceleration_converted_t *acceleration = (simulator_acceleration_converted_t *)can_devices.message;
+		ve_data->rtaxG_Velocity_Estimation = acceleration->x;
+		break;
+	}
+	case SIMULATOR_PEDALS_FRAME_ID: {
+		simulator_pedals_converted_t *pedals = (simulator_pedals_converted_t *)can_devices.message;
+		all_data->rtbrake_All0 = (pedals->brake_rear + pedals->brake_front) / 2.0;
+		all_data->rtDriver_req_All0 = pedals->throttle;
+		slip_data->rtbrake_SlipV2 = all_data->rtbrake_All0;
+		slip_data->rtDriver_req_SlipV2 = all_data->rtDriver_req_All0;
+		break;
+	}
+	case SIMULATOR_STEERING_ANGLE_FRAME_ID: {
+		simulator_steering_angle_converted_t *steering_angle = (simulator_steering_angle_converted_t *)can_devices.message;
+		all_data->rtSteeringangle_All0 = steering_angle->angle;
+		slip_data->rtSteeringangle_SlipV2 = all_data->rtSteeringangle_All0;
+		break;
+	}
+	case SIMULATOR_SPEED_FRAME_ID: {
+		simulator_speed_converted_t *speed = (simulator_speed_converted_t *)can_devices.message;
+		ve_data->rtomega_fl_Velocity_Estimation = speed->fl;
+		ve_data->rtomega_fr_Velocity_Estimation = speed->fr;
+		break;
+	}
+	}
+}
+
+static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+																							slip_data_t *slip_data) {
 	assert(message && ve_data);
 
 	primary_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
@@ -65,7 +119,8 @@ static inline void can_messages_parse_primary(can_message_t *message, ve_data_t 
 		break;
 	}
 }
-static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data, slip_data_t *slip_data) {
+static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+																								slip_data_t *slip_data) {
 	assert(message && ve_data);
 
 	secondary_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
@@ -102,7 +157,8 @@ static inline void can_messages_parse_secondary(can_message_t *message, ve_data_
 		break;
 	}
 }
-static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data, slip_data_t *slip_data) {
+static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+																								slip_data_t *slip_data) {
 	assert(message && ve_data);
 	UNUSED(all_data);
 

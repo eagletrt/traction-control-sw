@@ -10,6 +10,8 @@
 #include <sys/time.h>
 #include <math.h>
 
+#define SIMULATOR (1)
+
 #ifdef SYSLOG
 #include <syslog.h>
 #else
@@ -107,8 +109,6 @@ static uint64_t get_timestamp_u() {
 	return tv.tv_sec * (uint64_t)1000000 + tv.tv_usec;
 }
 
-static bool equal_d(double a, double b) {
-	return fabs(a - b) < 0.0001;
-}
+static bool equal_d(double a, double b) { return fabs(a - b) < 0.0001; }
 
 #endif // DEFINES_H
