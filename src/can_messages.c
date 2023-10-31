@@ -33,23 +33,25 @@ void can_messages_init() {
 void can_messages_parse(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data, slip_data_t *slip_data) {
 	assert(message && ve_data);
 
-	if (message->socket == CAN_SOCKET_PRIMARY) {
 #ifdef SIMULATOR
-		if (primary_id_is_message(message->frame.can_id)) {
-			can_messages_parse_primary(message, ve_data, all_data, slip_data);
-		}
-#else	 // SIMULATOR
+	if (message->socket == CAN_SOCKET_PRIMARY) {
 		if (simulator_id_is_message(message->frame.can_id)) {
 			can_messages_parse_simulator(message, ve_data, all_data, slip_data);
+		} 
+	}
+#else	 // SIMULATOR
+	if (message->socket == CAN_SOCKET_PRIMARY) {
+		if (primary_id_is_message(message->frame.can_id)) {
+			can_messages_parse_primary(message, ve_data, all_data, slip_data);
 		} else if (inverters_id_is_message(message->frame.can_id)) {
 			can_messages_parse_inverters(message, ve_data, all_data, slip_data);
 		}
-#endif // SIMULATOR
 	} else if (message->socket == CAN_SOCKET_SECONDARY) {
 		if (secondary_id_is_message(message->frame.can_id)) {
 			can_messages_parse_secondary(message, ve_data, all_data, slip_data);
 		}
 	}
+#endif // SIMULATOR
 }
 
 static inline void can_messages_parse_simulator(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
