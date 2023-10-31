@@ -59,21 +59,21 @@ static inline void can_messages_parse_simulator(can_message_t *message, ve_data_
 	simulator_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
 
 	switch (message->frame.can_id) {
-	case SIMULATOR_ANGULAR_RATE_FRAME_ID: {
-		simulator_angular_rate_converted_t *angular_rate = (simulator_angular_rate_converted_t *)can_devices.message;
-		all_data->rtyaw_rate_All0 = angular_rate->z;
+	case SIMULATOR_IMU_ANGULAR_RATE_FRAME_ID: {
+		simulator_imu_angular_rate_converted_t *angular_rate = (simulator_imu_angular_rate_converted_t *)can_devices.message;
+		all_data->rtyaw_rate_All0 = angular_rate->ang_rate_z;
 		slip_data->rtyaw_rate_SlipV2 = all_data->rtyaw_rate_All0;
 		break;
 	}
-	case SIMULATOR_ACCELERATION_FRAME_ID: {
-		simulator_acceleration_converted_t *acceleration = (simulator_acceleration_converted_t *)can_devices.message;
-		ve_data->rtaxG_Velocity_Estimation = acceleration->x;
+	case SIMULATOR_IMU_ACCELERATION_FRAME_ID: {
+		simulator_imu_acceleration_converted_t *acceleration = (simulator_imu_acceleration_converted_t *)can_devices.message;
+		ve_data->rtaxG_Velocity_Estimation = acceleration->accel_x;
 		break;
 	}
-	case SIMULATOR_PEDALS_FRAME_ID: {
-		simulator_pedals_converted_t *pedals = (simulator_pedals_converted_t *)can_devices.message;
-		all_data->rtbrake_All0 = (pedals->brake_rear + pedals->brake_front) / 2.0;
-		all_data->rtDriver_req_All0 = pedals->throttle;
+	case SIMULATOR_PEDALS_OUTPUT_FRAME_ID: {
+		simulator_pedals_output_converted_t *pedals = (simulator_pedals_output_converted_t *)can_devices.message;
+		all_data->rtbrake_All0 = (pedals->bse_front + pedals->bse_rear) / 2.0;
+		all_data->rtDriver_req_All0 = pedals->apps;
 		slip_data->rtbrake_SlipV2 = all_data->rtbrake_All0;
 		slip_data->rtDriver_req_SlipV2 = all_data->rtDriver_req_All0;
 		break;
@@ -86,8 +86,8 @@ static inline void can_messages_parse_simulator(can_message_t *message, ve_data_
 	}
 	case SIMULATOR_SPEED_FRAME_ID: {
 		simulator_speed_converted_t *speed = (simulator_speed_converted_t *)can_devices.message;
-		ve_data->rtomega_fl_Velocity_Estimation = speed->fl;
-		ve_data->rtomega_fr_Velocity_Estimation = speed->fr;
+		ve_data->rtomega_fl_Velocity_Estimation = speed->encoder_l;
+		ve_data->rtomega_fr_Velocity_Estimation = speed->encoder_r;
 		break;
 	}
 	}

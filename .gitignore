@@ -53,4 +53,5 @@ dkms.conf
 
 bin/
 build/
+build_cross/
 .vscode/
