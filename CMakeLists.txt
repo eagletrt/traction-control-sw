@@ -14,7 +14,7 @@ include_directories(
     # exported
     ${CMAKE_CURRENT_LIST_DIR}/exported/lib
     # VelocityEstimation
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation_ert_rtw
+    ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation
 )
 
 add_library(
@@ -23,11 +23,11 @@ add_library(
 
     ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV2.c
 
-    ${CMAKE_CURRENT_LIST_DIR}/exported/All0_ert_rtw/All0.c
-    ${CMAKE_CURRENT_LIST_DIR}/exported/All0_ert_rtw/All0_data.c
+    ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque.c
+    ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque_data.c
 
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation_ert_rtw/Velocity_Estimation.c
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation_ert_rtw/Velocity_Estimation_data.c
+    ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation/Velocity_Estimation.c
+    ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation/Velocity_Estimation_data.c
 )
 
 add_library(

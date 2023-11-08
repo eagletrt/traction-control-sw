@@ -5,11 +5,11 @@
  *
  * File: ert_main.c
  *
- * Code generated for Simulink model 'All0'.
+ * Code generated for Simulink model 'Torque'.
  *
- * Model version                  : 6.6
+ * Model version                  : 6.17
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Tue Sep 26 16:59:25 2023
+ * C/C++ source code generated on : Mon Nov  6 16:49:11 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -21,11 +21,11 @@
 
 #include <stddef.h>
 #include <stdio.h>            /* This example main program uses printf/fflush */
-#include "All0.h"                      /* Model header file */
+#include "Torque.h"                    /* Model header file */
 
-static RT_MODEL_All0 rtM_All0_;
-static RT_MODEL_All0 *const rtMPtr_All0 = &rtM_All0_;/* Real-time model */
-static DW_All0 rtDW_All0;              /* Observable states */
+static RT_MODEL_Torque rtM_Torque_;
+static RT_MODEL_Torque *const rtMPtr_Torque = &rtM_Torque_;/* Real-time model */
+static DW_Torque rtDW_Torque;          /* Observable states */
 
 /*
  * Associating rt_OneStep with a real-time clock or interrupt service routine
@@ -38,8 +38,8 @@ static DW_All0 rtDW_All0;              /* Observable states */
  * your application needs.  This example simply sets an error status in the
  * real-time model and returns from rt_OneStep.
  */
-void rt_OneStep(RT_MODEL_All0 *const rtM_All0);
-void rt_OneStep(RT_MODEL_All0 *const rtM_All0)
+void rt_OneStep(RT_MODEL_Torque *const rtM_Torque);
+void rt_OneStep(RT_MODEL_Torque *const rtM_Torque)
 {
   static boolean_T OverrunFlag = false;
 
@@ -47,7 +47,7 @@ void rt_OneStep(RT_MODEL_All0 *const rtM_All0)
 
   /* Check for overrun */
   if (OverrunFlag) {
-    rtmSetErrorStatus(rtM_All0, "Overrun");
+    rtmSetErrorStatus(rtM_Torque, "Overrun");
     return;
   }
 
@@ -58,7 +58,7 @@ void rt_OneStep(RT_MODEL_All0 *const rtM_All0)
   /* Set model inputs here */
 
   /* Step the model */
-  All0_step(rtM_All0);
+  Torque_step(rtM_Torque);
 
   /* Get model outputs here */
 
@@ -78,29 +78,29 @@ void rt_OneStep(RT_MODEL_All0 *const rtM_All0)
  */
 int_T main(int_T argc, const char *argv[])
 {
-  RT_MODEL_All0 *const rtM_All0 = rtMPtr_All0;
+  RT_MODEL_Torque *const rtM_Torque = rtMPtr_Torque;
 
   /* Unused arguments */
   (void)(argc);
   (void)(argv);
 
   /* Pack model data into RTM */
-  rtM_All0->dwork = &rtDW_All0;
+  rtM_Torque->dwork = &rtDW_Torque;
 
   /* Initialize model */
-  All0_initialize(rtM_All0);
+  Torque_initialize(rtM_Torque);
 
   /* Attach rt_OneStep to a timer or interrupt service routine with
    * period 0.0005 seconds (base rate of the model) here.
    * The call syntax for rt_OneStep is
    *
-   *  rt_OneStep(rtM_All0);
+   *  rt_OneStep(rtM_Torque);
    */
   printf("Warning: The simulation will run forever. "
          "Generated ERT main won't simulate model step behavior. "
          "To change this behavior select the 'MAT-file logging' option.\n");
   fflush((NULL));
-  while (rtmGetErrorStatus(rtM_All0) == (NULL)) {
+  while (rtmGetErrorStatus(rtM_Torque) == (NULL)) {
     /*  Perform application tasks here */
   }
 

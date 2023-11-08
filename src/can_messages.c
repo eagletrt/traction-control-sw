@@ -10,13 +10,13 @@
 
 static inline double inverter_convert_speed(double val);
 
-static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, torque_data_t *torque_data,
 																							slip_data_t *slip_data);
-static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, torque_data_t *torque_data,
 																								slip_data_t *slip_data);
-static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, torque_data_t *torque_data,
 																								slip_data_t *slip_data);
-static inline void can_messages_parse_simulator(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+static inline void can_messages_parse_simulator(can_message_t *message, ve_data_t *ve_data, torque_data_t *torque_data,
 																								slip_data_t *slip_data);
 
 uint8_t raw_mem[512];
@@ -30,31 +30,31 @@ void can_messages_init() {
 	device_set_address(&can_devices, &raw_mem, sizeof(raw_mem), &converted_mem, sizeof(converted_mem));
 }
 
-void can_messages_parse(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data, slip_data_t *slip_data) {
+void can_messages_parse(can_message_t *message, ve_data_t *ve_data, torque_data_t *torque_data, slip_data_t *slip_data) {
 	assert(message && ve_data);
 
 #ifdef SIMULATOR
 	if (message->socket == CAN_SOCKET_PRIMARY) {
 		if (simulator_id_is_message(message->frame.can_id)) {
-			can_messages_parse_simulator(message, ve_data, all_data, slip_data);
+			can_messages_parse_simulator(message, ve_data, torque_data, slip_data);
 		} 
 	}
 #else	 // SIMULATOR
 	if (message->socket == CAN_SOCKET_PRIMARY) {
 		if (primary_id_is_message(message->frame.can_id)) {
-			can_messages_parse_primary(message, ve_data, all_data, slip_data);
+			can_messages_parse_primary(message, ve_data, torque_data, slip_data);
 		} else if (inverters_id_is_message(message->frame.can_id)) {
-			can_messages_parse_inverters(message, ve_data, all_data, slip_data);
+			can_messages_parse_inverters(message, ve_data, torque_data, slip_data);
 		}
 	} else if (message->socket == CAN_SOCKET_SECONDARY) {
 		if (secondary_id_is_message(message->frame.can_id)) {
-			can_messages_parse_secondary(message, ve_data, all_data, slip_data);
+			can_messages_parse_secondary(message, ve_data, torque_data, slip_data);
 		}
 	}
 #endif // SIMULATOR
 }
 
-static inline void can_messages_parse_simulator(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+static inline void can_messages_parse_simulator(can_message_t *message, ve_data_t *ve_data, torque_data_t *torque_data,
 																								slip_data_t *slip_data) {
 	assert(message && ve_data);
 
@@ -63,8 +63,8 @@ static inline void can_messages_parse_simulator(can_message_t *message, ve_data_
 	switch (message->frame.can_id) {
 	case SIMULATOR_IMU_ANGULAR_RATE_FRAME_ID: {
 		simulator_imu_angular_rate_converted_t *angular_rate = (simulator_imu_angular_rate_converted_t *)can_devices.message;
-		all_data->rtyaw_rate_All0 = angular_rate->ang_rate_z;
-		slip_data->rtyaw_rate_SlipV2 = all_data->rtyaw_rate_All0;
+		torque_data->rtyaw_rate_Torque = angular_rate->ang_rate_z;
+		slip_data->rtyaw_rate_SlipV2 = torque_data->rtyaw_rate_Torque;
 		break;
 	}
 	case SIMULATOR_IMU_ACCELERATION_FRAME_ID: {
@@ -74,16 +74,16 @@ static inline void can_messages_parse_simulator(can_message_t *message, ve_data_
 	}
 	case SIMULATOR_PEDALS_OUTPUT_FRAME_ID: {
 		simulator_pedals_output_converted_t *pedals = (simulator_pedals_output_converted_t *)can_devices.message;
-		all_data->rtbrake_All0 = (pedals->bse_front + pedals->bse_rear) / 2.0;
-		all_data->rtDriver_req_All0 = pedals->apps;
-		slip_data->rtbrake_SlipV2 = all_data->rtbrake_All0;
-		slip_data->rtDriver_req_SlipV2 = all_data->rtDriver_req_All0;
+		torque_data->rtbrake_Torque = (pedals->bse_front + pedals->bse_rear) / 2.0;
+		torque_data->rtDriver_req_Torque = pedals->apps;
+		slip_data->rtbrake_SlipV2 = torque_data->rtbrake_Torque;
+		slip_data->rtDriver_req_SlipV2 = torque_data->rtDriver_req_Torque;
 		break;
 	}
 	case SIMULATOR_STEERING_ANGLE_FRAME_ID: {
 		simulator_steering_angle_converted_t *steering_angle = (simulator_steering_angle_converted_t *)can_devices.message;
-		all_data->rtSteeringangle_All0 = steering_angle->angle;
-		slip_data->rtSteeringangle_SlipV2 = all_data->rtSteeringangle_All0;
+		torque_data->rtSteeringangle_Torque = steering_angle->angle;
+		slip_data->rtSteeringangle_SlipV2 = torque_data->rtSteeringangle_Torque;
 		break;
 	}
 	case SIMULATOR_SPEED_FRAME_ID: {
@@ -95,7 +95,7 @@ static inline void can_messages_parse_simulator(can_message_t *message, ve_data_
 	}
 }
 
-static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+static inline void can_messages_parse_primary(can_message_t *message, ve_data_t *ve_data, torque_data_t *torque_data,
 																							slip_data_t *slip_data) {
 	assert(message && ve_data);
 
@@ -111,8 +111,8 @@ static inline void can_messages_parse_primary(can_message_t *message, ve_data_t 
 	case PRIMARY_STEER_STATUS_FRAME_ID: {
 		primary_steer_status_converted_t *steer_status = (primary_steer_status_converted_t *)can_devices.message;
 		ve_data->rtmap_motor_Velocity_Estimation = steer_status->map_pw;
-		all_data->rtmap_sc_All0 = steer_status->map_sc;
-		all_data->rtmap_tv_All0 = steer_status->map_tv;
+		torque_data->rtmap_sc_Torque = steer_status->map_sc;
+		torque_data->rtmap_tv_Torque = steer_status->map_tv;
 		slip_data->rtmap_sc_SlipV2 = steer_status->map_sc;
 		slip_data->rtmap_tv_SlipV2 = steer_status->map_tv;
 		break;
@@ -121,7 +121,7 @@ static inline void can_messages_parse_primary(can_message_t *message, ve_data_t 
 		break;
 	}
 }
-static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+static inline void can_messages_parse_secondary(can_message_t *message, ve_data_t *ve_data, torque_data_t *torque_data,
 																								slip_data_t *slip_data) {
 	assert(message && ve_data);
 
@@ -130,10 +130,10 @@ static inline void can_messages_parse_secondary(can_message_t *message, ve_data_
 	switch (message->frame.can_id) {
 	case SECONDARY_PEDALS_OUTPUT_FRAME_ID: {
 		secondary_pedals_output_converted_t *pedals_output = (secondary_pedals_output_converted_t *)can_devices.message;
-		all_data->rtbrake_All0 = (pedals_output->bse_rear + pedals_output->bse_front) / 2.0;
-		all_data->rtDriver_req_All0 = pedals_output->apps;
-		slip_data->rtbrake_SlipV2 = all_data->rtbrake_All0;
-		slip_data->rtDriver_req_SlipV2 = all_data->rtDriver_req_All0;
+		torque_data->rtbrake_Torque = (pedals_output->bse_rear + pedals_output->bse_front) / 2.0;
+		torque_data->rtDriver_req_Torque = pedals_output->apps;
+		slip_data->rtbrake_SlipV2 = torque_data->rtbrake_Torque;
+		slip_data->rtDriver_req_SlipV2 = torque_data->rtDriver_req_Torque;
 		break;
 	}
 	case SECONDARY_IMU_ACCELERATION_FRAME_ID: {
@@ -145,24 +145,24 @@ static inline void can_messages_parse_secondary(can_message_t *message, ve_data_
 	case SECONDARY_IMU_ANGULAR_RATE_FRAME_ID: {
 		secondary_imu_angular_rate_converted_t *angular_rate =
 				(secondary_imu_angular_rate_converted_t *)can_devices.message;
-		all_data->rtyaw_rate_All0 = angular_rate->ang_rate_z;
-		slip_data->rtyaw_rate_SlipV2 = all_data->rtyaw_rate_All0;
+		torque_data->rtyaw_rate_Torque = angular_rate->ang_rate_z;
+		slip_data->rtyaw_rate_SlipV2 = torque_data->rtyaw_rate_Torque;
 		break;
 	}
 	case SECONDARY_STEERING_ANGLE_FRAME_ID: {
 		secondary_steering_angle_converted_t *steering_angle = (secondary_steering_angle_converted_t *)can_devices.message;
-		all_data->rtSteeringangle_All0 = steering_angle->angle;
-		slip_data->rtSteeringangle_SlipV2 = all_data->rtSteeringangle_All0;
+		torque_data->rtSteeringangle_Torque = steering_angle->angle;
+		slip_data->rtSteeringangle_SlipV2 = torque_data->rtSteeringangle_Torque;
 		break;
 	}
 	default:
 		break;
 	}
 }
-static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, all_data_t *all_data,
+static inline void can_messages_parse_inverters(can_message_t *message, ve_data_t *ve_data, torque_data_t *torque_data,
 																								slip_data_t *slip_data) {
 	assert(message && ve_data);
-	UNUSED(all_data);
+	UNUSED(torque_data);
 
 	inverters_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
 

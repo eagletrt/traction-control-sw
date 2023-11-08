@@ -9,8 +9,8 @@
 int main(void) {
 
 	can_messages_init();
-	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
-	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
+	can_init(&can[CAN_SOCKET_PRIMARY], "vcan0");
+	can_init(&can[CAN_SOCKET_SECONDARY], "vcan1");
 
 	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
@@ -38,16 +38,18 @@ int main(void) {
 
 		ve_model_set_data(&ve_data);
 		Velocity_Estimation_step(&ve_model);
-		all_model_set_data(&all_data);
-		All0_step(&all_model);
+		torque_model_set_data(&torque_data);
+		Torque_step(&torque_model);
 		slip_model_set_data(&slip_data);
 		SlipV2_step(&slip_model);
 
 		pthread_mutex_unlock(&model_mutex);
 
-		fprintf(stdout, "\rve: %f", rtu_bar_Velocity_Estimation);
+		// fprintf(stdout, "\rve: %f", rtu_bar_Velocity_Estimation);
 
 		can_send_data();
+
+		// printf("%f\n", slip_data.rtSteeringangle_SlipV2);
 
 		usleep(1.0 / RUN_FREQUENCY * 1e6);
 	}
@@ -69,7 +71,7 @@ void can_thread(can_socket_t socket) {
 		message.frame = frame;
 
 		pthread_mutex_lock(&model_mutex);
-		can_messages_parse(&message, &ve_data, &all_data, &slip_data);
+		can_messages_parse(&message, &ve_data, &torque_data, &slip_data);
 		pthread_mutex_unlock(&model_mutex);
 	}
 }
@@ -79,8 +81,8 @@ bool init_model(void) {
 	ve_model.dwork = &ve_rtDW;
 	Velocity_Estimation_initialize(&ve_model);
 
-	all_model.dwork = &all_rtDW;
-	All0_initialize(&all_model);
+	torque_model.dwork = &torque_rtDW;
+	Torque_initialize(&torque_model);
 
 	slip_model.dwork = &slip_rtDW;
 	SlipV2_initialize(&slip_model);
@@ -105,27 +107,27 @@ void ve_model_set_data(ve_data_t *ve_d) {
 	rtu_bar_Velocity_Estimation = ve_d->rtu_bar_Velocity_Estimation;
 }
 
-void all_model_set_data(all_data_t *all_d) {
+void torque_model_set_data(torque_data_t *torque_d) {
 	// All0 Data
-	rtbrake_All0 = all_d->rtbrake_All0 / 100.0;
-	rtDriver_req_All0 = all_d->rtDriver_req_All0 / 100.0;
-	rtSteeringangle_All0 = all_d->rtSteeringangle_All0 * (M_PI / 180.0);
+	rtbrake_Torque = torque_d->rtbrake_Torque / 100.0;
+	rtDriver_req_Torque = torque_d->rtDriver_req_Torque / 100.0;
+	rtSteeringangle_Torque = torque_d->rtSteeringangle_Torque * (M_PI / 180.0);
 
-	rtmap_tv_All0 = all_d->rtmap_tv_All0;
-	if (!equal_d(rtmap_tv_All0, 0.0)) {
-		rtmap_sc_All0 = 0.0;
+	rtmap_tv_Torque = torque_d->rtmap_tv_Torque;
+	if (!equal_d(rtmap_tv_Torque, 0.0)) {
+		rtmap_sc_Torque = 0.0;
 	} else {
-		rtmap_sc_All0 = all_d->rtmap_sc_All0;
+		rtmap_sc_Torque = torque_d->rtmap_sc_Torque;
 	}
 
-	rtyaw_rate_All0 = all_d->rtyaw_rate_All0 * (M_PI / 180.0);
+	rtyaw_rate_Torque = torque_d->rtyaw_rate_Torque * (M_PI / 180.0);
 
-	rtTm_rl_All0 = rtTmax_rl_Velocity_Estimation;
-	rtTm_rr_All0 = rtTmax_rr_Velocity_Estimation;
+	rtTm_rl_Torque = rtTmax_rl_Velocity_Estimation;
+	rtTm_rr_Torque = rtTmax_rr_Velocity_Estimation;
 
-	rtu_bar_All0 = rtu_bar_Velocity_Estimation;
-	rtomega_rl_All0 = rtomega_rl_Velocity_Estimation;
-	rtomega_rr_All0 = rtomega_rr_Velocity_Estimation;
+	rtu_bar_Torque = rtu_bar_Velocity_Estimation;
+	rtomega_rl_Torque = rtomega_rl_Velocity_Estimation;
+	rtomega_rr_Torque = rtomega_rr_Velocity_Estimation;
 }
 
 void slip_model_set_data(slip_data_t *slip_d) {
@@ -163,11 +165,11 @@ void can_send_data() {
 		static primary_control_output_converted_t out_src;
 
 		out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
-		if (!equal_d(rtmap_tv_All0, 0.0)) {
-			out_src.tmax_l = rtTm_rl_All0;
-			out_src.tmax_r = rtTm_rr_All0;
-			out_src.torque_l = rtTm_rl_a_All0;
-			out_src.torque_r = rtTm_rr_m_All0;
+		if (!equal_d(rtmap_tv_Torque, 0.0)) {
+			out_src.tmax_l = rtTm_rl_Torque;
+			out_src.tmax_r = rtTm_rr_Torque;
+			out_src.torque_l = rtTm_rl_a_Torque;
+			out_src.torque_r = rtTm_rr_m_Torque;
 		} else {
 			out_src.tmax_l = rtTm_rl_SlipV2;
 			out_src.tmax_r = rtTm_rr_SlipV2;
@@ -187,8 +189,8 @@ void can_send_data() {
 		static secondary_control_state_converted_t state_src;
 
 		state_src.map_pw = rtmap_motor_Velocity_Estimation;
-		state_src.map_sc = rtmap_sc_All0;
-		state_src.map_tv = rtmap_tv_All0;
+		state_src.map_sc = rtmap_sc_Torque;
+		state_src.map_tv = rtmap_tv_Torque;
 
 		secondary_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
 		secondary_control_state_pack(data, &state_src_raw, SECONDARY_CONTROL_STATE_BYTE_SIZE);

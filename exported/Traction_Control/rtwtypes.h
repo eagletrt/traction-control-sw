@@ -5,11 +5,11 @@
  *
  * File: rtwtypes.h
  *
- * Code generated for Simulink model 'All0'.
+ * Code generated for Simulink model 'Torque'.
  *
- * Model version                  : 6.6
+ * Model version                  : 6.17
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Tue Sep 26 16:59:25 2023
+ * C/C++ source code generated on : Mon Nov  6 16:49:11 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
