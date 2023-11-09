@@ -10,7 +10,8 @@
 #include <sys/time.h>
 #include <math.h>
 
-#define SIMULATOR (1)
+#define SIMULATOR 0
+#define ENABLE_TORQUE_VECTORING 1
 
 #ifdef SYSLOG
 #include <syslog.h>

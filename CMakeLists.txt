@@ -19,7 +19,7 @@ include_directories(
 
 add_library(
     exported
-    SHARED
+    STATIC
 
     ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV2.c
 
@@ -40,7 +40,7 @@ target_compile_options(can-lib PRIVATE -w)
 
 add_library(
     traction-control-lib
-    SHARED
+    STATIC
     ${traction-control-lib-src}
 )
 target_link_libraries(traction-control-lib can-lib m pthread)

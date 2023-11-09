@@ -7,10 +7,11 @@
 #define RUN_FREQUENCY 1000 // Hz
 
 int main(void) {
+	UNUSED(equal_d);
 
 	can_messages_init();
-	can_init(&can[CAN_SOCKET_PRIMARY], "vcan0");
-	can_init(&can[CAN_SOCKET_SECONDARY], "vcan1");
+	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
+	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
 
 	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
@@ -36,20 +37,19 @@ int main(void) {
 	while (true) {
 		pthread_mutex_lock(&model_mutex);
 
-		ve_model_set_data(&ve_data);
+		// Velocity Estimation
+		ve_model_set_data(&can_data);
 		Velocity_Estimation_step(&ve_model);
-		torque_model_set_data(&torque_data);
+		// Torque Vectoring
+		torque_model_set_data(&can_data);
 		Torque_step(&torque_model);
-		slip_model_set_data(&slip_data);
+		// Slip Control
+		slip_model_set_data(&can_data);
 		SlipV2_step(&slip_model);
 
 		pthread_mutex_unlock(&model_mutex);
 
-		// fprintf(stdout, "\rve: %f", rtu_bar_Velocity_Estimation);
-
 		can_send_data();
-
-		// printf("%f\n", slip_data.rtSteeringangle_SlipV2);
 
 		usleep(1.0 / RUN_FREQUENCY * 1e6);
 	}
@@ -71,7 +71,7 @@ void can_thread(can_socket_t socket) {
 		message.frame = frame;
 
 		pthread_mutex_lock(&model_mutex);
-		can_messages_parse(&message, &ve_data, &torque_data, &slip_data);
+		can_messages_parse(&message, &can_data);
 		pthread_mutex_unlock(&model_mutex);
 	}
 }
@@ -90,37 +90,28 @@ bool init_model(void) {
 	return true;
 }
 
-void ve_model_set_data(ve_data_t *ve_d) {
+void ve_model_set_data(can_data_t *can_data) {
 	// Velocity Estimation Data
-	rtaxG_Velocity_Estimation = ve_d->rtaxG_Velocity_Estimation * 9.81;
+	rtaxG_Velocity_Estimation = can_data->accel_x;
 
-	rtTmax_rl_Velocity_Estimation = ve_d->rtTmax_rl_Velocity_Estimation;
-	rtTmax_rr_Velocity_Estimation = ve_d->rtTmax_rr_Velocity_Estimation;
+	rtmap_motor_Velocity_Estimation = can_data->map_pw;
 
-	rtmap_motor_Velocity_Estimation = ve_d->rtmap_motor_Velocity_Estimation;
-
-	rtomega_fl_Velocity_Estimation = ve_d->rtomega_fl_Velocity_Estimation;
-	rtomega_fr_Velocity_Estimation = ve_d->rtomega_fr_Velocity_Estimation;
-	rtomega_rl_Velocity_Estimation = ve_d->rtomega_rl_Velocity_Estimation;
-	rtomega_rr_Velocity_Estimation = ve_d->rtomega_rr_Velocity_Estimation;
-
-	rtu_bar_Velocity_Estimation = ve_d->rtu_bar_Velocity_Estimation;
+	rtomega_fl_Velocity_Estimation = can_data->omega_fl;
+	rtomega_fr_Velocity_Estimation = can_data->omega_fr;
+	rtomega_rl_Velocity_Estimation = can_data->omega_rl;
+	rtomega_rr_Velocity_Estimation = can_data->omega_rr;
 }
 
-void torque_model_set_data(torque_data_t *torque_d) {
+void torque_model_set_data(can_data_t *can_data) {
 	// All0 Data
-	rtbrake_Torque = torque_d->rtbrake_Torque / 100.0;
-	rtDriver_req_Torque = torque_d->rtDriver_req_Torque / 100.0;
-	rtSteeringangle_Torque = torque_d->rtSteeringangle_Torque * (M_PI / 180.0);
+	rtbrake_Torque = can_data->brake;
+	rtDriver_req_Torque = can_data->throttle;
+	rtSteeringangle_Torque = can_data->steering_angle;
 
-	rtmap_tv_Torque = torque_d->rtmap_tv_Torque;
-	if (!equal_d(rtmap_tv_Torque, 0.0)) {
-		rtmap_sc_Torque = 0.0;
-	} else {
-		rtmap_sc_Torque = torque_d->rtmap_sc_Torque;
-	}
+	rtmap_tv_Torque = can_data->map_tv;
+	rtmap_sc_Torque = can_data->map_sc;
 
-	rtyaw_rate_Torque = torque_d->rtyaw_rate_Torque * (M_PI / 180.0);
+	rtyaw_rate_Torque = can_data->gyro_z;
 
 	rtTm_rl_Torque = rtTmax_rl_Velocity_Estimation;
 	rtTm_rr_Torque = rtTmax_rr_Velocity_Estimation;
@@ -130,20 +121,16 @@ void torque_model_set_data(torque_data_t *torque_d) {
 	rtomega_rr_Torque = rtomega_rr_Velocity_Estimation;
 }
 
-void slip_model_set_data(slip_data_t *slip_d) {
+void slip_model_set_data(can_data_t *can_data) {
 	// SlipV2 Data
-	rtbrake_SlipV2 = slip_d->rtbrake_SlipV2 / 100.0;
-	rtDriver_req_SlipV2 = slip_d->rtDriver_req_SlipV2 / 100.0;
-	rtSteeringangle_SlipV2 = slip_d->rtSteeringangle_SlipV2 * (M_PI / 180.0);
+	rtbrake_SlipV2 = can_data->brake;
+	rtDriver_req_SlipV2 = can_data->throttle;
+	rtSteeringangle_SlipV2 = can_data->steering_angle;
 
-	if (!equal_d(slip_d->rtmap_tv_SlipV2, 0.0)) {
-		rtmap_sc_SlipV2 = 0.0;
-	} else {
-		rtmap_sc_SlipV2 = slip_d->rtmap_sc_SlipV2;
-	}
-	rtmap_tv_SlipV2 = 0.0;
+	rtmap_sc_SlipV2 = can_data->map_sc;
+	rtmap_tv_SlipV2 = can_data->map_tv;
 
-	rtyaw_rate_SlipV2 = slip_d->rtyaw_rate_SlipV2 * (M_PI / 180.0);
+	rtyaw_rate_SlipV2 = can_data->gyro_z;
 
 	rtTm_rl_SlipV2 = rtTmax_rl_Velocity_Estimation;
 	rtTm_rr_SlipV2 = rtTmax_rr_Velocity_Estimation;
@@ -165,17 +152,17 @@ void can_send_data() {
 		static primary_control_output_converted_t out_src;
 
 		out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
-		if (!equal_d(rtmap_tv_Torque, 0.0)) {
+#if 1==ENABLE_TORQUE_VECTORING
 			out_src.tmax_l = rtTm_rl_Torque;
 			out_src.tmax_r = rtTm_rr_Torque;
 			out_src.torque_l = rtTm_rl_a_Torque;
 			out_src.torque_r = rtTm_rr_m_Torque;
-		} else {
+#else
 			out_src.tmax_l = rtTm_rl_SlipV2;
 			out_src.tmax_r = rtTm_rr_SlipV2;
 			out_src.torque_l = rtTm_rl_a_SlipV2;
 			out_src.torque_r = rtTm_rr_m_SlipV2;
-		}
+#endif
 
 		primary_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
 		primary_control_output_pack(data, &out_src_raw, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);

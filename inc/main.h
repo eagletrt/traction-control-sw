@@ -20,22 +20,21 @@
 
 can_t can[CAN_SOCKET_COUNT];
 
+can_data_t can_data;
+
 DW_Torque torque_rtDW;
 RT_MODEL_Torque torque_model;
-torque_data_t torque_data;
 
 DW_Velocity_Estimation ve_rtDW;
 RT_MODEL_Velocity_Estimation ve_model;
-ve_data_t ve_data;
 
 DW_SlipV2 slip_rtDW;
 RT_MODEL_SlipV2 slip_model;
-slip_data_t slip_data;
 
 bool init_model(void);
-void ve_model_set_data(ve_data_t *ve_d);
-void torque_model_set_data(torque_data_t *torque_d);
-void slip_model_set_data(slip_data_t *slip_d);
+void ve_model_set_data(can_data_t *can_data);
+void torque_model_set_data(can_data_t *can_data);
+void slip_model_set_data(can_data_t *can_data);
 
 // CAN thread
 bool kill_can_thread;
