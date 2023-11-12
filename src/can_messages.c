@@ -12,6 +12,7 @@ static inline double inverter_convert_speed(double val);
 static inline double convert_gyro(double val);
 static inline double convert_accel(double val);
 static inline double convert_brake(double val);
+static inline double convert_throttle(double val);
 static inline double convert_steering_angle(double val);
 
 static inline void can_messages_parse_primary(can_message_t *message, can_data_t *can_data);
@@ -125,7 +126,7 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 	switch (message->frame.can_id) {
 	case SECONDARY_PEDALS_OUTPUT_FRAME_ID: {
 		secondary_pedals_output_converted_t *pedals_output = (secondary_pedals_output_converted_t *)can_devices.message;
-		can_data->throttle = pedals_output->apps;
+		can_data->throttle = convert_throttle(pedals_output->apps);
 		can_data->brake = convert_brake((pedals_output->bse_front + pedals_output->bse_rear) / 2.0);
 		break;
 	}
@@ -191,4 +192,5 @@ static inline double inverter_convert_speed(double val) { return (val * 10.0f * 
 static inline double convert_gyro(double val) { return val * M_PI / 180.0; };
 static inline double convert_accel(double val) {return val * 9.81; };
 static inline double convert_brake(double val) { return val / 100.0; };
+static inline double convert_throttle(double val) { return val / 100.0; };
 static inline double convert_steering_angle(double val) { return val * (M_PI / 180.0); };
