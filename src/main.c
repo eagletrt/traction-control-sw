@@ -1,13 +1,21 @@
 #include "inc/main.h"
 #include "inc/defines.h"
+#include "inc/benchmark.h"
 
 #include <math.h>
 #include <unistd.h>
+#include <signal.h>
 
 #define RUN_FREQUENCY 1000 // Hz
 
 int main(void) {
-	UNUSED(equal_d);
+	BENCHMARK_START();
+	
+	// Register signal handler
+	if (signal(SIGINT, sig_handler) == SIG_ERR) {
+		eprintf("Error registering signal handler\n");
+		return EXIT_FAILURE;
+	}
 
 	can_messages_init();
 	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
@@ -34,26 +42,35 @@ int main(void) {
 	pthread_create(&can_threads[CAN_SOCKET_SECONDARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_SECONDARY);
 
 	fprintf(stdout, "\n");
-	while (true) {
-		pthread_mutex_lock(&model_mutex);
+	running = true;
+	while (running) {
+		BENCHMARK_TICK();
+		{
+			BENCHMARK_TICK();
+			pthread_mutex_lock(&model_mutex);
 
-		// Velocity Estimation
-		ve_model_set_data(&can_data);
-		Velocity_Estimation_step(&ve_model);
-		// Torque Vectoring
-		torque_model_set_data(&can_data);
-		Torque_step(&torque_model);
-		// Slip Control
-		slip_model_set_data(&can_data);
-		SlipV2_step(&slip_model);
+			// Velocity Estimation
+			ve_model_set_data(&can_data);
+			Velocity_Estimation_step(&ve_model);
+			// Torque Vectoring
+			torque_model_set_data(&can_data);
+			Torque_step(&torque_model);
+			// Slip Control
+			slip_model_set_data(&can_data);
+			SlipV2_step(&slip_model);
 
-		pthread_mutex_unlock(&model_mutex);
+			pthread_mutex_unlock(&model_mutex);
+			BENCHMARK_TOCK();
+		}
 
 		can_send_data();
+
+		BENCHMARK_TOCK();
 
 		usleep(1.0 / RUN_FREQUENCY * 1e6);
 	}
 
+	BENCHMARK_END();
 	return EXIT_SUCCESS;
 }
 
@@ -176,11 +193,23 @@ void can_send_data() {
 		static secondary_control_state_converted_t state_src;
 
 		state_src.map_pw = rtmap_motor_Velocity_Estimation;
+#if 1==ENABLE_TORQUE_VECTORING
 		state_src.map_sc = rtmap_sc_Torque;
 		state_src.map_tv = rtmap_tv_Torque;
+#else
+		state_src.map_sc = rtmap_sc_SlipV2;
+		state_src.map_tv = rtmap_tv_SlipV2;
+#endif
 
 		secondary_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
 		secondary_control_state_pack(data, &state_src_raw, SECONDARY_CONTROL_STATE_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_CONTROL_STATE_FRAME_ID, data, SECONDARY_CONTROL_STATE_BYTE_SIZE);
+	}
+}
+
+// sig handler
+void sig_handler(int signo) {
+	if (signo == SIGINT) {
+		running = false;
 	}
 }

@@ -9,9 +9,11 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <math.h>
+#include <stdbool.h>
 
 #define SIMULATOR 0
-#define ENABLE_TORQUE_VECTORING 1
+#define ENABLE_TORQUE_VECTORING 0
+#define BENCHMARK 0
 
 #ifdef SYSLOG
 #include <syslog.h>
@@ -105,11 +107,11 @@
 #define INV_MAX_SPEED 6500.f // MOT_RPM_LIMIT_REAL
 
 static uint64_t get_timestamp_u() {
-	struct timeval tv;
+	static struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * (uint64_t)1000000 + tv.tv_usec;
 }
 
-static bool equal_d(double a, double b) { return fabs(a - b) < 0.0001; }
+// static bool equal_d(double a, double b) { return fabs(a - b) < 0.0001; }
 
 #endif // DEFINES_H

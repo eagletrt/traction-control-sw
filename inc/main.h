@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #include "inc/can.h"
 #include "inc/data.h"
@@ -18,6 +19,7 @@
 #include "exported/Traction_Control/Torque.h"
 #include "exported/Velocity_Estimation/Velocity_Estimation.h"
 
+bool running;
 can_t can[CAN_SOCKET_COUNT];
 
 can_data_t can_data;
@@ -43,5 +45,6 @@ pthread_t can_threads[CAN_SOCKET_COUNT];
 
 void can_thread(can_socket_t socket);
 void can_send_data();
+void sig_handler(int signo);
 
 #endif // __MAIN_H__

@@ -54,4 +54,5 @@ dkms.conf
 bin/
 build/
 build_cross/
+benchmark.json
 .vscode/

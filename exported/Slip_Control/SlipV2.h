@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV2'.
  *
- * Model version                  : 6.17
+ * Model version                  : 6.18
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Mon Nov  6 16:53:02 2023
+ * C/C++ source code generated on : Sun Nov 19 15:43:04 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -88,18 +88,15 @@ extern real_T rtyaw_rate_SlipV2;       /* '<Root>/Omega' */
  * Block '<S61>/Data Type Propagation' : Unused code path elimination
  * Block '<S3>/Scope' : Unused code path elimination
  * Block '<S3>/Scope1' : Unused code path elimination
+ * Block '<S3>/Scope2' : Unused code path elimination
  * Block '<S2>/Manual Switch' : Eliminated due to constant selection input
  * Block '<S2>/Manual Switch1' : Eliminated due to constant selection input
- * Block '<S2>/Manual Switch2' : Eliminated due to constant selection input
  * Block '<S3>/Manual Switch' : Eliminated due to constant selection input
  * Block '<S3>/Manual Switch1' : Eliminated due to constant selection input
- * Block '<S3>/Manual Switch2' : Eliminated due to constant selection input
  * Block '<S2>/1-D Lookup Table' : Unused code path elimination
  * Block '<S2>/1-D Lookup Table1' : Unused code path elimination
- * Block '<S2>/Constant8' : Unused code path elimination
  * Block '<S3>/1-D Lookup Table' : Unused code path elimination
  * Block '<S3>/1-D Lookup Table1' : Unused code path elimination
- * Block '<S3>/Constant8' : Unused code path elimination
  */
 
 /*-
