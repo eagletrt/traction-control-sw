@@ -14,6 +14,7 @@
 #include "lib/can/lib/primary/primary_watchdog.h"
 #include "lib/can/lib/secondary/secondary_network.h"
 #include "lib/can/lib/secondary/secondary_watchdog.h"
+#include "lib/can/lib/simulator/simulator_network.h"
 
 #include "exported/Slip_Control/SlipV2.h"
 #include "exported/Traction_Control/Torque.h"

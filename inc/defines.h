@@ -11,9 +11,11 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define SIMULATOR 0
+#define SIMULATOR 1
 #define ENABLE_TORQUE_VECTORING 0
+
 #define BENCHMARK 0
+#define RUN_FREQUENCY 1000 // Hz
 
 #ifdef SYSLOG
 #include <syslog.h>

@@ -6,11 +6,9 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define RUN_FREQUENCY 1000 // Hz
-
 int main(void) {
 	BENCHMARK_START();
-	
+
 	// Register signal handler
 	if (signal(SIGINT, sig_handler) == SIG_ERR) {
 		eprintf("Error registering signal handler\n");
@@ -165,35 +163,49 @@ void can_send_data() {
 	if (timestamp - PRIMARY_INTERVAL_CONTROL_OUTPUT * 1e3 > out_timestamp) {
 		out_timestamp = timestamp;
 
-		static primary_control_output_t out_src_raw;
-		static primary_control_output_converted_t out_src;
-
-		out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
-#if 1==ENABLE_TORQUE_VECTORING
-			out_src.tmax_l = rtTm_rl_Torque;
-			out_src.tmax_r = rtTm_rr_Torque;
-			out_src.torque_l = rtTm_rl_a_Torque;
-			out_src.torque_r = rtTm_rr_m_Torque;
+#if SIMULATOR == 1
+		static simulator_control_output_converted_t out_src;
 #else
-			out_src.tmax_l = rtTm_rl_SlipV2;
-			out_src.tmax_r = rtTm_rr_SlipV2;
-			out_src.torque_l = rtTm_rl_a_SlipV2;
-			out_src.torque_r = rtTm_rr_m_SlipV2;
+		static primary_control_output_converted_t out_src;
 #endif
 
+		out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
+#if ENABLE_TORQUE_VECTORING == 1
+		out_src.tmax_l = rtTm_rl_Torque;
+		out_src.tmax_r = rtTm_rr_Torque;
+		out_src.torque_l = rtTm_rl_a_Torque;
+		out_src.torque_r = rtTm_rr_m_Torque;
+#else
+		out_src.tmax_l = rtTm_rl_SlipV2;
+		out_src.tmax_r = rtTm_rr_SlipV2;
+		out_src.torque_l = rtTm_rl_a_SlipV2;
+		out_src.torque_r = rtTm_rr_m_SlipV2;
+#endif
+
+#if SIMULATOR == 1
+		static simulator_control_output_t out_src_raw;
+		simulator_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
+		simulator_control_output_pack(data, &out_src_raw, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_OUTPUT_FRAME_ID, data, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
+#else
+		static primary_control_output_t out_src_raw;
 		primary_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
 		primary_control_output_pack(data, &out_src_raw, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_OUTPUT_FRAME_ID, data, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
+#endif
 	}
 
 	if (timestamp - SECONDARY_INTERVAL_CONTROL_STATE * 1e3 > state_timestamp) {
 		state_timestamp = timestamp;
 
-		static secondary_control_state_t state_src_raw;
+#if SIMULATOR == 1
+		static simulator_control_state_converted_t state_src;
+#else
 		static secondary_control_state_converted_t state_src;
+#endif
 
 		state_src.map_pw = rtmap_motor_Velocity_Estimation;
-#if 1==ENABLE_TORQUE_VECTORING
+#if ENABLE_TORQUE_VECTORING == 1
 		state_src.map_sc = rtmap_sc_Torque;
 		state_src.map_tv = rtmap_tv_Torque;
 #else
@@ -201,9 +213,17 @@ void can_send_data() {
 		state_src.map_tv = rtmap_tv_SlipV2;
 #endif
 
+#if SIMULATOR == 1
+		static simulator_control_state_t state_src_raw;
+		simulator_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
+		simulator_control_state_pack(data, &state_src_raw, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_STATE_FRAME_ID, data, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
+#else
+		static secondary_control_state_t state_src_raw;
 		secondary_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
 		secondary_control_state_pack(data, &state_src_raw, SECONDARY_CONTROL_STATE_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_CONTROL_STATE_FRAME_ID, data, SECONDARY_CONTROL_STATE_BYTE_SIZE);
+#endif
 	}
 }
 

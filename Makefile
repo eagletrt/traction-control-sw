@@ -1,3 +1,4 @@
+MAKEFLAGS += --no-print-directory
 
 .PHONY: all clean build run format
 

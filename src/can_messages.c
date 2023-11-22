@@ -34,13 +34,13 @@ void can_messages_init() {
 void can_messages_parse(can_message_t *message, can_data_t *can_data) {
 	assert(message && can_data);
 
-#if 1==SIMULATOR
+#if SIMULATOR == 1
 	if (message->socket == CAN_SOCKET_PRIMARY) {
 		if (simulator_id_is_message(message->frame.can_id)) {
 			can_messages_parse_simulator(message, can_data);
-		} 
+		}
 	}
-#else	 // SIMULATOR
+#else
 	if (message->socket == CAN_SOCKET_PRIMARY) {
 		if (primary_id_is_message(message->frame.can_id)) {
 			can_messages_parse_primary(message, can_data);
@@ -62,14 +62,16 @@ static inline void can_messages_parse_simulator(can_message_t *message, can_data
 
 	switch (message->frame.can_id) {
 	case SIMULATOR_IMU_ANGULAR_RATE_FRAME_ID: {
-		simulator_imu_angular_rate_converted_t *angular_rate = (simulator_imu_angular_rate_converted_t *)can_devices.message;
+		simulator_imu_angular_rate_converted_t *angular_rate =
+				(simulator_imu_angular_rate_converted_t *)can_devices.message;
 		can_data->gyro_x = convert_gyro(angular_rate->ang_rate_x);
 		can_data->gyro_y = convert_gyro(angular_rate->ang_rate_y);
 		can_data->gyro_z = convert_gyro(angular_rate->ang_rate_z);
 		break;
 	}
 	case SIMULATOR_IMU_ACCELERATION_FRAME_ID: {
-		simulator_imu_acceleration_converted_t *acceleration = (simulator_imu_acceleration_converted_t *)can_devices.message;
+		simulator_imu_acceleration_converted_t *acceleration =
+				(simulator_imu_acceleration_converted_t *)can_devices.message;
 		can_data->accel_x = convert_accel(acceleration->accel_x);
 		can_data->accel_y = convert_accel(acceleration->accel_y);
 		can_data->accel_z = convert_accel(acceleration->accel_z);
@@ -190,7 +192,7 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 
 static inline double inverter_convert_speed(double val) { return (val * 10.0f * INV_MAX_SPEED) / 32767.f; }
 static inline double convert_gyro(double val) { return val * M_PI / 180.0; };
-static inline double convert_accel(double val) {return val * 9.81; };
+static inline double convert_accel(double val) { return val * 9.81; };
 static inline double convert_brake(double val) { return val / 100.0; };
 static inline double convert_throttle(double val) { return val / 100.0; };
 static inline double convert_steering_angle(double val) { return val * (M_PI / 180.0); };
