@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Torque'.
  *
- * Model version                  : 6.17
+ * Model version                  : 6.28
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Mon Nov  6 16:49:11 2023
+ * C/C++ source code generated on : Fri Nov 24 22:36:36 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7

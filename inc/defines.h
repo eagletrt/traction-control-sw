@@ -17,6 +17,15 @@
 #define BENCHMARK 0
 #define RUN_FREQUENCY 1000 // Hz
 
+#define SC_LAMBDA_REF 0.136
+#define SC_PID_KP 200.0
+#define SC_PID_KI 850.0
+#define SC_SPEED_CUTOFF 100.0
+
+#define TV_KUF 0.0002
+#define TV_PID_KP 150.0
+#define TV_PID_KI 300.0
+
 #ifdef SYSLOG
 #include <syslog.h>
 #else

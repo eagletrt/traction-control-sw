@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV2'.
  *
- * Model version                  : 6.18
+ * Model version                  : 6.27
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Sun Nov 19 15:43:04 2023
+ * C/C++ source code generated on : Fri Nov 24 14:37:51 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -62,7 +62,12 @@ extern void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2);
 
 /* Data with Exported storage */
 extern real_T rtDriver_req_SlipV2;     /* '<Root>/driver_request' */
+extern real_T rtERROR_SlipV2;          /* '<Root>/ERROR' */
 extern real_T rtSteeringangle_SlipV2;  /* '<Root>/delta' */
+extern real_T rtTel_Inp_SC_Ki_SlipV2;  /* '<Root>/Tel_Inp_SC_Ki' */
+extern real_T rtTel_Inp_SC_Kp_SlipV2;  /* '<Root>/Tel_Inp_SC_Kp' */
+extern real_T rtTel_Inp_SC_LambdaRef_SlipV2;/* '<Root>/Tel_Inp_SC_LambdaRef' */
+extern real_T rtTel_Inp_SC_SpeedCutoff_SlipV2;/* '<Root>/Tel_Inp_SC_SpeedCutoff' */
 extern real_T rtTm_rl_SlipV2;          /* '<Root>/Tmax_rl' */
 extern real_T rtTm_rl_a_SlipV2;        /* '<Root>/Tm_rl' */
 extern real_T rtTm_rr_SlipV2;          /* '<Root>/Tmax_rr' */
@@ -89,14 +94,6 @@ extern real_T rtyaw_rate_SlipV2;       /* '<Root>/Omega' */
  * Block '<S3>/Scope' : Unused code path elimination
  * Block '<S3>/Scope1' : Unused code path elimination
  * Block '<S3>/Scope2' : Unused code path elimination
- * Block '<S2>/Manual Switch' : Eliminated due to constant selection input
- * Block '<S2>/Manual Switch1' : Eliminated due to constant selection input
- * Block '<S3>/Manual Switch' : Eliminated due to constant selection input
- * Block '<S3>/Manual Switch1' : Eliminated due to constant selection input
- * Block '<S2>/1-D Lookup Table' : Unused code path elimination
- * Block '<S2>/1-D Lookup Table1' : Unused code path elimination
- * Block '<S3>/1-D Lookup Table' : Unused code path elimination
- * Block '<S3>/1-D Lookup Table1' : Unused code path elimination
  */
 
 /*-
@@ -119,7 +116,7 @@ extern real_T rtyaw_rate_SlipV2;       /* '<Root>/Omega' */
  * '<Root>' : 'Fenice_VehicleModel/Vehicle Controller'
  * '<S1>'   : 'Fenice_VehicleModel/Vehicle Controller/SlipV2'
  * '<S2>'   : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Left Wheel'
- * '<S3>'   : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1'
+ * '<S3>'   : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel'
  * '<S4>'   : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Left Wheel/Discrete Varying PID'
  * '<S5>'   : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Left Wheel/Saturation Dynamic1'
  * '<S6>'   : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Left Wheel/Saturation Dynamic2'
@@ -175,61 +172,61 @@ extern real_T rtyaw_rate_SlipV2;       /* '<Root>/Omega' */
  * '<S56>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Left Wheel/Discrete Varying PID/Tsamp - Ngain/Passthrough'
  * '<S57>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Left Wheel/Discrete Varying PID/postSat Signal/Feedback_Path'
  * '<S58>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Left Wheel/Discrete Varying PID/preSat Signal/Feedback_Path'
- * '<S59>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID'
- * '<S60>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Saturation Dynamic1'
- * '<S61>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Saturation Dynamic2'
- * '<S62>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Slip_est1'
- * '<S63>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/map'
- * '<S64>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Anti-windup'
- * '<S65>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/D Gain'
- * '<S66>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Filter'
- * '<S67>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Filter ICs'
- * '<S68>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/I Gain'
- * '<S69>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Ideal P Gain'
- * '<S70>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Ideal P Gain Fdbk'
- * '<S71>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Integrator'
- * '<S72>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Integrator ICs'
- * '<S73>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/N Copy'
- * '<S74>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/N Gain'
- * '<S75>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/P Copy'
- * '<S76>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Parallel P Gain'
- * '<S77>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Reset Signal'
- * '<S78>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Saturation'
- * '<S79>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Saturation Fdbk'
- * '<S80>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Sum'
- * '<S81>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Sum Fdbk'
- * '<S82>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Tracking Mode'
- * '<S83>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Tracking Mode Sum'
- * '<S84>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Tsamp - Integral'
- * '<S85>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Tsamp - Ngain'
- * '<S86>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/postSat Signal'
- * '<S87>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/preSat Signal'
- * '<S88>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel'
- * '<S89>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel/Dead Zone'
- * '<S90>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel/Dead Zone/Enabled'
- * '<S91>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/D Gain/Disabled'
- * '<S92>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Filter/Disabled'
- * '<S93>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Filter ICs/Disabled'
- * '<S94>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/I Gain/External Parameters'
- * '<S95>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Ideal P Gain/Passthrough'
- * '<S96>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Ideal P Gain Fdbk/Passthrough'
- * '<S97>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Integrator/Discrete'
- * '<S98>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Integrator ICs/Internal IC'
- * '<S99>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/N Copy/Disabled wSignal Specification'
- * '<S100>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/N Gain/Disabled'
- * '<S101>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/P Copy/Disabled'
- * '<S102>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Parallel P Gain/External Parameters'
- * '<S103>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Reset Signal/Disabled'
- * '<S104>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Saturation/Enabled'
- * '<S105>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Saturation Fdbk/Passthrough'
- * '<S106>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Sum/Sum_PI'
- * '<S107>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Sum Fdbk/Enabled'
- * '<S108>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Tracking Mode/Disabled'
- * '<S109>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Tracking Mode Sum/Passthrough'
- * '<S110>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Tsamp - Integral/Passthrough'
- * '<S111>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/Tsamp - Ngain/Passthrough'
- * '<S112>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/postSat Signal/Feedback_Path'
- * '<S113>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel1/Discrete Varying PID/preSat Signal/Feedback_Path'
+ * '<S59>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID'
+ * '<S60>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Saturation Dynamic1'
+ * '<S61>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Saturation Dynamic2'
+ * '<S62>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Slip_est1'
+ * '<S63>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/map'
+ * '<S64>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Anti-windup'
+ * '<S65>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/D Gain'
+ * '<S66>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Filter'
+ * '<S67>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Filter ICs'
+ * '<S68>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/I Gain'
+ * '<S69>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Ideal P Gain'
+ * '<S70>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Ideal P Gain Fdbk'
+ * '<S71>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Integrator'
+ * '<S72>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Integrator ICs'
+ * '<S73>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/N Copy'
+ * '<S74>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/N Gain'
+ * '<S75>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/P Copy'
+ * '<S76>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Parallel P Gain'
+ * '<S77>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Reset Signal'
+ * '<S78>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Saturation'
+ * '<S79>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Saturation Fdbk'
+ * '<S80>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Sum'
+ * '<S81>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Sum Fdbk'
+ * '<S82>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Tracking Mode'
+ * '<S83>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Tracking Mode Sum'
+ * '<S84>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Tsamp - Integral'
+ * '<S85>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Tsamp - Ngain'
+ * '<S86>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/postSat Signal'
+ * '<S87>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/preSat Signal'
+ * '<S88>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel'
+ * '<S89>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel/Dead Zone'
+ * '<S90>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Anti-windup/Disc. Clamping Parallel/Dead Zone/Enabled'
+ * '<S91>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/D Gain/Disabled'
+ * '<S92>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Filter/Disabled'
+ * '<S93>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Filter ICs/Disabled'
+ * '<S94>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/I Gain/External Parameters'
+ * '<S95>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Ideal P Gain/Passthrough'
+ * '<S96>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Ideal P Gain Fdbk/Passthrough'
+ * '<S97>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Integrator/Discrete'
+ * '<S98>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Integrator ICs/Internal IC'
+ * '<S99>'  : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/N Copy/Disabled wSignal Specification'
+ * '<S100>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/N Gain/Disabled'
+ * '<S101>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/P Copy/Disabled'
+ * '<S102>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Parallel P Gain/External Parameters'
+ * '<S103>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Reset Signal/Disabled'
+ * '<S104>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Saturation/Enabled'
+ * '<S105>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Saturation Fdbk/Passthrough'
+ * '<S106>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Sum/Sum_PI'
+ * '<S107>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Sum Fdbk/Enabled'
+ * '<S108>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Tracking Mode/Disabled'
+ * '<S109>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Tracking Mode Sum/Passthrough'
+ * '<S110>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Tsamp - Integral/Passthrough'
+ * '<S111>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/Tsamp - Ngain/Passthrough'
+ * '<S112>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/postSat Signal/Feedback_Path'
+ * '<S113>' : 'Fenice_VehicleModel/Vehicle Controller/SlipV2/TCS Rear Right Wheel/Discrete Varying PID/preSat Signal/Feedback_Path'
  */
 #endif                                 /* RTW_HEADER_SlipV2_h_ */
 

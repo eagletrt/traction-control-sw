@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.16)
 project(traction-control)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -24,7 +25,6 @@ add_library(
     ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV2.c
 
     ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque.c
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque_data.c
 
     ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation/Velocity_Estimation.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation/Velocity_Estimation_data.c
