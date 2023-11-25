@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV2'.
  *
- * Model version                  : 6.27
+ * Model version                  : 6.29
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Fri Nov 24 14:37:51 2023
+ * C/C++ source code generated on : Sat Nov 25 17:00:43 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -190,7 +190,7 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
    *  Inport: '<Root>/Tmax_rr'
    *  Inport: '<Root>/map_sc'
    */
-  rtb_vms = (1.0 - fmin(fmax((1.0 - rtb_vms / rtTel_Inp_SC_SpeedCutoff_SlipV2) *
+  rtb_vms = (1.0 - fmin(fmax(rtb_vms / rtTel_Inp_SC_SpeedCutoff_SlipV2 *
     rtmap_sc_SlipV2, 0.0), 1.0)) * (rtTm_rr_SlipV2 - Vmax) + Vmax;
 
   /* Product: '<S3>/Product' incorporates:
@@ -343,7 +343,7 @@ void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
    *  Inport: '<Root>/Tmax_rl'
    *  Inport: '<Root>/map_sc'
    */
-  rtb_vms = (1.0 - fmin(fmax((1.0 - rtb_vms / rtTel_Inp_SC_SpeedCutoff_SlipV2) *
+  rtb_vms = (1.0 - fmin(fmax(rtb_vms / rtTel_Inp_SC_SpeedCutoff_SlipV2 *
     rtmap_sc_SlipV2, 0.0), 1.0)) * (rtTm_rl_SlipV2 - rtb_Sum) + rtb_Sum;
 
   /* Product: '<S2>/Product' incorporates:

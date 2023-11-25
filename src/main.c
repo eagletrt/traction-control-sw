@@ -132,8 +132,8 @@ void torque_model_set_data(can_data_t *can_data) {
 
 	rtyaw_rate_Torque = can_data->gyro_z;
 
-	rtTm_rl_Torque = rtTmax_rl_Velocity_Estimation;
-	rtTm_rr_Torque = rtTmax_rr_Velocity_Estimation;
+	rtTm_rl_Torque = 100.0f; // rtTmax_rl_Velocity_Estimation;
+	rtTm_rr_Torque = 100.0f; // rtTmax_rr_Velocity_Estimation;
 
 	rtu_bar_Torque = rtu_bar_Velocity_Estimation;
 	rtomega_rl_Torque = rtomega_rl_Velocity_Estimation;
@@ -156,8 +156,8 @@ void slip_model_set_data(can_data_t *can_data) {
 
 	rtyaw_rate_SlipV2 = can_data->gyro_z;
 
-	rtTm_rl_SlipV2 = rtTmax_rl_Velocity_Estimation;
-	rtTm_rr_SlipV2 = rtTmax_rr_Velocity_Estimation;
+	rtTm_rl_SlipV2 = 100.0f; // rtTmax_rl_Velocity_Estimation;
+	rtTm_rr_SlipV2 = 100.0f; // rtTmax_rr_Velocity_Estimation;
 
 	rtu_bar_SlipV2 = rtu_bar_Velocity_Estimation;
 	rtomega_rl_SlipV2 = rtomega_rl_Velocity_Estimation;
@@ -167,7 +167,7 @@ void slip_model_set_data(can_data_t *can_data) {
 void can_send_data() {
 	static uint8_t data[8];
 	uint64_t timestamp = get_timestamp_u();
-	static uint64_t out_timestamp = 0, state_timestamp = 0;
+	static uint64_t out_timestamp = 0, state_timestamp = 0, debug_timestamp = 0;
 
 	if (timestamp - PRIMARY_INTERVAL_CONTROL_OUTPUT * 1e3 > out_timestamp) {
 		out_timestamp = timestamp;
@@ -245,8 +245,8 @@ void can_send_data() {
 			can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_CONTROL_STATE_FRAME_ID, data, SECONDARY_CONTROL_STATE_BYTE_SIZE);
 		}
 	}
-	if (timestamp - SECONDARY_INTERVAL_DEBUG_SIGNAL * 1e3 > state_timestamp) {
-		state_timestamp = timestamp;
+	if (timestamp - SECONDARY_INTERVAL_DEBUG_SIGNAL * 1e3 > debug_timestamp) {
+		debug_timestamp = timestamp;
 
 		if (SIMULATOR) {
 			static simulator_debug_signal_converted_t debug_src;

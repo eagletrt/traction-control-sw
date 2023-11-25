@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV2'.
  *
- * Model version                  : 6.27
+ * Model version                  : 6.29
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Fri Nov 24 14:37:51 2023
+ * C/C++ source code generated on : Sat Nov 25 17:00:43 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -94,6 +94,7 @@ extern real_T rtyaw_rate_SlipV2;       /* '<Root>/Omega' */
  * Block '<S3>/Scope' : Unused code path elimination
  * Block '<S3>/Scope1' : Unused code path elimination
  * Block '<S3>/Scope2' : Unused code path elimination
+ * Block '<S3>/Scope3' : Unused code path elimination
  */
 
 /*-

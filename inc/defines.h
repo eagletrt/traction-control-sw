@@ -11,18 +11,18 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define SIMULATOR 1
+#define SIMULATOR 0
 #define ENABLE_TORQUE_VECTORING 0
 
 #define BENCHMARK 0
 #define RUN_FREQUENCY 1000 // Hz
 
 #define SC_LAMBDA_REF 0.136
-#define SC_PID_KP 200.0
-#define SC_PID_KI 850.0
-#define SC_SPEED_CUTOFF 100.0
+#define SC_PID_KP 200.0 * 0.6
+#define SC_PID_KI 850.0 * 0.8
+#define SC_SPEED_CUTOFF 2.0
 
-#define TV_KUF 0.0002
+#define TV_KUF 0.001
 #define TV_PID_KP 150.0
 #define TV_PID_KI 300.0
 
