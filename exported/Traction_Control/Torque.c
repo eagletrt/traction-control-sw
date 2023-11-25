@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Torque'.
  *
- * Model version                  : 6.28
+ * Model version                  : 6.29
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Fri Nov 24 22:36:36 2023
+ * C/C++ source code generated on : Sat Nov 25 17:22:02 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -65,9 +65,9 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
   rtb_error = pow(rtSteeringangle_Torque, 10.0);
   rtb_IProdOut = pow(rtSteeringangle_Torque, 9.0);
   Integrator = pow(rtSteeringangle_Torque, 8.0);
-  rtb_T_diff_k = pow(rtSteeringangle_Torque, 7.0);
-  rtb_Tm_req_o = pow(rtSteeringangle_Torque, 6.0);
-  rtb_Tm_rr = pow(rtSteeringangle_Torque, 5.0);
+  rtb_Tm_rr = pow(rtSteeringangle_Torque, 7.0);
+  rtb_T_diff_k = pow(rtSteeringangle_Torque, 6.0);
+  rtb_Tm_req_o = pow(rtSteeringangle_Torque, 5.0);
   rtb_error_tmp = pow(rtSteeringangle_Torque, 4.0);
   rtb_error_tmp_0 = pow(rtSteeringangle_Torque, 3.0);
   rtb_error_tmp_1 = rtSteeringangle_Torque * rtSteeringangle_Torque;
@@ -82,15 +82,15 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    *  MATLAB Function: '<S8>/Yaw-Rate'
    */
   rtb_error = (((((((((((-3.534335194E-8 * rtb_error + 1.618153531E-7 *
-    rtb_IProdOut) - 3.16758626E-7 * Integrator) + 1.704839325E-6 * rtb_T_diff_k)
-                      - 8.483242635E-6 * rtb_Tm_req_o) + 5.3472838E-5 *
-                     rtb_Tm_rr) - 0.0002074730388 * rtb_error_tmp) +
+    rtb_IProdOut) - 3.16758626E-7 * Integrator) + 1.704839325E-6 * rtb_Tm_rr) -
+                      8.483242635E-6 * rtb_T_diff_k) + 5.3472838E-5 *
+                     rtb_Tm_req_o) - 0.0002074730388 * rtb_error_tmp) +
                    0.001981845031 * rtb_error_tmp_0) - rtb_error_tmp_1 *
                   0.006788067431) + 0.217964925 * rtSteeringangle_Torque) +
                 2.836E-7) + ((((((((((3.534215197E-8 * rtb_error +
     1.618025757E-7 * rtb_IProdOut) + 3.167586246E-7 * Integrator) +
-    1.704975313E-6 * rtb_T_diff_k) + 8.483283483E-6 * rtb_Tm_req_o) +
-    5.347236085E-5 * rtb_Tm_rr) + 0.0002074729834 * rtb_error_tmp) +
+    1.704975313E-6 * rtb_Tm_rr) + 8.483283483E-6 * rtb_T_diff_k) +
+    5.347236085E-5 * rtb_Tm_req_o) + 0.0002074729834 * rtb_error_tmp) +
     0.001981845682 * rtb_error_tmp_0) + rtb_error_tmp_1 * 0.006788067316) +
     0.2179649246 * rtSteeringangle_Torque) - 2.845E-7)) / 2.0 * rtu_bar_Torque /
     (rtu_bar_Torque * rtu_bar_Torque * rtTel_Inp_Kus_Torque + 1.53) -
@@ -125,14 +125,9 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
   rtb_Tm_req_o = (rtTm_rl_Torque + rtTm_rr_Torque) * 0.5 * rtDriver_req_Torque;
 
   /* MATLAB Function: '<S1>/MATLAB Function' */
-  if (rtb_T_diff_k >= 0.0) {
-    rtb_Tm_rr = rtb_Tm_req_o;
-    rtb_Tm_req_o -= rtb_T_diff_k;
-  } else {
-    rtb_Tm_rr = rtb_Tm_req_o + rtb_T_diff_k;
-  }
-
-  /* End of MATLAB Function: '<S1>/MATLAB Function' */
+  rtb_error_tmp = fabs(rtb_T_diff_k * 0.5);
+  rtb_Tm_rr = (rtb_T_diff_k * 0.5 + rtb_Tm_req_o) - rtb_error_tmp;
+  rtb_T_diff_k = (rtb_Tm_req_o - rtb_T_diff_k * 0.5) - rtb_error_tmp;
 
   /* Switch: '<S5>/Switch2' incorporates:
    *  Constant: '<S1>/Constant2'
@@ -166,10 +161,10 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    *  RelationalOperator: '<S4>/UpperRelop'
    *  Switch: '<S4>/Switch'
    */
-  if (rtb_Tm_req_o > rtTm_rr_Torque) {
+  if (rtb_T_diff_k > rtTm_rr_Torque) {
     /* Outport: '<Root>/Tm_rl' */
     rtTm_rl_a_Torque = rtTm_rr_Torque;
-  } else if (rtb_Tm_req_o < 0.0) {
+  } else if (rtb_T_diff_k < 0.0) {
     /* Switch: '<S4>/Switch' incorporates:
      *  Constant: '<S1>/Constant1'
      *  Outport: '<Root>/Tm_rl'
@@ -179,7 +174,7 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
     /* Outport: '<Root>/Tm_rl' incorporates:
      *  Switch: '<S4>/Switch'
      */
-    rtTm_rl_a_Torque = rtb_Tm_req_o;
+    rtTm_rl_a_Torque = rtb_T_diff_k;
   }
 
   /* End of Switch: '<S4>/Switch2' */
