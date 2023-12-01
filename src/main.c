@@ -99,7 +99,7 @@ bool init_model(void) {
 	torque_model.dwork = &torque_rtDW;
 	Torque_initialize(&torque_model);
 
-	slip_model.dwork = &slip_rtDW;
+	// slip_model.dwork = &slip_rtDW;
 	SlipV2_initialize(&slip_model);
 
 	return true;
@@ -123,8 +123,8 @@ void torque_model_set_data(can_data_t *can_data) {
 	rtDriver_req_Torque = can_data->throttle;
 	rtSteeringangle_Torque = can_data->steering_angle;
 
-	rtmap_tv_Torque = can_data->map_tv;
-	rtmap_sc_Torque = can_data->map_sc;
+	rtmap_tv_Torque = 1.0; // can_data->map_tv;
+	rtmap_sc_Torque = 0.0; // can_data->map_sc;
 
 	rtTel_Inp_Ki_Torque = TV_PID_KI;
 	rtTel_Inp_Kp_Torque = TV_PID_KP;
@@ -146,13 +146,17 @@ void slip_model_set_data(can_data_t *can_data) {
 	rtDriver_req_SlipV2 = can_data->throttle;
 	rtSteeringangle_SlipV2 = can_data->steering_angle;
 
-	rtmap_sc_SlipV2 = can_data->map_sc;
-	rtmap_tv_SlipV2 = can_data->map_tv;
+	rtmap_sc_SlipV2 = 1.0; // can_data->map_sc;
+	rtmap_tv_SlipV2 = 1.0; // can_data->map_tv;
 
-	rtTel_Inp_SC_Ki_SlipV2 = SC_PID_KI;
-	rtTel_Inp_SC_Kp_SlipV2 = SC_PID_KP;
-	rtTel_Inp_SC_LambdaRef_SlipV2 = SC_LAMBDA_REF;
-	rtTel_Inp_SC_SpeedCutoff_SlipV2 = SC_SPEED_CUTOFF;
+	// rtTel_Inp_SC_Ki_SlipV2 = SC_PID_KI;
+	// rtTel_Inp_SC_Kp_SlipV2 = SC_PID_KP;
+	// rtTel_Inp_SC_LambdaRef_SlipV2 = SC_LAMBDA_REF;
+	// rtTel_Inp_SC_SpeedCutoff_SlipV2 = SC_SPEED_CUTOFF;
+
+	rtTel_Inp_SC_PeakTorque_SlipV2 = SLIP_PEAK;
+	rtTel_Inp_SC_SpeedCutoff_SlipV2 = SLIP_SPEED_CUTOFF;
+	rtTel_Inp_SC_StartTorque_SlipV2 = SLIP_START_TORQUE;
 
 	rtyaw_rate_SlipV2 = can_data->gyro_z;
 
@@ -250,8 +254,8 @@ void can_send_data() {
 
 		if (SIMULATOR) {
 			static simulator_debug_signal_converted_t debug_src;
-			debug_src.field_1 = rtTel_Out_error_Torque;
-			debug_src.field_2 = rtERROR_SlipV2;
+			debug_src.field_1 = rtTel_Out_error_Torque / 100.0;
+			debug_src.field_2 = rtERROR_SlipV2 / 100.0;
 			static simulator_debug_signal_t debug_src_raw;
 			simulator_debug_signal_conversion_to_raw_struct(&debug_src_raw, &debug_src);
 			simulator_debug_signal_pack(data, &debug_src_raw, SIMULATOR_DEBUG_SIGNAL_BYTE_SIZE);

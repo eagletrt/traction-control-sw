@@ -79,7 +79,7 @@ static inline void can_messages_parse_simulator(can_message_t *message, can_data
 	}
 	case SIMULATOR_PEDALS_OUTPUT_FRAME_ID: {
 		simulator_pedals_output_converted_t *pedals = (simulator_pedals_output_converted_t *)can_devices.message;
-		can_data->throttle = pedals->apps;
+		can_data->throttle = convert_throttle(pedals->apps);
 		can_data->brake = convert_brake((pedals->bse_front + pedals->bse_rear) / 2.0);
 		break;
 	}

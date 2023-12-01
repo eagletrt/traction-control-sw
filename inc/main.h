@@ -31,7 +31,8 @@ RT_MODEL_Torque torque_model;
 DW_Velocity_Estimation ve_rtDW;
 RT_MODEL_Velocity_Estimation ve_model;
 
-DW_SlipV2 slip_rtDW;
+char SlipError;
+// DW_SlipV2 slip_rtDW;
 RT_MODEL_SlipV2 slip_model;
 
 bool init_model(void);

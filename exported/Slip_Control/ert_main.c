@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV2'.
  *
- * Model version                  : 6.29
+ * Model version                  : 6.38
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Sat Nov 25 17:00:43 2023
+ * C/C++ source code generated on : Fri Dec  1 17:12:13 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -25,7 +25,6 @@
 
 static RT_MODEL_SlipV2 rtM_SlipV2_;
 static RT_MODEL_SlipV2 *const rtMPtr_SlipV2 = &rtM_SlipV2_;/* Real-time model */
-static DW_SlipV2 rtDW_SlipV2;          /* Observable states */
 
 /*
  * Associating rt_OneStep with a real-time clock or interrupt service routine
@@ -85,7 +84,6 @@ int_T main(int_T argc, const char *argv[])
   (void)(argv);
 
   /* Pack model data into RTM */
-  rtM_SlipV2->dwork = &rtDW_SlipV2;
 
   /* Initialize model */
   SlipV2_initialize(rtM_SlipV2);

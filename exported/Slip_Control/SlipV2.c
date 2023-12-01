@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV2'.
  *
- * Model version                  : 6.29
+ * Model version                  : 6.38
  * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Sat Nov 25 17:00:43 2023
+ * C/C++ source code generated on : Fri Dec  1 17:12:13 2023
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -22,7 +22,6 @@
 #include "SlipV2.h"
 #include <math.h>
 #include "rtwtypes.h"
-#include <string.h>
 
 /* Exported data definition */
 
@@ -30,10 +29,9 @@
 real_T rtDriver_req_SlipV2;            /* '<Root>/driver_request' */
 real_T rtERROR_SlipV2;                 /* '<Root>/ERROR' */
 real_T rtSteeringangle_SlipV2;         /* '<Root>/delta' */
-real_T rtTel_Inp_SC_Ki_SlipV2;         /* '<Root>/Tel_Inp_SC_Ki' */
-real_T rtTel_Inp_SC_Kp_SlipV2;         /* '<Root>/Tel_Inp_SC_Kp' */
-real_T rtTel_Inp_SC_LambdaRef_SlipV2;  /* '<Root>/Tel_Inp_SC_LambdaRef' */
+real_T rtTel_Inp_SC_PeakTorque_SlipV2; /* '<Root>/Tel_Inp_SC_PeakTorque' */
 real_T rtTel_Inp_SC_SpeedCutoff_SlipV2;/* '<Root>/Tel_Inp_SC_SpeedCutoff' */
+real_T rtTel_Inp_SC_StartTorque_SlipV2;/* '<Root>/Tel_Inp_SC_StartTorque' */
 real_T rtTm_rl_SlipV2;                 /* '<Root>/Tmax_rl' */
 real_T rtTm_rl_a_SlipV2;               /* '<Root>/Tm_rl' */
 real_T rtTm_rr_SlipV2;                 /* '<Root>/Tmax_rr' */
@@ -46,352 +44,196 @@ real_T rtomega_rr_SlipV2;              /* '<Root>/omega_rr' */
 real_T rtu_bar_SlipV2;                 /* '<Root>/u_bar' */
 real_T rtyaw_rate_SlipV2;              /* '<Root>/Omega' */
 
+/*===========*
+ * Constants *
+ *===========*/
+#define RT_PI                          3.14159265358979323846
+#define RT_PIF                         3.1415927F
+#define RT_LN_10                       2.30258509299404568402
+#define RT_LN_10F                      2.3025851F
+#define RT_LOG10E                      0.43429448190325182765
+#define RT_LOG10EF                     0.43429449F
+#define RT_E                           2.7182818284590452354
+#define RT_EF                          2.7182817F
+
+/*
+ * UNUSED_PARAMETER(x)
+ *   Used to specify that a function parameter (argument) is required but not
+ *   accessed by the function body.
+ */
+#ifndef UNUSED_PARAMETER
+#if defined(__LCC__)
+#define UNUSED_PARAMETER(x)                                      /* do nothing */
+#else
+
+/*
+ * This is the semi-ANSI standard way of indicating that an
+ * unused function parameter is required.
+ */
+#define UNUSED_PARAMETER(x)            (void) (x)
+#endif
+#endif
+
 /* Model step function */
 void SlipV2_step(RT_MODEL_SlipV2 *const rtM_SlipV2)
 {
-  DW_SlipV2 *rtDW_SlipV2 = rtM_SlipV2->dwork;
-  real_T Integrator;
-  real_T Vmax;
-  real_T rtb_Rr;
-  real_T rtb_Rr_e;
-  real_T rtb_Sum;
-  real_T rtb_Switch;
-  real_T rtb_vms;
-  int8_T tmp;
-  int8_T tmp_0;
-  boolean_T rtb_RelationalOperator;
-  boolean_T rtb_fixforDTpropagationissue;
+  real_T T_max_nomap;
+  real_T load_transf_coeff;
+  real_T load_transf_coeff_tmp;
+  real_T rtb_Product;
+  real_T rtb_Product2;
+  real_T rtb_T_max;
 
-  /* Gain: '<S3>/Rr' incorporates:
-   *  Inport: '<Root>/omega_rr'
-   */
-  rtb_Rr = 0.203 * rtomega_rr_SlipV2;
-
-  /* Sum: '<S3>/Add2' incorporates:
-   *  Gain: '<S3>/Wr//2'
-   *  Inport: '<Root>/Omega'
-   *  Inport: '<Root>/u_bar'
-   */
-  rtb_vms = 0.605 * rtyaw_rate_SlipV2 + rtu_bar_SlipV2;
-
-  /* MATLAB Function: '<S3>/Slip_est1' incorporates:
-   *  Constant: '<S3>/Constant'
-   */
-  Vmax = fmax(fabs(rtb_vms), fabs(rtb_Rr));
-  if (Vmax > 1.0) {
-    rtb_Rr = fabs((rtb_vms - rtb_Rr) / Vmax);
-  } else {
-    rtb_Rr = fabs((rtb_vms - rtb_Rr) * 2.0 / (Vmax * Vmax + 1.0));
-  }
-
-  /* End of MATLAB Function: '<S3>/Slip_est1' */
-
-  /* Sum: '<S3>/Add1' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_LambdaRef'
-   */
-  rtb_Rr = rtTel_Inp_SC_LambdaRef_SlipV2 - rtb_Rr;
-
-  /* Product: '<S102>/PProd Out' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_Kp'
-   */
-  rtb_Sum = rtb_Rr * rtTel_Inp_SC_Kp_SlipV2;
-
-  /* Sum: '<S107>/Sum Fdbk' */
-  Vmax = rtb_Sum + rtDW_SlipV2->Integrator_DSTATE;
-
-  /* DeadZone: '<S90>/DeadZone' */
-  if (Vmax > 100.0) {
-    Vmax -= 100.0;
-  } else if (Vmax >= 0.0) {
-    Vmax = 0.0;
-  }
-
-  /* End of DeadZone: '<S90>/DeadZone' */
-
-  /* RelationalOperator: '<S88>/Relational Operator' incorporates:
-   *  Constant: '<S88>/Clamping_zero'
-   */
-  rtb_RelationalOperator = (Vmax != 0.0);
-
-  /* RelationalOperator: '<S88>/fix for DT propagation issue' incorporates:
-   *  Constant: '<S88>/Clamping_zero'
-   */
-  rtb_fixforDTpropagationissue = (Vmax > 0.0);
-
-  /* Product: '<S94>/IProd Out' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_Ki'
-   */
-  Vmax = rtb_Rr * rtTel_Inp_SC_Ki_SlipV2;
-
-  /* Switch: '<S88>/Switch1' incorporates:
-   *  Constant: '<S88>/Constant'
-   *  Constant: '<S88>/Constant2'
-   */
-  if (rtb_fixforDTpropagationissue) {
-    tmp = 1;
-  } else {
-    tmp = -1;
-  }
-
-  /* Switch: '<S88>/Switch2' incorporates:
-   *  Constant: '<S88>/Clamping_zero'
-   *  Constant: '<S88>/Constant3'
-   *  Constant: '<S88>/Constant4'
-   *  RelationalOperator: '<S88>/fix for DT propagation issue1'
-   */
-  if (Vmax > 0.0) {
-    tmp_0 = 1;
-  } else {
-    tmp_0 = -1;
-  }
-
-  /* Switch: '<S88>/Switch' incorporates:
-   *  Constant: '<S88>/Constant1'
-   *  Logic: '<S88>/AND3'
-   *  RelationalOperator: '<S88>/Equal1'
-   *  Switch: '<S88>/Switch1'
-   *  Switch: '<S88>/Switch2'
-   */
-  if (rtb_RelationalOperator && (tmp == tmp_0)) {
-    rtb_Switch = 0.0;
-  } else {
-    rtb_Switch = Vmax;
-  }
-
-  /* End of Switch: '<S88>/Switch' */
-
-  /* DiscreteIntegrator: '<S97>/Integrator' */
-  Integrator = 0.00025 * rtb_Switch + rtDW_SlipV2->Integrator_DSTATE;
-
-  /* Sum: '<S106>/Sum' */
-  Vmax = rtb_Sum + Integrator;
-
-  /* Saturate: '<S104>/Saturation' */
-  if (Vmax > 100.0) {
-    Vmax = 100.0;
-  } else if (Vmax < 0.0) {
-    Vmax = 0.0;
-  }
-
-  /* End of Saturate: '<S104>/Saturation' */
-
-  /* Switch: '<S61>/Switch2' incorporates:
-   *  Inport: '<Root>/Tmax_rr'
-   *  RelationalOperator: '<S61>/LowerRelop1'
-   */
-  if (Vmax > rtTm_rr_SlipV2) {
-    Vmax = rtTm_rr_SlipV2;
-  }
-
-  /* End of Switch: '<S61>/Switch2' */
-
-  /* MATLAB Function: '<S3>/map' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_SpeedCutoff'
-   *  Inport: '<Root>/Tmax_rr'
-   *  Inport: '<Root>/map_sc'
-   */
-  rtb_vms = (1.0 - fmin(fmax(rtb_vms / rtTel_Inp_SC_SpeedCutoff_SlipV2 *
-    rtmap_sc_SlipV2, 0.0), 1.0)) * (rtTm_rr_SlipV2 - Vmax) + Vmax;
-
-  /* Product: '<S3>/Product' incorporates:
+  /* Product: '<S1>/Product' incorporates:
    *  Inport: '<Root>/Tmax_rr'
    *  Inport: '<Root>/driver_request'
    */
-  Vmax = rtDriver_req_SlipV2 * rtTm_rr_SlipV2;
+  rtb_Product = rtTm_rr_SlipV2 * rtDriver_req_SlipV2;
 
-  /* Switch: '<S60>/Switch2' incorporates:
-   *  Constant: '<S3>/Constant2'
-   *  RelationalOperator: '<S60>/LowerRelop1'
-   *  RelationalOperator: '<S60>/UpperRelop'
-   *  Switch: '<S60>/Switch'
+  /* MATLAB Function: '<S1>/MATLAB Function2' incorporates:
+   *  Inport: '<Root>/Omega'
+   *  Inport: '<Root>/Tel_Inp_SC_PeakTorque'
+   *  Inport: '<Root>/Tel_Inp_SC_SpeedCutoff'
+   *  Inport: '<Root>/Tel_Inp_SC_StartTorque'
+   *  Inport: '<Root>/map_sc'
+   *  Inport: '<Root>/u_bar'
+   *  MATLAB Function: '<S1>/MATLAB Function1'
+   *  Product: '<S1>/Product2'
    */
-  if (Vmax > rtb_vms) {
+  rtb_Product2 = (rtTel_Inp_SC_PeakTorque_SlipV2 -
+                  rtTel_Inp_SC_StartTorque_SlipV2) * fmin(fmax(rtu_bar_SlipV2 /
+    rtTel_Inp_SC_SpeedCutoff_SlipV2, 0.0), 1.0) +
+    rtTel_Inp_SC_StartTorque_SlipV2;
+  T_max_nomap = rtb_Product2;
+  load_transf_coeff_tmp = rtyaw_rate_SlipV2 * rtu_bar_SlipV2 * 61.217 / 4.0;
+  load_transf_coeff = (load_transf_coeff_tmp + 411.00221250000004) /
+    411.00221250000004;
+  if (load_transf_coeff < 1.0) {
+    T_max_nomap = rtb_Product2 * load_transf_coeff;
+  }
+
+  rtb_T_max = (rtb_Product - T_max_nomap) * (1.0 - rtmap_sc_SlipV2) +
+    T_max_nomap;
+
+  /* End of MATLAB Function: '<S1>/MATLAB Function2' */
+
+  /* Switch: '<S5>/Switch2' incorporates:
+   *  Constant: '<S1>/Constant'
+   *  Inport: '<Root>/Tmax_rr'
+   *  RelationalOperator: '<S5>/LowerRelop1'
+   *  RelationalOperator: '<S5>/UpperRelop'
+   *  Switch: '<S5>/Switch'
+   */
+  if (rtb_T_max > rtTm_rr_SlipV2) {
+    rtb_T_max = rtTm_rr_SlipV2;
+  } else if (rtb_T_max < 0.0) {
+    /* Switch: '<S5>/Switch' incorporates:
+     *  Constant: '<S1>/Constant'
+     */
+    rtb_T_max = 0.0;
+  }
+
+  /* End of Switch: '<S5>/Switch2' */
+
+  /* Switch: '<S4>/Switch2' incorporates:
+   *  Constant: '<S1>/Constant1'
+   *  RelationalOperator: '<S4>/LowerRelop1'
+   *  RelationalOperator: '<S4>/UpperRelop'
+   *  Switch: '<S4>/Switch'
+   */
+  if (rtb_Product > rtb_T_max) {
     /* Outport: '<Root>/Tm_rr' */
-    rtTm_rr_m_SlipV2 = rtb_vms;
-  } else if (Vmax < 0.0) {
-    /* Switch: '<S60>/Switch' incorporates:
-     *  Constant: '<S3>/Constant2'
+    rtTm_rr_m_SlipV2 = rtb_T_max;
+  } else if (rtb_Product < 0.0) {
+    /* Switch: '<S4>/Switch' incorporates:
+     *  Constant: '<S1>/Constant1'
      *  Outport: '<Root>/Tm_rr'
      */
     rtTm_rr_m_SlipV2 = 0.0;
   } else {
     /* Outport: '<Root>/Tm_rr' incorporates:
-     *  Switch: '<S60>/Switch'
+     *  Switch: '<S4>/Switch'
      */
-    rtTm_rr_m_SlipV2 = Vmax;
+    rtTm_rr_m_SlipV2 = rtb_Product;
   }
 
-  /* End of Switch: '<S60>/Switch2' */
+  /* End of Switch: '<S4>/Switch2' */
 
-  /* Gain: '<S2>/Rr' incorporates:
-   *  Inport: '<Root>/omega_rl'
+  /* Product: '<S1>/Product1' incorporates:
+   *  Inport: '<Root>/Tmax_rl'
+   *  Inport: '<Root>/driver_request'
    */
-  rtb_Rr_e = 0.203 * rtomega_rl_SlipV2;
+  rtb_Product = rtDriver_req_SlipV2 * rtTm_rl_SlipV2;
 
-  /* Sum: '<S2>/Add2' incorporates:
-   *  Gain: '<S2>/Wr//2'
-   *  Inport: '<Root>/Omega'
-   *  Inport: '<Root>/u_bar'
+  /* MATLAB Function: '<S1>/MATLAB Function1' incorporates:
+   *  Inport: '<Root>/map_sc'
    */
-  rtb_vms = rtu_bar_SlipV2 - 0.605 * rtyaw_rate_SlipV2;
-
-  /* MATLAB Function: '<S2>/Slip_est1' incorporates:
-   *  Constant: '<S2>/Constant'
-   */
-  Vmax = fmax(fabs(rtb_vms), fabs(rtb_Rr_e));
-  if (Vmax > 1.0) {
-    Vmax = fabs((rtb_vms - rtb_Rr_e) / Vmax);
-  } else {
-    Vmax = fabs((rtb_vms - rtb_Rr_e) * 2.0 / (Vmax * Vmax + 1.0));
+  T_max_nomap = rtb_Product2;
+  load_transf_coeff = (411.00221250000004 - load_transf_coeff_tmp) /
+    411.00221250000004;
+  if (load_transf_coeff < 1.0) {
+    T_max_nomap = rtb_Product2 * load_transf_coeff;
   }
 
-  /* End of MATLAB Function: '<S2>/Slip_est1' */
-
-  /* Sum: '<S2>/Add1' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_LambdaRef'
-   */
-  Vmax = rtTel_Inp_SC_LambdaRef_SlipV2 - Vmax;
-
-  /* Product: '<S47>/PProd Out' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_Kp'
-   */
-  rtb_Sum = Vmax * rtTel_Inp_SC_Kp_SlipV2;
-
-  /* Sum: '<S52>/Sum Fdbk' */
-  rtb_Rr_e = rtb_Sum + rtDW_SlipV2->Integrator_DSTATE_o;
-
-  /* DeadZone: '<S35>/DeadZone' */
-  if (rtb_Rr_e > 100.0) {
-    rtb_Rr_e -= 100.0;
-  } else if (rtb_Rr_e >= 0.0) {
-    rtb_Rr_e = 0.0;
-  }
-
-  /* End of DeadZone: '<S35>/DeadZone' */
-
-  /* Product: '<S39>/IProd Out' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_Ki'
-   */
-  Vmax *= rtTel_Inp_SC_Ki_SlipV2;
-
-  /* Switch: '<S33>/Switch1' incorporates:
-   *  Constant: '<S33>/Clamping_zero'
-   *  Constant: '<S33>/Constant'
-   *  Constant: '<S33>/Constant2'
-   *  RelationalOperator: '<S33>/fix for DT propagation issue'
-   */
-  if (rtb_Rr_e > 0.0) {
-    tmp = 1;
-  } else {
-    tmp = -1;
-  }
-
-  /* Switch: '<S33>/Switch2' incorporates:
-   *  Constant: '<S33>/Clamping_zero'
-   *  Constant: '<S33>/Constant3'
-   *  Constant: '<S33>/Constant4'
-   *  RelationalOperator: '<S33>/fix for DT propagation issue1'
-   */
-  if (Vmax > 0.0) {
-    tmp_0 = 1;
-  } else {
-    tmp_0 = -1;
-  }
-
-  /* Switch: '<S33>/Switch' incorporates:
-   *  Constant: '<S33>/Clamping_zero'
-   *  Constant: '<S33>/Constant1'
-   *  Logic: '<S33>/AND3'
-   *  RelationalOperator: '<S33>/Equal1'
-   *  RelationalOperator: '<S33>/Relational Operator'
-   *  Switch: '<S33>/Switch1'
-   *  Switch: '<S33>/Switch2'
-   */
-  if ((rtb_Rr_e != 0.0) && (tmp == tmp_0)) {
-    Vmax = 0.0;
-  }
-
-  /* End of Switch: '<S33>/Switch' */
-
-  /* DiscreteIntegrator: '<S42>/Integrator' */
-  rtb_Rr_e = 0.00025 * Vmax + rtDW_SlipV2->Integrator_DSTATE_o;
-
-  /* Sum: '<S51>/Sum' */
-  rtb_Sum += rtb_Rr_e;
-
-  /* Saturate: '<S49>/Saturation' */
-  if (rtb_Sum > 100.0) {
-    rtb_Sum = 100.0;
-  } else if (rtb_Sum < 0.0) {
-    rtb_Sum = 0.0;
-  }
-
-  /* End of Saturate: '<S49>/Saturation' */
+  rtb_Product2 = (rtb_Product - T_max_nomap) * (1.0 - rtmap_sc_SlipV2) +
+    T_max_nomap;
 
   /* Switch: '<S6>/Switch2' incorporates:
+   *  Constant: '<S1>/Constant2'
    *  Inport: '<Root>/Tmax_rl'
    *  RelationalOperator: '<S6>/LowerRelop1'
+   *  RelationalOperator: '<S6>/UpperRelop'
+   *  Switch: '<S6>/Switch'
    */
-  if (rtb_Sum > rtTm_rl_SlipV2) {
-    rtb_Sum = rtTm_rl_SlipV2;
+  if (rtb_Product2 > rtTm_rl_SlipV2) {
+    rtb_Product2 = rtTm_rl_SlipV2;
+  } else if (rtb_Product2 < 0.0) {
+    /* Switch: '<S6>/Switch' incorporates:
+     *  Constant: '<S1>/Constant2'
+     */
+    rtb_Product2 = 0.0;
   }
 
   /* End of Switch: '<S6>/Switch2' */
 
-  /* MATLAB Function: '<S2>/map' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_SpeedCutoff'
-   *  Inport: '<Root>/Tmax_rl'
-   *  Inport: '<Root>/map_sc'
+  /* Outport: '<Root>/ERROR' incorporates:
+   *  Sum: '<S1>/Subtract'
    */
-  rtb_vms = (1.0 - fmin(fmax(rtb_vms / rtTel_Inp_SC_SpeedCutoff_SlipV2 *
-    rtmap_sc_SlipV2, 0.0), 1.0)) * (rtTm_rl_SlipV2 - rtb_Sum) + rtb_Sum;
+  rtERROR_SlipV2 = rtb_T_max - rtb_Product2;
 
-  /* Product: '<S2>/Product' incorporates:
-   *  Inport: '<Root>/Tmax_rl'
-   *  Inport: '<Root>/driver_request'
+  /* Switch: '<S7>/Switch2' incorporates:
+   *  Constant: '<S1>/Constant3'
+   *  RelationalOperator: '<S7>/LowerRelop1'
+   *  RelationalOperator: '<S7>/UpperRelop'
+   *  Switch: '<S7>/Switch'
    */
-  rtb_Sum = rtDriver_req_SlipV2 * rtTm_rl_SlipV2;
-
-  /* Switch: '<S5>/Switch2' incorporates:
-   *  Constant: '<S2>/Constant2'
-   *  RelationalOperator: '<S5>/LowerRelop1'
-   *  RelationalOperator: '<S5>/UpperRelop'
-   *  Switch: '<S5>/Switch'
-   */
-  if (rtb_Sum > rtb_vms) {
+  if (rtb_Product > rtb_Product2) {
     /* Outport: '<Root>/Tm_rl' */
-    rtTm_rl_a_SlipV2 = rtb_vms;
-  } else if (rtb_Sum < 0.0) {
-    /* Switch: '<S5>/Switch' incorporates:
-     *  Constant: '<S2>/Constant2'
+    rtTm_rl_a_SlipV2 = rtb_Product2;
+  } else if (rtb_Product < 0.0) {
+    /* Switch: '<S7>/Switch' incorporates:
+     *  Constant: '<S1>/Constant3'
      *  Outport: '<Root>/Tm_rl'
      */
     rtTm_rl_a_SlipV2 = 0.0;
   } else {
     /* Outport: '<Root>/Tm_rl' incorporates:
-     *  Switch: '<S5>/Switch'
+     *  Switch: '<S7>/Switch'
      */
-    rtTm_rl_a_SlipV2 = rtb_Sum;
+    rtTm_rl_a_SlipV2 = rtb_Product;
   }
 
-  /* End of Switch: '<S5>/Switch2' */
-
-  /* Outport: '<Root>/ERROR' */
-  rtERROR_SlipV2 = rtb_Rr;
-
-  /* Update for DiscreteIntegrator: '<S97>/Integrator' */
-  rtDW_SlipV2->Integrator_DSTATE = 0.00025 * rtb_Switch + Integrator;
-
-  /* Update for DiscreteIntegrator: '<S42>/Integrator' */
-  rtDW_SlipV2->Integrator_DSTATE_o = 0.00025 * Vmax + rtb_Rr_e;
+  /* End of Switch: '<S7>/Switch2' */
+  UNUSED_PARAMETER(rtM_SlipV2);
 }
 
 /* Model initialize function */
 void SlipV2_initialize(RT_MODEL_SlipV2 *const rtM_SlipV2)
 {
-  DW_SlipV2 *rtDW_SlipV2 = rtM_SlipV2->dwork;
-
   /* Registration code */
+
+  /* initialize error status */
+  rtmSetErrorStatus(rtM_SlipV2, (NULL));
 
   /* Storage classes */
   rtDriver_req_SlipV2 = 0.0;
@@ -405,25 +247,15 @@ void SlipV2_initialize(RT_MODEL_SlipV2 *const rtM_SlipV2)
   rtTm_rr_SlipV2 = 0.0;
   rtmap_tv_SlipV2 = 0.0;
   rtmap_sc_SlipV2 = 0.0;
-  rtTel_Inp_SC_LambdaRef_SlipV2 = 0.0;
-  rtTel_Inp_SC_Kp_SlipV2 = 0.0;
-  rtTel_Inp_SC_Ki_SlipV2 = 0.0;
+  rtTel_Inp_SC_StartTorque_SlipV2 = 0.0;
+  rtTel_Inp_SC_PeakTorque_SlipV2 = 0.0;
   rtTel_Inp_SC_SpeedCutoff_SlipV2 = 0.0;
 
   /* Storage classes */
   rtTm_rr_m_SlipV2 = 0.0;
   rtTm_rl_a_SlipV2 = 0.0;
   rtERROR_SlipV2 = 0.0;
-
-  /* states (dwork) */
-  (void) memset((void *)rtDW_SlipV2, 0,
-                sizeof(DW_SlipV2));
-
-  /* InitializeConditions for DiscreteIntegrator: '<S97>/Integrator' */
-  rtDW_SlipV2->Integrator_DSTATE = 0.0;
-
-  /* InitializeConditions for DiscreteIntegrator: '<S42>/Integrator' */
-  rtDW_SlipV2->Integrator_DSTATE_o = 0.0;
+  UNUSED_PARAMETER(rtM_SlipV2);
 }
 
 /*
