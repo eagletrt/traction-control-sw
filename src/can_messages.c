@@ -46,7 +46,7 @@ void can_messages_parse(can_message_t *message, can_data_t *can_data) {
 			can_messages_parse_inverters(message, can_data);
 		} else if (primary_id_is_message(message->frame.can_id)) {
 			can_messages_parse_primary(message, can_data);
-		} 
+		}
 	} else if (message->socket == CAN_SOCKET_SECONDARY) {
 		if (secondary_id_is_message(message->frame.can_id)) {
 			can_messages_parse_secondary(message, can_data);
@@ -190,9 +190,11 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 	}
 }
 
-static inline double inverter_convert_speed(double val) { return (val * 4.5 * (M_PI / 60.0) * (INV_MAX_SPEED / 32767.f)); }
-static inline double convert_gyro(double val) { return - val * M_PI / 180.0; };
-static inline double convert_accel(double val) { return - val * 9.81; };
+static inline double inverter_convert_speed(double val) {
+	return (val * 4.5 * (M_PI / 60.0) * (INV_MAX_SPEED / 32767.f));
+}
+static inline double convert_gyro(double val) { return -val * M_PI / 180.0; };
+static inline double convert_accel(double val) { return -val * 9.81; };
 static inline double convert_brake(double val) { return val / 100.0; };
 static inline double convert_throttle(double val) { return val / 100.0; };
 static inline double convert_steering_angle(double val) { return val * (M_PI / 180.0); };
