@@ -99,6 +99,9 @@ bool init_model(void) {
 	torque_model.dwork = &torque_rtDW;
 	Torque_initialize(&torque_model);
 
+	all_model.dwork = &all_rtDW;
+	AllControl_initialize(&all_model);
+
 	// slip_model.dwork = &slip_rtDW;
 	SlipV2_initialize(&slip_model);
 
@@ -166,6 +169,21 @@ void slip_model_set_data(can_data_t *can_data) {
 	rtu_bar_SlipV2 = rtu_bar_Velocity_Estimation;
 	rtomega_rl_SlipV2 = rtomega_rl_Velocity_Estimation;
 	rtomega_rr_SlipV2 = rtomega_rr_Velocity_Estimation;
+}
+
+void all_model_set_data(can_data_t *can_data) {
+	// AllControl Data
+	rtDriver_req_AllControl = can_data->throttle;
+	rtbrake_AllControl = can_data->brake;
+	rtSteeringangle_AllControl = can_data->steering_angle;
+	rtTm_rl_AllControl = 100.0f; // rtTmax_rl_Velocity_Estimation;
+	rtTm_rr_AllControl = 100.0f; // rtTmax_rr_Velocity_Estimation;
+	rtmap_sc_AllControl = 0.0;	 // can_data->map_sc;
+	rtmap_tv_AllControl = 0.0;	 // can_data->map_tv;
+	rtomega_rl_AllControl = rtomega_rl_Velocity_Estimation;
+	rtomega_rr_AllControl = rtomega_rr_Velocity_Estimation;
+	rtu_bar_AllControl = rtu_bar_Velocity_Estimation;
+	rtyaw_rate_AllControl = can_data->gyro_z;
 }
 
 void can_send_data() {

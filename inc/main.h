@@ -18,6 +18,7 @@
 
 #include "exported/Slip_Control/SlipV2.h"
 #include "exported/Traction_Control/Torque.h"
+#include "exported/AllControl/AllControl.h"
 #include "exported/Velocity_Estimation/Velocity_Estimation.h"
 
 bool running;
@@ -28,16 +29,19 @@ can_data_t can_data;
 DW_Torque torque_rtDW;
 RT_MODEL_Torque torque_model;
 
+DW_AllControl all_rtDW;
+RT_MODEL_AllControl all_model;
+
 DW_Velocity_Estimation ve_rtDW;
 RT_MODEL_Velocity_Estimation ve_model;
 
 char SlipError;
-// DW_SlipV2 slip_rtDW;
 RT_MODEL_SlipV2 slip_model;
 
 bool init_model(void);
 void ve_model_set_data(can_data_t *can_data);
 void torque_model_set_data(can_data_t *can_data);
+void all_model_set_data(can_data_t *can_data);
 void slip_model_set_data(can_data_t *can_data);
 
 // CAN thread

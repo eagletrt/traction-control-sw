@@ -23,8 +23,8 @@ add_library(
     STATIC
 
     ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV2.c
-
     ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque.c
+    ${CMAKE_CURRENT_LIST_DIR}/exported/AllControl/AllControl.c
 
     ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation/Velocity_Estimation.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation/Velocity_Estimation_data.c
