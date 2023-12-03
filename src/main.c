@@ -15,29 +15,33 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
-	can_messages_init();
-	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
-	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
-
-	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
-		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
-		return EXIT_FAILURE;
-	}
-	if (can_open_socket(&can[CAN_SOCKET_SECONDARY]) < 0) {
-		eprintf("Error opening socket %s\n", can[CAN_SOCKET_SECONDARY].device);
-		return EXIT_FAILURE;
-	}
 	if (!init_model()) {
 		eprintf("Error initializing model\n");
 		return EXIT_FAILURE;
 	}
 
+	can_messages_init();
 	// Start CAN threads
 	kill_can_thread = false;
 	pthread_mutex_init(&model_mutex, NULL);
 
+
+	can_init(&can[CAN_SOCKET_PRIMARY], "vcan0");
+	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
+		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
+		return EXIT_FAILURE;
+	}
 	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_PRIMARY);
+#if 0 == SIMULATOR
+	can_init(&can[CAN_SOCKET_SECONDARY], "vcan1");
+	if (can_open_socket(&can[CAN_SOCKET_SECONDARY]) < 0) {
+		eprintf("Error opening socket %s\n", can[CAN_SOCKET_SECONDARY].device);
+		return EXIT_FAILURE;
+	}
 	pthread_create(&can_threads[CAN_SOCKET_SECONDARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_SECONDARY);
+#endif
+
+
 
 	fprintf(stdout, "\n");
 	running = true;
@@ -51,7 +55,10 @@ int main(void) {
 			ve_model_set_data(&can_data);
 			Velocity_Estimation_step(&ve_model);
 
-			switch(CONTROL_MODE) {
+			rtTmax_rl_Velocity_Estimation = 100.0;
+			rtTmax_rr_Velocity_Estimation = 100.0;
+
+			switch (CONTROL_MODE) {
 			case CONTROL_SLIP:
 				// Slip Control
 				slip_model_set_data(&can_data);
@@ -63,7 +70,7 @@ int main(void) {
 				Torque_step(&torque_model);
 				break;
 			case CONTROL_COMBINED:
-				// All0
+				// All Control
 				all_model_set_data(&can_data);
 				AllControl_step(&all_model);
 				break;
@@ -140,8 +147,8 @@ void torque_model_set_data(can_data_t *can_data) {
 	rtDriver_req_Torque = can_data->throttle;
 	rtSteeringangle_Torque = can_data->steering_angle;
 
-	rtmap_tv_Torque = can_data->map_tv;
 	rtmap_sc_Torque = can_data->map_sc;
+	rtmap_tv_Torque = can_data->map_tv;
 
 	rtTel_Inp_Ki_Torque = TV_PID_KI;
 	rtTel_Inp_Kp_Torque = TV_PID_KP;
@@ -149,8 +156,8 @@ void torque_model_set_data(can_data_t *can_data) {
 
 	rtyaw_rate_Torque = can_data->gyro_z;
 
-	rtTm_rl_Torque = 100.0f; // rtTmax_rl_Velocity_Estimation;
-	rtTm_rr_Torque = 100.0f; // rtTmax_rr_Velocity_Estimation;
+	rtTm_rl_Torque = rtTmax_rl_Velocity_Estimation;
+	rtTm_rr_Torque = rtTmax_rr_Velocity_Estimation;
 
 	rtu_bar_Torque = rtu_bar_Velocity_Estimation;
 	rtomega_rl_Torque = rtomega_rl_Velocity_Estimation;
@@ -172,8 +179,8 @@ void slip_model_set_data(can_data_t *can_data) {
 
 	rtyaw_rate_SlipV2 = can_data->gyro_z;
 
-	rtTm_rl_SlipV2 = 100.0f; // rtTmax_rl_Velocity_Estimation;
-	rtTm_rr_SlipV2 = 100.0f; // rtTmax_rr_Velocity_Estimation;
+	rtTm_rl_SlipV2 = rtTmax_rl_Velocity_Estimation;
+	rtTm_rr_SlipV2 = rtTmax_rr_Velocity_Estimation;
 
 	rtu_bar_SlipV2 = rtu_bar_Velocity_Estimation;
 	rtomega_rl_SlipV2 = rtomega_rl_Velocity_Estimation;
@@ -186,8 +193,8 @@ void all_model_set_data(can_data_t *can_data) {
 	rtbrake_AllControl = can_data->brake;
 	rtSteeringangle_AllControl = can_data->steering_angle;
 
-	rtTm_rl_AllControl = 100.0f; // rtTmax_rl_Velocity_Estimation;
-	rtTm_rr_AllControl = 100.0f; // rtTmax_rr_Velocity_Estimation;
+	rtTm_rl_AllControl = rtTmax_rl_Velocity_Estimation;
+	rtTm_rr_AllControl = rtTmax_rr_Velocity_Estimation;
 	rtmap_sc_AllControl = can_data->map_sc;
 	rtmap_tv_AllControl = can_data->map_tv;
 
@@ -216,8 +223,7 @@ void can_send_data() {
 		real_T t_rr = 0.0;
 		real_T tm_rl = 0.0;
 		real_T tm_rr = 0.0;
-		switch (CONTROL_MODE)
-		{
+		switch (CONTROL_MODE) {
 		case CONTROL_SLIP:
 			t_rl = rtTm_rl_a_SlipV2;
 			t_rr = rtTm_rr_m_SlipV2;
@@ -240,28 +246,28 @@ void can_send_data() {
 			break;
 		}
 
-#if 1==SIMULATOR
-			static simulator_control_output_converted_t out_src;
-			out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
-			out_src.tmax_l = tm_rl;
-			out_src.tmax_r = tm_rr;
-			out_src.torque_l = t_rl;
-			out_src.torque_r = t_rr;
-			static simulator_control_output_t out_src_raw;
-			simulator_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
-			simulator_control_output_pack(data, &out_src_raw, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
-			can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_OUTPUT_FRAME_ID, data, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
+#if 1 == SIMULATOR
+		static simulator_control_output_converted_t out_src;
+		out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
+		out_src.tmax_l = tm_rl;
+		out_src.tmax_r = tm_rr;
+		out_src.torque_l = t_rl;
+		out_src.torque_r = t_rr;
+		static simulator_control_output_t out_src_raw;
+		simulator_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
+		simulator_control_output_pack(data, &out_src_raw, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_OUTPUT_FRAME_ID, data, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
 #else
-			static primary_control_output_converted_t out_src;
-			out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
-			out_src.tmax_l = tm_rl;
-			out_src.tmax_r = tm_rr;
-			out_src.torque_l = t_rl;
-			out_src.torque_r = t_rr;
-			static primary_control_output_t out_src_raw;
-			primary_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
-			primary_control_output_pack(data, &out_src_raw, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
-			can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_OUTPUT_FRAME_ID, data, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
+		static primary_control_output_converted_t out_src;
+		out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
+		out_src.tmax_l = tm_rl;
+		out_src.tmax_r = tm_rr;
+		out_src.torque_l = t_rl;
+		out_src.torque_r = t_rr;
+		static primary_control_output_t out_src_raw;
+		primary_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
+		primary_control_output_pack(data, &out_src_raw, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_OUTPUT_FRAME_ID, data, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
 #endif
 	}
 
@@ -269,7 +275,7 @@ void can_send_data() {
 		state_timestamp = timestamp;
 		real_T map_sc = 0.0;
 		real_T map_tv = 0.0;
-		switch(CONTROL_MODE) {
+		switch (CONTROL_MODE) {
 		case CONTROL_SLIP:
 			map_sc = rtmap_sc_SlipV2;
 			map_tv = rtmap_tv_SlipV2;
@@ -286,45 +292,45 @@ void can_send_data() {
 			break;
 		}
 
-#if 1==SIMULATOR
-			static simulator_control_state_converted_t state_src;
-			state_src.map_pw = rtmap_motor_Velocity_Estimation;
-			state_src.map_sc = map_sc;
-			state_src.map_tv = map_tv;
-			static simulator_control_state_t state_src_raw;
-			simulator_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
-			simulator_control_state_pack(data, &state_src_raw, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
-			can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_STATE_FRAME_ID, data, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
+#if 1 == SIMULATOR
+		static simulator_control_state_converted_t state_src;
+		state_src.map_pw = rtmap_motor_Velocity_Estimation;
+		state_src.map_sc = map_sc;
+		state_src.map_tv = map_tv;
+		static simulator_control_state_t state_src_raw;
+		simulator_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
+		simulator_control_state_pack(data, &state_src_raw, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_STATE_FRAME_ID, data, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
 #else
-			static secondary_control_state_converted_t state_src;
-			state_src.map_pw = rtmap_motor_Velocity_Estimation;
-			state_src.map_sc = map_sc;
-			state_src.map_tv = map_tv;
-			static secondary_control_state_t state_src_raw;
-			secondary_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
-			secondary_control_state_pack(data, &state_src_raw, SECONDARY_CONTROL_STATE_BYTE_SIZE);
-			can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_CONTROL_STATE_FRAME_ID, data, SECONDARY_CONTROL_STATE_BYTE_SIZE);
+		static secondary_control_state_converted_t state_src;
+		state_src.map_pw = rtmap_motor_Velocity_Estimation;
+		state_src.map_sc = map_sc;
+		state_src.map_tv = map_tv;
+		static secondary_control_state_t state_src_raw;
+		secondary_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
+		secondary_control_state_pack(data, &state_src_raw, SECONDARY_CONTROL_STATE_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_CONTROL_STATE_FRAME_ID, data, SECONDARY_CONTROL_STATE_BYTE_SIZE);
 #endif
 	}
 	if (timestamp - SECONDARY_INTERVAL_DEBUG_SIGNAL * 1e3 > debug_timestamp) {
 		debug_timestamp = timestamp;
 
-#if 1==SIMULATOR
-			static simulator_debug_signal_converted_t debug_src;
-			debug_src.field_1 = rtTel_Out_error_Torque / 100.0;
-			debug_src.field_2 = rtERROR_SlipV2 / 100.0;
-			static simulator_debug_signal_t debug_src_raw;
-			simulator_debug_signal_conversion_to_raw_struct(&debug_src_raw, &debug_src);
-			simulator_debug_signal_pack(data, &debug_src_raw, SIMULATOR_DEBUG_SIGNAL_BYTE_SIZE);
-			can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_DEBUG_SIGNAL_FRAME_ID, data, SIMULATOR_DEBUG_SIGNAL_BYTE_SIZE);
+#if 1 == SIMULATOR
+		static simulator_debug_signal_converted_t debug_src;
+		debug_src.field_1 = rtTel_Out_error_Torque / 100.0;
+		debug_src.field_2 = rtERROR_SlipV2 / 100.0;
+		static simulator_debug_signal_t debug_src_raw;
+		simulator_debug_signal_conversion_to_raw_struct(&debug_src_raw, &debug_src);
+		simulator_debug_signal_pack(data, &debug_src_raw, SIMULATOR_DEBUG_SIGNAL_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_DEBUG_SIGNAL_FRAME_ID, data, SIMULATOR_DEBUG_SIGNAL_BYTE_SIZE);
 #else
-			static secondary_debug_signal_converted_t debug_src;
-			debug_src.field_1 = rtTel_Out_error_Torque;
-			debug_src.field_2 = rtERROR_SlipV2;
-			static secondary_debug_signal_t debug_src_raw;
-			secondary_debug_signal_conversion_to_raw_struct(&debug_src_raw, &debug_src);
-			secondary_debug_signal_pack(data, &debug_src_raw, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
-			can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_DEBUG_SIGNAL_FRAME_ID, data, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
+		static secondary_debug_signal_converted_t debug_src;
+		debug_src.field_1 = rtTel_Out_error_Torque;
+		debug_src.field_2 = rtERROR_SlipV2;
+		static secondary_debug_signal_t debug_src_raw;
+		secondary_debug_signal_conversion_to_raw_struct(&debug_src_raw, &debug_src);
+		secondary_debug_signal_pack(data, &debug_src_raw, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_DEBUG_SIGNAL_FRAME_ID, data, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
 #endif
 	}
 }
@@ -333,5 +339,6 @@ void can_send_data() {
 void sig_handler(int signo) {
 	if (signo == SIGINT) {
 		running = false;
+		kill_can_thread = true;
 	}
 }
