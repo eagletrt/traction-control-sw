@@ -25,23 +25,20 @@ int main(void) {
 	kill_can_thread = false;
 	pthread_mutex_init(&model_mutex, NULL);
 
-
-	can_init(&can[CAN_SOCKET_PRIMARY], "vcan0");
+	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
 	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
 		return EXIT_FAILURE;
 	}
 	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_PRIMARY);
 #if 0 == SIMULATOR
-	can_init(&can[CAN_SOCKET_SECONDARY], "vcan1");
+	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
 	if (can_open_socket(&can[CAN_SOCKET_SECONDARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_SECONDARY].device);
 		return EXIT_FAILURE;
 	}
 	pthread_create(&can_threads[CAN_SOCKET_SECONDARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_SECONDARY);
 #endif
-
-
 
 	fprintf(stdout, "\n");
 	running = true;
