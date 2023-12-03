@@ -50,12 +50,26 @@ int main(void) {
 			// Velocity Estimation
 			ve_model_set_data(&can_data);
 			Velocity_Estimation_step(&ve_model);
-			// Torque Vectoring
-			torque_model_set_data(&can_data);
-			Torque_step(&torque_model);
-			// Slip Control
-			slip_model_set_data(&can_data);
-			SlipV2_step(&slip_model);
+
+			switch(CONTROL_MODE) {
+			case CONTROL_SLIP:
+				// Slip Control
+				slip_model_set_data(&can_data);
+				SlipV2_step(&slip_model);
+				break;
+			case CONTROL_TORQUE:
+				// Torque Vectoring
+				torque_model_set_data(&can_data);
+				Torque_step(&torque_model);
+				break;
+			case CONTROL_COMBINED:
+				// All0
+				all_model_set_data(&can_data);
+				AllControl_step(&all_model);
+				break;
+			default:
+				break;
+			}
 
 			pthread_mutex_unlock(&model_mutex);
 			BENCHMARK_TOCK();
@@ -126,8 +140,8 @@ void torque_model_set_data(can_data_t *can_data) {
 	rtDriver_req_Torque = can_data->throttle;
 	rtSteeringangle_Torque = can_data->steering_angle;
 
-	rtmap_tv_Torque = 1.0; // can_data->map_tv;
-	rtmap_sc_Torque = 0.0; // can_data->map_sc;
+	rtmap_tv_Torque = can_data->map_tv;
+	rtmap_sc_Torque = can_data->map_sc;
 
 	rtTel_Inp_Ki_Torque = TV_PID_KI;
 	rtTel_Inp_Kp_Torque = TV_PID_KP;
@@ -149,13 +163,8 @@ void slip_model_set_data(can_data_t *can_data) {
 	rtDriver_req_SlipV2 = can_data->throttle;
 	rtSteeringangle_SlipV2 = can_data->steering_angle;
 
-	rtmap_sc_SlipV2 = 1.0; // can_data->map_sc;
-	rtmap_tv_SlipV2 = 1.0; // can_data->map_tv;
-
-	// rtTel_Inp_SC_Ki_SlipV2 = SC_PID_KI;
-	// rtTel_Inp_SC_Kp_SlipV2 = SC_PID_KP;
-	// rtTel_Inp_SC_LambdaRef_SlipV2 = SC_LAMBDA_REF;
-	// rtTel_Inp_SC_SpeedCutoff_SlipV2 = SC_SPEED_CUTOFF;
+	rtmap_sc_SlipV2 = can_data->map_sc;
+	rtmap_tv_SlipV2 = can_data->map_tv;
 
 	rtTel_Inp_SC_PeakTorque_SlipV2 = SLIP_PEAK;
 	rtTel_Inp_SC_SpeedCutoff_SlipV2 = SLIP_SPEED_CUTOFF;
@@ -176,10 +185,19 @@ void all_model_set_data(can_data_t *can_data) {
 	rtDriver_req_AllControl = can_data->throttle;
 	rtbrake_AllControl = can_data->brake;
 	rtSteeringangle_AllControl = can_data->steering_angle;
+
 	rtTm_rl_AllControl = 100.0f; // rtTmax_rl_Velocity_Estimation;
 	rtTm_rr_AllControl = 100.0f; // rtTmax_rr_Velocity_Estimation;
-	rtmap_sc_AllControl = 0.0;	 // can_data->map_sc;
-	rtmap_tv_AllControl = 0.0;	 // can_data->map_tv;
+	rtmap_sc_AllControl = can_data->map_sc;
+	rtmap_tv_AllControl = can_data->map_tv;
+
+	rtTel_Inp_SC_PeakTorque_AllCont = SLIP_PEAK;
+	rtTel_Inp_SC_SpeedCutoff_AllCon = SLIP_SPEED_CUTOFF;
+	rtTel_Inp_SC_StartTorque_AllCon = SLIP_START_TORQUE;
+	rtTel_Inp_TV_Ki_AllControl = TV_PID_KI;
+	rtTel_Inp_TV_Kp_AllControl = TV_PID_KP;
+	rtTel_Inp_TV_Kus_AllControl = TV_KUF;
+
 	rtomega_rl_AllControl = rtomega_rl_Velocity_Estimation;
 	rtomega_rr_AllControl = rtomega_rr_Velocity_Estimation;
 	rtu_bar_AllControl = rtu_bar_Velocity_Estimation;
