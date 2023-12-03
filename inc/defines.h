@@ -11,8 +11,14 @@
 #include <math.h>
 #include <stdbool.h>
 
+typedef enum {
+	CONTROL_SLIP = 0,
+	CONTROL_TORQUE,
+	CONTROL_COMBINED
+} control_mode_t;
+
 #define SIMULATOR 1
-#define ENABLE_TORQUE_VECTORING 1
+static const control_mode_t CONTROL_MODE = CONTROL_COMBINED;
 
 #define BENCHMARK 0
 #define RUN_FREQUENCY 1000 // Hz

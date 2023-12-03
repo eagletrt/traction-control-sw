@@ -198,19 +198,31 @@ void can_send_data() {
 		real_T t_rr = 0.0;
 		real_T tm_rl = 0.0;
 		real_T tm_rr = 0.0;
-		if (ENABLE_TORQUE_VECTORING) {
-			t_rl = rtTm_rl_a_Torque;
-			t_rr = rtTm_rr_m_Torque;
-			tm_rl = rtTm_rl_Torque;
-			tm_rr = rtTm_rr_Torque;
-		} else {
+		switch (CONTROL_MODE)
+		{
+		case CONTROL_SLIP:
 			t_rl = rtTm_rl_a_SlipV2;
 			t_rr = rtTm_rr_m_SlipV2;
 			tm_rl = rtTm_rl_SlipV2;
 			tm_rr = rtTm_rr_SlipV2;
+			break;
+		case CONTROL_TORQUE:
+			t_rl = rtTm_rl_a_Torque;
+			t_rr = rtTm_rr_m_Torque;
+			tm_rl = rtTm_rl_Torque;
+			tm_rr = rtTm_rr_Torque;
+			break;
+		case CONTROL_COMBINED:
+			t_rl = rtTm_rl_a_AllControl;
+			t_rr = rtTm_rr_m_AllControl;
+			tm_rl = rtTm_rl_AllControl;
+			tm_rr = rtTm_rr_AllControl;
+			break;
+		default:
+			break;
 		}
 
-		if (SIMULATOR) {
+#if 1==SIMULATOR
 			static simulator_control_output_converted_t out_src;
 			out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
 			out_src.tmax_l = tm_rl;
@@ -221,7 +233,7 @@ void can_send_data() {
 			simulator_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
 			simulator_control_output_pack(data, &out_src_raw, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
 			can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_OUTPUT_FRAME_ID, data, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
-		} else {
+#else
 			static primary_control_output_converted_t out_src;
 			out_src.estimated_velocity = rtu_bar_Velocity_Estimation;
 			out_src.tmax_l = tm_rl;
@@ -232,22 +244,31 @@ void can_send_data() {
 			primary_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
 			primary_control_output_pack(data, &out_src_raw, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
 			can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_OUTPUT_FRAME_ID, data, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
-		}
+#endif
 	}
 
 	if (timestamp - SECONDARY_INTERVAL_CONTROL_STATE * 1e3 > state_timestamp) {
 		state_timestamp = timestamp;
 		real_T map_sc = 0.0;
 		real_T map_tv = 0.0;
-		if (ENABLE_TORQUE_VECTORING) {
-			map_sc = rtmap_sc_Torque;
-			map_tv = rtmap_tv_Torque;
-		} else {
+		switch(CONTROL_MODE) {
+		case CONTROL_SLIP:
 			map_sc = rtmap_sc_SlipV2;
 			map_tv = rtmap_tv_SlipV2;
+			break;
+		case CONTROL_TORQUE:
+			map_sc = rtmap_sc_Torque;
+			map_tv = rtmap_tv_Torque;
+			break;
+		case CONTROL_COMBINED:
+			map_sc = rtmap_sc_AllControl;
+			map_tv = rtmap_tv_AllControl;
+			break;
+		default:
+			break;
 		}
 
-		if (SIMULATOR) {
+#if 1==SIMULATOR
 			static simulator_control_state_converted_t state_src;
 			state_src.map_pw = rtmap_motor_Velocity_Estimation;
 			state_src.map_sc = map_sc;
@@ -256,7 +277,7 @@ void can_send_data() {
 			simulator_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
 			simulator_control_state_pack(data, &state_src_raw, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
 			can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_STATE_FRAME_ID, data, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
-		} else {
+#else
 			static secondary_control_state_converted_t state_src;
 			state_src.map_pw = rtmap_motor_Velocity_Estimation;
 			state_src.map_sc = map_sc;
@@ -265,12 +286,12 @@ void can_send_data() {
 			secondary_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
 			secondary_control_state_pack(data, &state_src_raw, SECONDARY_CONTROL_STATE_BYTE_SIZE);
 			can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_CONTROL_STATE_FRAME_ID, data, SECONDARY_CONTROL_STATE_BYTE_SIZE);
-		}
+#endif
 	}
 	if (timestamp - SECONDARY_INTERVAL_DEBUG_SIGNAL * 1e3 > debug_timestamp) {
 		debug_timestamp = timestamp;
 
-		if (SIMULATOR) {
+#if 1==SIMULATOR
 			static simulator_debug_signal_converted_t debug_src;
 			debug_src.field_1 = rtTel_Out_error_Torque / 100.0;
 			debug_src.field_2 = rtERROR_SlipV2 / 100.0;
@@ -278,7 +299,7 @@ void can_send_data() {
 			simulator_debug_signal_conversion_to_raw_struct(&debug_src_raw, &debug_src);
 			simulator_debug_signal_pack(data, &debug_src_raw, SIMULATOR_DEBUG_SIGNAL_BYTE_SIZE);
 			can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_DEBUG_SIGNAL_FRAME_ID, data, SIMULATOR_DEBUG_SIGNAL_BYTE_SIZE);
-		} else {
+#else
 			static secondary_debug_signal_converted_t debug_src;
 			debug_src.field_1 = rtTel_Out_error_Torque;
 			debug_src.field_2 = rtERROR_SlipV2;
@@ -286,7 +307,7 @@ void can_send_data() {
 			secondary_debug_signal_conversion_to_raw_struct(&debug_src_raw, &debug_src);
 			secondary_debug_signal_pack(data, &debug_src_raw, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
 			can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_DEBUG_SIGNAL_FRAME_ID, data, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
-		}
+#endif
 	}
 }
 
