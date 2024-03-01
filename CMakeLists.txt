@@ -22,7 +22,8 @@ add_library(
     exported
     STATIC
 
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV2.c
+    ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV1.c
+    ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV1_data.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/AllControl/AllControl.c
 

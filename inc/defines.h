@@ -23,6 +23,7 @@ static const control_mode_t CONTROL_MODE = CONTROL_COMBINED;
 #define SLIP_SPEED_CUTOFF 3.0
 #define SLIP_START_TORQUE 20.0
 #define STEER_CONVERSION_FACTOR 4.588f
+#define WHEEL_RADIUS 0.2035f
 
 #define TV_KUF 0.001
 #define TV_PID_KP 150.0

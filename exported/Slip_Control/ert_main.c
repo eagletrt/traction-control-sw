@@ -5,11 +5,11 @@
  *
  * File: ert_main.c
  *
- * Code generated for Simulink model 'SlipV2'.
+ * Code generated for Simulink model 'SlipV1'.
  *
- * Model version                  : 6.38
- * Simulink Coder version         : 9.8 (R2022b) 13-May-2022
- * C/C++ source code generated on : Fri Dec  1 17:12:13 2023
+ * Model version                  : 6.25
+ * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
+ * C/C++ source code generated on : Fri Mar  1 17:13:29 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -21,10 +21,11 @@
 
 #include <stddef.h>
 #include <stdio.h>            /* This example main program uses printf/fflush */
-#include "SlipV2.h"                    /* Model header file */
+#include "SlipV1.h"                    /* Model header file */
 
-static RT_MODEL_SlipV2 rtM_SlipV2_;
-static RT_MODEL_SlipV2 *const rtMPtr_SlipV2 = &rtM_SlipV2_;/* Real-time model */
+static RT_MODEL_SlipV1 rtM_SlipV1_;
+static RT_MODEL_SlipV1 *const rtMPtr_SlipV1 = &rtM_SlipV1_;/* Real-time model */
+static DW_SlipV1 rtDW_SlipV1;          /* Observable states */
 
 /*
  * Associating rt_OneStep with a real-time clock or interrupt service routine
@@ -37,8 +38,8 @@ static RT_MODEL_SlipV2 *const rtMPtr_SlipV2 = &rtM_SlipV2_;/* Real-time model */
  * your application needs.  This example simply sets an error status in the
  * real-time model and returns from rt_OneStep.
  */
-void rt_OneStep(RT_MODEL_SlipV2 *const rtM_SlipV2);
-void rt_OneStep(RT_MODEL_SlipV2 *const rtM_SlipV2)
+void rt_OneStep(RT_MODEL_SlipV1 *const rtM_SlipV1);
+void rt_OneStep(RT_MODEL_SlipV1 *const rtM_SlipV1)
 {
   static boolean_T OverrunFlag = false;
 
@@ -46,7 +47,7 @@ void rt_OneStep(RT_MODEL_SlipV2 *const rtM_SlipV2)
 
   /* Check for overrun */
   if (OverrunFlag) {
-    rtmSetErrorStatus(rtM_SlipV2, "Overrun");
+    rtmSetErrorStatus(rtM_SlipV1, "Overrun");
     return;
   }
 
@@ -57,7 +58,7 @@ void rt_OneStep(RT_MODEL_SlipV2 *const rtM_SlipV2)
   /* Set model inputs here */
 
   /* Step the model */
-  SlipV2_step(rtM_SlipV2);
+  SlipV1_step(rtM_SlipV1);
 
   /* Get model outputs here */
 
@@ -77,28 +78,29 @@ void rt_OneStep(RT_MODEL_SlipV2 *const rtM_SlipV2)
  */
 int_T main(int_T argc, const char *argv[])
 {
-  RT_MODEL_SlipV2 *const rtM_SlipV2 = rtMPtr_SlipV2;
+  RT_MODEL_SlipV1 *const rtM_SlipV1 = rtMPtr_SlipV1;
 
   /* Unused arguments */
   (void)(argc);
   (void)(argv);
 
   /* Pack model data into RTM */
+  rtM_SlipV1->dwork = &rtDW_SlipV1;
 
   /* Initialize model */
-  SlipV2_initialize(rtM_SlipV2);
+  SlipV1_initialize(rtM_SlipV1);
 
   /* Attach rt_OneStep to a timer or interrupt service routine with
    * period 0.0005 seconds (base rate of the model) here.
    * The call syntax for rt_OneStep is
    *
-   *  rt_OneStep(rtM_SlipV2);
+   *  rt_OneStep(rtM_SlipV1);
    */
   printf("Warning: The simulation will run forever. "
          "Generated ERT main won't simulate model step behavior. "
          "To change this behavior select the 'MAT-file logging' option.\n");
   fflush((NULL));
-  while (rtmGetErrorStatus(rtM_SlipV2) == (NULL)) {
+  while (rtmGetErrorStatus(rtM_SlipV1) == (NULL)) {
     /*  Perform application tasks here */
   }
 

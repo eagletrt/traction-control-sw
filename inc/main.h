@@ -16,7 +16,7 @@
 #include "lib/can/lib/secondary/secondary_watchdog.h"
 #include "lib/can/lib/simulator/simulator_network.h"
 
-#include "exported/Slip_Control/SlipV2.h"
+#include "exported/Slip_Control/SlipV1.h"
 #include "exported/Traction_Control/Torque.h"
 #include "exported/AllControl/AllControl.h"
 
@@ -34,7 +34,8 @@ DW_AllControl all_rtDW;
 RT_MODEL_AllControl all_model;
 
 char SlipError;
-RT_MODEL_SlipV2 slip_model;
+DW_SlipV1 slip_rtDW;
+RT_MODEL_SlipV1 slip_model;
 
 bool init_model(void);
 double torque_max(can_data_t *can_data);

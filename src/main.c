@@ -25,14 +25,14 @@ int main(void) {
 	kill_can_thread = false;
 	pthread_mutex_init(&model_mutex, NULL);
 
-	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
+	can_init(&can[CAN_SOCKET_PRIMARY], "vcan0");
 	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
 		return EXIT_FAILURE;
 	}
 	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_PRIMARY);
 #if 0 == SIMULATOR
-	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
+	can_init(&can[CAN_SOCKET_SECONDARY], "vcan1");
 	if (can_open_socket(&can[CAN_SOCKET_SECONDARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_SECONDARY].device);
 		return EXIT_FAILURE;
@@ -55,7 +55,7 @@ int main(void) {
 			case CONTROL_SLIP:
 				// Slip Control
 				slip_model_set_data(&can_data);
-				SlipV2_step(&slip_model);
+				SlipV1_step(&slip_model);
 				break;
 			case CONTROL_TORQUE:
 				// Torque Vectoring
@@ -112,8 +112,8 @@ bool init_model(void) {
 	all_model.dwork = &all_rtDW;
 	AllControl_initialize(&all_model);
 
-	// slip_model.dwork = &slip_rtDW;
-	SlipV2_initialize(&slip_model);
+	slip_model.dwork = &slip_rtDW;
+	SlipV1_initialize(&slip_model);
 
 	return true;
 }
@@ -125,7 +125,7 @@ double torque_max(can_data_t *can_data) {
 
 void velocity_estimation(can_data_t *can_data, double *u_bar) {
 	double delta = can_data->steering_angle / STEER_CONVERSION_FACTOR;
-	double v_g = (can_data->omega_fl + can_data->omega_fr) / 2.0;
+	double v_g = WHEEL_RADIUS * (can_data->omega_fl + can_data->omega_fr) / 2.0;
 	*u_bar = v_g * cos(delta);
 }
 
@@ -153,26 +153,29 @@ void torque_model_set_data(can_data_t *can_data) {
 }
 
 void slip_model_set_data(can_data_t *can_data) {
-	// SlipV2 Data
-	rtbrake_SlipV2 = can_data->brake;
-	rtDriver_req_SlipV2 = can_data->throttle;
-	rtSteeringangle_SlipV2 = can_data->steering_angle;
+	// SlipV1 Data
+	rtbrake_SlipV1 = can_data->brake;
+	rtDriver_req_SlipV1 = can_data->throttle;
+	rtSteeringangle_SlipV1 = can_data->steering_angle;
 
-	rtmap_sc_SlipV2 = can_data->map_sc;
-	rtmap_tv_SlipV2 = can_data->map_tv;
+	rtmap_sc_SlipV1 = can_data->map_sc;
+	rtmap_tv_SlipV1 = can_data->map_tv;
 
-	rtTel_Inp_SC_PeakTorque_SlipV2 = SLIP_PEAK;
-	rtTel_Inp_SC_SpeedCutoff_SlipV2 = SLIP_SPEED_CUTOFF;
-	rtTel_Inp_SC_StartTorque_SlipV2 = SLIP_START_TORQUE;
+	rtTel_Inp_SC_Ki_SlipV1 = 2500.0;
+	rtTel_Inp_SC_Kp_SlipV1 = 100.0;
+	rtTel_Inp_SC_LambdaRef_SlipV1 = 0.05;
+	rtTel_Inp_minT_SlipV1 = 20.0;
+	// rtTel_Inp_T0_SlipV1
+	// rtTel_Inp_Vramp_SlipV1
 
-	rtyaw_rate_SlipV2 = can_data->gyro_z;
+	rtyaw_rate_SlipV1 = can_data->gyro_z;
 
-	rtTm_rl_SlipV2 = torque_max(can_data);
-	rtTm_rr_SlipV2 = torque_max(can_data);
+	rtTm_rl_SlipV1 = torque_max(can_data);
+	rtTm_rr_SlipV1 = torque_max(can_data);
 
-	rtu_bar_SlipV2 = u_bar;
-	rtomega_rl_SlipV2 = can_data->omega_rl;
-	rtomega_rr_SlipV2 = can_data->omega_rr;
+	rtu_bar_SlipV1 = u_bar;
+	rtomega_rl_SlipV1 = can_data->omega_rl;
+	rtomega_rr_SlipV1 = can_data->omega_rr;
 }
 
 void all_model_set_data(can_data_t *can_data) {
@@ -213,10 +216,10 @@ void can_send_data() {
 		real_T tm_rr = 0.0;
 		switch (CONTROL_MODE) {
 		case CONTROL_SLIP:
-			t_rl = rtTm_rl_a_SlipV2;
-			t_rr = rtTm_rr_m_SlipV2;
-			tm_rl = rtTm_rl_SlipV2;
-			tm_rr = rtTm_rr_SlipV2;
+			t_rl = rtTm_rl_a_SlipV1;
+			t_rr = rtTm_rr_m_SlipV1;
+			tm_rl = rtTm_rl_SlipV1;
+			tm_rr = rtTm_rr_SlipV1;
 			break;
 		case CONTROL_TORQUE:
 			t_rl = rtTm_rl_a_Torque;
@@ -265,8 +268,8 @@ void can_send_data() {
 		real_T map_tv = 0.0;
 		switch (CONTROL_MODE) {
 		case CONTROL_SLIP:
-			map_sc = rtmap_sc_SlipV2;
-			map_tv = rtmap_tv_SlipV2;
+			map_sc = rtmap_sc_SlipV1;
+			map_tv = rtmap_tv_SlipV1;
 			break;
 		case CONTROL_TORQUE:
 			map_sc = rtmap_sc_Torque;
