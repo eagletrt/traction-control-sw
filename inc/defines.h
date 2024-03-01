@@ -11,11 +11,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-typedef enum {
-	CONTROL_SLIP = 0,
-	CONTROL_TORQUE,
-	CONTROL_COMBINED
-} control_mode_t;
+typedef enum { CONTROL_SLIP = 0, CONTROL_TORQUE, CONTROL_COMBINED } control_mode_t;
 
 #define SIMULATOR 1
 static const control_mode_t CONTROL_MODE = CONTROL_COMBINED;
@@ -26,6 +22,7 @@ static const control_mode_t CONTROL_MODE = CONTROL_COMBINED;
 #define SLIP_PEAK 60.0
 #define SLIP_SPEED_CUTOFF 3.0
 #define SLIP_START_TORQUE 20.0
+#define STEER_CONVERSION_FACTOR 4.588f
 
 #define TV_KUF 0.001
 #define TV_PID_KP 150.0
