@@ -25,6 +25,7 @@ add_library(
     ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV1.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV1_data.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque.c
+    ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque_data.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/AllControl/AllControl.c
 
     ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation/Velocity_Estimation.c
