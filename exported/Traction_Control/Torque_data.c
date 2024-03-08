@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Torque'.
  *
- * Model version                  : 6.25
+ * Model version                  : 6.31
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Fri Mar  1 17:31:38 2024
+ * C/C++ source code generated on : Fri Mar  8 13:28:06 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -110,7 +110,7 @@ P_Torque rtP_Torque = {
    */
   -1,
 
-  /* Computed Parameter: Constant3_Value_c
+  /* Computed Parameter: Constant3_Value_f
    * Referenced by: '<S32>/Constant3'
    */
   1,

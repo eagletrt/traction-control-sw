@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Torque'.
  *
- * Model version                  : 6.25
+ * Model version                  : 6.31
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Fri Mar  1 17:31:38 2024
+ * C/C++ source code generated on : Fri Mar  8 13:28:06 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -122,7 +122,7 @@ struct P_Torque_ {
   int8_T Constant2_Value;              /* Computed Parameter: Constant2_Value
                                         * Referenced by: '<S32>/Constant2'
                                         */
-  int8_T Constant3_Value_c;            /* Computed Parameter: Constant3_Value_c
+  int8_T Constant3_Value_f;            /* Computed Parameter: Constant3_Value_f
                                         * Referenced by: '<S32>/Constant3'
                                         */
   int8_T Constant4_Value;              /* Computed Parameter: Constant4_Value
@@ -154,12 +154,14 @@ extern real_T rtSteeringangle_Torque;  /* '<Root>/delta' */
 extern real_T rtTel_Inp_Ki_Torque;     /* '<Root>/Tel_Inp_Ki' */
 extern real_T rtTel_Inp_Kp_Torque;     /* '<Root>/Tel_Inp_Kp' */
 extern real_T rtTel_Inp_Kus_Torque;    /* '<Root>/Tel_Inp_Kus' */
-extern real_T rtTel_Out_error_Torque;  /* '<Root>/Tel_Out_error' */
+extern real_T rtTel_Out_Debug_Torque_Torque;/* '<Root>/Tel_Out_Debug_Torque' */
 extern real_T rtTm_rl_Torque;          /* '<Root>/Tmax_rl' */
 extern real_T rtTm_rl_a_Torque;        /* '<Root>/Tm_rl' */
 extern real_T rtTm_rr_Torque;          /* '<Root>/Tmax_rr' */
 extern real_T rtTm_rr_m_Torque;        /* '<Root>/Tm_rr' */
 extern real_T rtbrake_Torque;          /* '<Root>/Brake' */
+extern real_T rtlambda_rr_Torque;      /* '<Root>/Tmax_rr_Slip' */
+extern real_T rtlambda_rr_n_Torque;    /* '<Root>/Tmax_rl_Slip' */
 extern real_T rtmap_sc_Torque;         /* '<Root>/map_sc' */
 extern real_T rtmap_tv_Torque;         /* '<Root>/map_TV' */
 extern real_T rtomega_rl_Torque;       /* '<Root>/omega_rl' */

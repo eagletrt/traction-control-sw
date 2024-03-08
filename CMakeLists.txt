@@ -4,6 +4,7 @@ project(traction-control)
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -Wextra -Werror -O0 -g)
 add_compile_definitions(CANLIB_TIMESTAMP)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB traction-control-lib-src ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
 file(GLOB can-lib-src ${CMAKE_CURRENT_LIST_DIR}/lib/can/**/**/*.c)
@@ -26,10 +27,6 @@ add_library(
     ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SlipV1_data.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/Torque_data.c
-    ${CMAKE_CURRENT_LIST_DIR}/exported/AllControl/AllControl.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation/Velocity_Estimation.c
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation/Velocity_Estimation_data.c
 )
 
 add_library(

@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Torque'.
  *
- * Model version                  : 6.25
+ * Model version                  : 6.31
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Fri Mar  1 17:31:38 2024
+ * C/C++ source code generated on : Fri Mar  8 13:28:06 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -31,12 +31,14 @@ real_T rtSteeringangle_Torque;         /* '<Root>/delta' */
 real_T rtTel_Inp_Ki_Torque;            /* '<Root>/Tel_Inp_Ki' */
 real_T rtTel_Inp_Kp_Torque;            /* '<Root>/Tel_Inp_Kp' */
 real_T rtTel_Inp_Kus_Torque;           /* '<Root>/Tel_Inp_Kus' */
-real_T rtTel_Out_error_Torque;         /* '<Root>/Tel_Out_error' */
+real_T rtTel_Out_Debug_Torque_Torque;  /* '<Root>/Tel_Out_Debug_Torque' */
 real_T rtTm_rl_Torque;                 /* '<Root>/Tmax_rl' */
 real_T rtTm_rl_a_Torque;               /* '<Root>/Tm_rl' */
 real_T rtTm_rr_Torque;                 /* '<Root>/Tmax_rr' */
 real_T rtTm_rr_m_Torque;               /* '<Root>/Tm_rr' */
 real_T rtbrake_Torque;                 /* '<Root>/Brake' */
+real_T rtlambda_rr_Torque;             /* '<Root>/Tmax_rr_Slip' */
+real_T rtlambda_rr_n_Torque;           /* '<Root>/Tmax_rl_Slip' */
 real_T rtmap_sc_Torque;                /* '<Root>/map_sc' */
 real_T rtmap_tv_Torque;                /* '<Root>/map_TV' */
 real_T rtomega_rl_Torque;              /* '<Root>/omega_rl' */
@@ -145,7 +147,7 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    *  RelationalOperator: '<S32>/fix for DT propagation issue1'
    */
   if (rtb_IProdOut > rtP_Torque.Clamping_zero_Value) {
-    tmp_0 = rtP_Torque.Constant3_Value_c;
+    tmp_0 = rtP_Torque.Constant3_Value_f;
   } else {
     tmp_0 = rtP_Torque.Constant4_Value;
   }
@@ -210,15 +212,15 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
     rtP_Torque.Constant3_Value;
 
   /* MATLAB Function: '<S1>/MATLAB Function' incorporates:
-   *  Inport: '<Root>/Tmax_rl'
-   *  Inport: '<Root>/Tmax_rr'
+   *  Inport: '<Root>/Tmax_rl_Slip'
+   *  Inport: '<Root>/Tmax_rr_Slip'
    *  Inport: '<Root>/driver_request'
    */
   coeff = fmin(fmax(rtDriver_req_Torque * 10.0, 0.0), 1.0);
   rtb_IProdOut_tmp = (rtb_Saturation * 0.5 + rtb_Tm_req) * coeff;
   rtb_Tm_req = (rtb_Tm_req - rtb_Saturation * 0.5) * coeff;
-  coeff = fmax(fmax(rtb_IProdOut_tmp - rtTm_rl_Torque, 0.0), fmax(rtb_Tm_req -
-    rtTm_rr_Torque, 0.0));
+  coeff = fmax(fmax(rtb_IProdOut_tmp - rtlambda_rr_Torque, 0.0), fmax(rtb_Tm_req
+    - rtlambda_rr_n_Torque, 0.0));
 
   /* Outport: '<Root>/Tm_rr' incorporates:
    *  MATLAB Function: '<S1>/MATLAB Function'
@@ -230,8 +232,8 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    */
   rtTm_rl_a_Torque = rtb_Tm_req - coeff;
 
-  /* Outport: '<Root>/Tel_Out_error' */
-  rtTel_Out_error_Torque = rtb_Saturation;
+  /* Outport: '<Root>/Tel_Out_Debug_Torque' */
+  rtTel_Out_Debug_Torque_Torque = rtb_Saturation;
 
   /* Update for DiscreteIntegrator: '<S41>/Integrator' */
   rtDW_Torque->Integrator_DSTATE = rtb_IProdOut + rtb_Delta_T_g;
@@ -266,11 +268,13 @@ void Torque_initialize(RT_MODEL_Torque *const rtM_Torque)
   rtTel_Inp_Kus_Torque = 0.0;
   rtTel_Inp_Kp_Torque = 0.0;
   rtTel_Inp_Ki_Torque = 0.0;
+  rtlambda_rr_Torque = 0.0;
+  rtlambda_rr_n_Torque = 0.0;
 
   /* Storage classes */
   rtTm_rr_m_Torque = 0.0;
   rtTm_rl_a_Torque = 0.0;
-  rtTel_Out_error_Torque = 0.0;
+  rtTel_Out_Debug_Torque_Torque = 0.0;
 
   /* states (dwork) */
   (void) memset((void *)rtDW_Torque, 0,

@@ -51,25 +51,12 @@ int main(void) {
 			// Velocity Estimation
 			velocity_estimation(&can_data, &u_bar);
 
-			switch (CONTROL_MODE) {
-			case CONTROL_SLIP:
-				// Slip Control
-				slip_model_set_data(&can_data);
-				SlipV1_step(&slip_model);
-				break;
-			case CONTROL_TORQUE:
-				// Torque Vectoring
-				torque_model_set_data(&can_data);
-				Torque_step(&torque_model);
-				break;
-			case CONTROL_COMBINED:
-				// All Control
-				all_model_set_data(&can_data);
-				AllControl_step(&all_model);
-				break;
-			default:
-				break;
-			}
+			// Slip Control
+			slip_model_set_data(&can_data);
+			SlipV1_step(&slip_model);
+			// Torque Vectoring
+			torque_model_set_data(&can_data);
+			Torque_step(&torque_model);
 
 			pthread_mutex_unlock(&model_mutex);
 			BENCHMARK_TOCK();
@@ -109,9 +96,6 @@ bool init_model(void) {
 	torque_model.dwork = &torque_rtDW;
 	Torque_initialize(&torque_model);
 
-	all_model.dwork = &all_rtDW;
-	AllControl_initialize(&all_model);
-
 	slip_model.dwork = &slip_rtDW;
 	SlipV1_initialize(&slip_model);
 
@@ -144,8 +128,8 @@ void torque_model_set_data(can_data_t *can_data) {
 
 	rtyaw_rate_Torque = can_data->gyro_z;
 
-	rtTm_rl_Torque = torque_max(can_data);
-	rtTm_rr_Torque = torque_max(can_data);
+	rtTm_rl_Torque = rtTm_rl_SlipV1;
+	rtTm_rr_Torque = rtTm_rr_SlipV1;
 
 	rtu_bar_Torque = u_bar;
 	rtomega_rl_Torque = can_data->omega_rl;
@@ -165,8 +149,8 @@ void slip_model_set_data(can_data_t *can_data) {
 	rtTel_Inp_SC_Kp_SlipV1 = 100.0;
 	rtTel_Inp_SC_LambdaRef_SlipV1 = 0.05;
 	rtTel_Inp_minT_SlipV1 = 20.0;
-	// rtTel_Inp_T0_SlipV1
-	// rtTel_Inp_Vramp_SlipV1
+	rtTel_Inp_UppSatLim_SlipV1 = 70.0;
+	rtTel_Inp_IntegralResetValue_Sl = 0;
 
 	rtyaw_rate_SlipV1 = can_data->gyro_z;
 
@@ -178,30 +162,6 @@ void slip_model_set_data(can_data_t *can_data) {
 	rtomega_rr_SlipV1 = can_data->omega_rr;
 }
 
-void all_model_set_data(can_data_t *can_data) {
-	// AllControl Data
-	rtDriver_req_AllControl = can_data->throttle;
-	rtbrake_AllControl = can_data->brake;
-	rtSteeringangle_AllControl = can_data->steering_angle;
-
-	rtTm_rl_AllControl = torque_max(can_data);
-	rtTm_rr_AllControl = torque_max(can_data);
-	rtmap_sc_AllControl = can_data->map_sc;
-	rtmap_tv_AllControl = can_data->map_tv;
-
-	rtTel_Inp_SC_PeakTorque_AllCont = SLIP_PEAK;
-	rtTel_Inp_SC_SpeedCutoff_AllCon = SLIP_SPEED_CUTOFF;
-	rtTel_Inp_SC_StartTorque_AllCon = SLIP_START_TORQUE;
-	rtTel_Inp_TV_Ki_AllControl = TV_PID_KI;
-	rtTel_Inp_TV_Kp_AllControl = TV_PID_KP;
-	rtTel_Inp_TV_Kus_AllControl = TV_KUF;
-
-	rtomega_rl_AllControl = can_data->omega_rl;
-	rtomega_rr_AllControl = can_data->omega_rr;
-	rtu_bar_AllControl = u_bar;
-	rtyaw_rate_AllControl = can_data->gyro_z;
-}
-
 void can_send_data() {
 	static uint8_t data[8];
 	uint64_t timestamp = get_timestamp_u();
@@ -210,32 +170,10 @@ void can_send_data() {
 	if (timestamp - PRIMARY_INTERVAL_CONTROL_OUTPUT * 1e3 > out_timestamp) {
 		out_timestamp = timestamp;
 
-		real_T t_rl = 0.0;
-		real_T t_rr = 0.0;
-		real_T tm_rl = 0.0;
-		real_T tm_rr = 0.0;
-		switch (CONTROL_MODE) {
-		case CONTROL_SLIP:
-			t_rl = rtTm_rl_a_SlipV1;
-			t_rr = rtTm_rr_m_SlipV1;
-			tm_rl = rtTm_rl_SlipV1;
-			tm_rr = rtTm_rr_SlipV1;
-			break;
-		case CONTROL_TORQUE:
-			t_rl = rtTm_rl_a_Torque;
-			t_rr = rtTm_rr_m_Torque;
-			tm_rl = rtTm_rl_Torque;
-			tm_rr = rtTm_rr_Torque;
-			break;
-		case CONTROL_COMBINED:
-			t_rl = rtTm_rl_a_AllControl;
-			t_rr = rtTm_rr_m_AllControl;
-			tm_rl = rtTm_rl_AllControl;
-			tm_rr = rtTm_rr_AllControl;
-			break;
-		default:
-			break;
-		}
+		real_T t_rl = rtTm_rl_a_Torque;
+		real_T t_rr = rtTm_rr_m_Torque;
+		real_T tmax_rl = rtTm_rl_Torque;
+		real_T tmax_rr = rtTm_rr_Torque;
 
 #if 1 == SIMULATOR
 		static simulator_control_output_converted_t out_src;
@@ -251,8 +189,8 @@ void can_send_data() {
 #else
 		static primary_control_output_converted_t out_src;
 		out_src.estimated_velocity = u_bar;
-		out_src.tmax_l = tm_rl;
-		out_src.tmax_r = tm_rr;
+		out_src.tmax_l = tmax_rl;
+		out_src.tmax_r = tmax_rr;
 		out_src.torque_l = t_rl;
 		out_src.torque_r = t_rr;
 		static primary_control_output_t out_src_raw;
@@ -264,24 +202,8 @@ void can_send_data() {
 
 	if (timestamp - SECONDARY_INTERVAL_CONTROL_STATE * 1e3 > state_timestamp) {
 		state_timestamp = timestamp;
-		real_T map_sc = 0.0;
-		real_T map_tv = 0.0;
-		switch (CONTROL_MODE) {
-		case CONTROL_SLIP:
-			map_sc = rtmap_sc_SlipV1;
-			map_tv = rtmap_tv_SlipV1;
-			break;
-		case CONTROL_TORQUE:
-			map_sc = rtmap_sc_Torque;
-			map_tv = rtmap_tv_Torque;
-			break;
-		case CONTROL_COMBINED:
-			map_sc = rtmap_sc_AllControl;
-			map_tv = rtmap_tv_AllControl;
-			break;
-		default:
-			break;
-		}
+		real_T map_sc = rtmap_sc_SlipV1;
+		real_T map_tv = rtmap_tv_Torque;
 
 #if 1 == SIMULATOR
 		static simulator_control_state_converted_t state_src;
