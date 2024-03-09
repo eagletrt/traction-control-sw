@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Torque'.
  *
- * Model version                  : 6.31
+ * Model version                  : 6.32
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Fri Mar  8 13:28:06 2024
+ * C/C++ source code generated on : Sat Mar  9 12:22:29 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -42,105 +42,16 @@
 /* Forward declaration for rtModel */
 typedef struct tag_RTM_Torque RT_MODEL_Torque;
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_XXZzH7IZw0BprRxUKGpB6E_
-#define DEFINED_TYPEDEF_FOR_struct_XXZzH7IZw0BprRxUKGpB6E_
-
-typedef struct {
-  real_T L;
-  real_T Vlow;
-  real_T Wr;
-  real_T tau_red;
-  real_T eff_red;
-  real_T Rf;
-  real_T Rr;
-  real_T maxTorque;
-  real_T ms;
-  real_T izz;
-  real_T ixz;
-  real_T static_toe_f;
-  real_T static_toe_r;
-  real_T static_camber_f;
-  real_T static_camber_r;
-} struct_XXZzH7IZw0BprRxUKGpB6E;
-
-#endif
-
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
   real_T Integrator_DSTATE;            /* '<S41>/Integrator' */
 } DW_Torque;
-
-/* Parameters (default storage) */
-struct P_Torque_ {
-  struct_XXZzH7IZw0BprRxUKGpB6E controlData;/* Variable: controlData
-                                             * Referenced by:
-                                             *   '<S3>/Delta_T = 2*Nz*r // (Wr*tau_red*eff)'
-                                             *   '<S7>/Constant'
-                                             */
-  real_T DiscreteVaryingPID_InitialCondi;
-                              /* Mask Parameter: DiscreteVaryingPID_InitialCondi
-                               * Referenced by: '<S41>/Integrator'
-                               */
-  real_T DiscreteVaryingPID_LowerIntegra;
-                              /* Mask Parameter: DiscreteVaryingPID_LowerIntegra
-                               * Referenced by: '<S41>/Integrator'
-                               */
-  real_T DiscreteVaryingPID_LowerSaturat;
-                              /* Mask Parameter: DiscreteVaryingPID_LowerSaturat
-                               * Referenced by:
-                               *   '<S48>/Saturation'
-                               *   '<S34>/DeadZone'
-                               */
-  real_T DiscreteVaryingPID_UpperIntegra;
-                              /* Mask Parameter: DiscreteVaryingPID_UpperIntegra
-                               * Referenced by: '<S41>/Integrator'
-                               */
-  real_T DiscreteVaryingPID_UpperSaturat;
-                              /* Mask Parameter: DiscreteVaryingPID_UpperSaturat
-                               * Referenced by:
-                               *   '<S48>/Saturation'
-                               *   '<S34>/DeadZone'
-                               */
-  real_T Steeringangle2deg1_const;   /* Mask Parameter: Steeringangle2deg1_const
-                                      * Referenced by: '<S5>/Constant'
-                                      */
-  real_T Constant1_Value;              /* Expression: 0
-                                        * Referenced by: '<S32>/Constant1'
-                                        */
-  real_T Clamping_zero_Value;          /* Expression: 0
-                                        * Referenced by: '<S32>/Clamping_zero'
-                                        */
-  real_T Integrator_gainval;           /* Computed Parameter: Integrator_gainval
-                                        * Referenced by: '<S41>/Integrator'
-                                        */
-  real_T Constant3_Value;              /* Expression: 0.5
-                                        * Referenced by: '<S1>/Constant3'
-                                        */
-  int8_T Constant_Value;               /* Computed Parameter: Constant_Value
-                                        * Referenced by: '<S32>/Constant'
-                                        */
-  int8_T Constant2_Value;              /* Computed Parameter: Constant2_Value
-                                        * Referenced by: '<S32>/Constant2'
-                                        */
-  int8_T Constant3_Value_f;            /* Computed Parameter: Constant3_Value_f
-                                        * Referenced by: '<S32>/Constant3'
-                                        */
-  int8_T Constant4_Value;              /* Computed Parameter: Constant4_Value
-                                        * Referenced by: '<S32>/Constant4'
-                                        */
-};
-
-/* Parameters (default storage) */
-typedef struct P_Torque_ P_Torque;
 
 /* Real-time Model Data Structure */
 struct tag_RTM_Torque {
   const char_T * volatile errorStatus;
   DW_Torque *dwork;
 };
-
-/* Block parameters (default storage) */
-extern P_Torque rtP_Torque;
 
 /* Model entry point functions */
 extern void Torque_initialize(RT_MODEL_Torque *const rtM_Torque);

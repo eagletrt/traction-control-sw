@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Torque'.
  *
- * Model version                  : 6.31
+ * Model version                  : 6.32
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Fri Mar  8 13:28:06 2024
+ * C/C++ source code generated on : Sat Mar  9 12:22:29 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -97,7 +97,7 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
                       rtb_IProdOut_tmp_1) + rtb_IProdOut_tmp_2 * 0.006788067316)
                     + 0.2179649246 * rtSteeringangle_Torque) - 2.845E-7)) / 2.0 *
     rtu_bar_Torque / (rtu_bar_Torque * rtu_bar_Torque * rtTel_Inp_Kus_Torque +
-                      rtP_Torque.controlData.L) - rtyaw_rate_Torque;
+                      1.53) - rtyaw_rate_Torque;
 
   /* Product: '<S46>/PProd Out' incorporates:
    *  Inport: '<Root>/Tel_Inp_Kp'
@@ -108,12 +108,12 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
   rtb_Delta_T_g = rtb_Saturation + rtDW_Torque->Integrator_DSTATE;
 
   /* DeadZone: '<S34>/DeadZone' */
-  if (rtb_Delta_T_g > rtP_Torque.DiscreteVaryingPID_UpperSaturat) {
-    rtb_Delta_T_g -= rtP_Torque.DiscreteVaryingPID_UpperSaturat;
-  } else if (rtb_Delta_T_g >= rtP_Torque.DiscreteVaryingPID_LowerSaturat) {
+  if (rtb_Delta_T_g > 300.0) {
+    rtb_Delta_T_g -= 300.0;
+  } else if (rtb_Delta_T_g >= -300.0) {
     rtb_Delta_T_g = 0.0;
   } else {
-    rtb_Delta_T_g -= rtP_Torque.DiscreteVaryingPID_LowerSaturat;
+    rtb_Delta_T_g -= -300.0;
   }
 
   /* End of DeadZone: '<S34>/DeadZone' */
@@ -125,8 +125,7 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    *  Product: '<S3>/Product3'
    *  RelationalOperator: '<S5>/Compare'
    */
-  rtb_IProdOut *= rtDriver_req_Torque >= rtP_Torque.Steeringangle2deg1_const ?
-    rtTel_Inp_Ki_Torque : 0.0;
+  rtb_IProdOut *= rtDriver_req_Torque >= 0.01 ? rtTel_Inp_Ki_Torque : 0.0;
 
   /* Switch: '<S32>/Switch1' incorporates:
    *  Constant: '<S32>/Clamping_zero'
@@ -134,10 +133,10 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    *  Constant: '<S32>/Constant2'
    *  RelationalOperator: '<S32>/fix for DT propagation issue'
    */
-  if (rtb_Delta_T_g > rtP_Torque.Clamping_zero_Value) {
-    tmp = rtP_Torque.Constant_Value;
+  if (rtb_Delta_T_g > 0.0) {
+    tmp = 1;
   } else {
-    tmp = rtP_Torque.Constant2_Value;
+    tmp = -1;
   }
 
   /* Switch: '<S32>/Switch2' incorporates:
@@ -146,10 +145,10 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    *  Constant: '<S32>/Constant4'
    *  RelationalOperator: '<S32>/fix for DT propagation issue1'
    */
-  if (rtb_IProdOut > rtP_Torque.Clamping_zero_Value) {
-    tmp_0 = rtP_Torque.Constant3_Value_f;
+  if (rtb_IProdOut > 0.0) {
+    tmp_0 = 1;
   } else {
-    tmp_0 = rtP_Torque.Constant4_Value;
+    tmp_0 = -1;
   }
 
   /* Switch: '<S32>/Switch' incorporates:
@@ -161,35 +160,32 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    *  Switch: '<S32>/Switch1'
    *  Switch: '<S32>/Switch2'
    */
-  if ((rtP_Torque.Clamping_zero_Value != rtb_Delta_T_g) && (tmp == tmp_0)) {
-    rtb_IProdOut = rtP_Torque.Constant1_Value;
+  if ((rtb_Delta_T_g != 0.0) && (tmp == tmp_0)) {
+    rtb_IProdOut = 0.0;
   }
 
   /* End of Switch: '<S32>/Switch' */
 
   /* DiscreteIntegrator: '<S41>/Integrator' */
-  rtb_IProdOut *= rtP_Torque.Integrator_gainval;
+  rtb_Delta_T_g = 0.00025 * rtb_IProdOut + rtDW_Torque->Integrator_DSTATE;
 
   /* DiscreteIntegrator: '<S41>/Integrator' */
-  rtb_Delta_T_g = rtb_IProdOut + rtDW_Torque->Integrator_DSTATE;
-
-  /* DiscreteIntegrator: '<S41>/Integrator' */
-  if (rtb_Delta_T_g > rtP_Torque.DiscreteVaryingPID_UpperIntegra) {
+  if (rtb_Delta_T_g > 20.0) {
     /* DiscreteIntegrator: '<S41>/Integrator' */
-    rtb_Delta_T_g = rtP_Torque.DiscreteVaryingPID_UpperIntegra;
-  } else if (rtb_Delta_T_g < rtP_Torque.DiscreteVaryingPID_LowerIntegra) {
+    rtb_Delta_T_g = 20.0;
+  } else if (rtb_Delta_T_g < -20.0) {
     /* DiscreteIntegrator: '<S41>/Integrator' */
-    rtb_Delta_T_g = rtP_Torque.DiscreteVaryingPID_LowerIntegra;
+    rtb_Delta_T_g = -20.0;
   }
 
   /* Sum: '<S50>/Sum' */
   rtb_Saturation += rtb_Delta_T_g;
 
   /* Saturate: '<S48>/Saturation' */
-  if (rtb_Saturation > rtP_Torque.DiscreteVaryingPID_UpperSaturat) {
-    rtb_Saturation = rtP_Torque.DiscreteVaryingPID_UpperSaturat;
-  } else if (rtb_Saturation < rtP_Torque.DiscreteVaryingPID_LowerSaturat) {
-    rtb_Saturation = rtP_Torque.DiscreteVaryingPID_LowerSaturat;
+  if (rtb_Saturation > 300.0) {
+    rtb_Saturation = 300.0;
+  } else if (rtb_Saturation < -300.0) {
+    rtb_Saturation = -300.0;
   }
 
   /* Product: '<S3>/Product1' incorporates:
@@ -197,9 +193,7 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    *  Inport: '<Root>/map_TV'
    *  Saturate: '<S48>/Saturation'
    */
-  rtb_Saturation = 2.0 * rtP_Torque.controlData.Rr / (rtP_Torque.controlData.Wr *
-    rtP_Torque.controlData.tau_red * rtP_Torque.controlData.eff_red) *
-    rtb_Saturation * rtmap_tv_Torque;
+  rtb_Saturation = 0.080176150557382225 * rtb_Saturation * rtmap_tv_Torque;
 
   /* Product: '<S1>/Product1' incorporates:
    *  Constant: '<S1>/Constant3'
@@ -208,8 +202,7 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
    *  Inport: '<Root>/driver_request'
    *  Sum: '<S1>/Add'
    */
-  rtb_Tm_req = (rtTm_rl_Torque + rtTm_rr_Torque) * rtDriver_req_Torque *
-    rtP_Torque.Constant3_Value;
+  rtb_Tm_req = (rtTm_rl_Torque + rtTm_rr_Torque) * rtDriver_req_Torque * 0.5;
 
   /* MATLAB Function: '<S1>/MATLAB Function' incorporates:
    *  Inport: '<Root>/Tmax_rl_Slip'
@@ -236,14 +229,14 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
   rtTel_Out_Debug_Torque_Torque = rtb_Saturation;
 
   /* Update for DiscreteIntegrator: '<S41>/Integrator' */
-  rtDW_Torque->Integrator_DSTATE = rtb_IProdOut + rtb_Delta_T_g;
-  if (rtDW_Torque->Integrator_DSTATE >
-      rtP_Torque.DiscreteVaryingPID_UpperIntegra) {
-    rtDW_Torque->Integrator_DSTATE = rtP_Torque.DiscreteVaryingPID_UpperIntegra;
-  } else if (rtDW_Torque->Integrator_DSTATE <
-             rtP_Torque.DiscreteVaryingPID_LowerIntegra) {
-    rtDW_Torque->Integrator_DSTATE = rtP_Torque.DiscreteVaryingPID_LowerIntegra;
+  rtDW_Torque->Integrator_DSTATE = 0.00025 * rtb_IProdOut + rtb_Delta_T_g;
+  if (rtDW_Torque->Integrator_DSTATE > 20.0) {
+    rtDW_Torque->Integrator_DSTATE = 20.0;
+  } else if (rtDW_Torque->Integrator_DSTATE < -20.0) {
+    rtDW_Torque->Integrator_DSTATE = -20.0;
   }
+
+  /* End of Update for DiscreteIntegrator: '<S41>/Integrator' */
 }
 
 /* Model initialize function */
@@ -281,7 +274,7 @@ void Torque_initialize(RT_MODEL_Torque *const rtM_Torque)
                 sizeof(DW_Torque));
 
   /* InitializeConditions for DiscreteIntegrator: '<S41>/Integrator' */
-  rtDW_Torque->Integrator_DSTATE = rtP_Torque.DiscreteVaryingPID_InitialCondi;
+  rtDW_Torque->Integrator_DSTATE = 0.0;
 }
 
 /*

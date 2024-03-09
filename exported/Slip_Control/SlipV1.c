@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV1'.
  *
- * Model version                  : 6.31
+ * Model version                  : 6.32
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Fri Mar  8 13:25:54 2024
+ * C/C++ source code generated on : Sat Mar  9 12:19:17 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -68,41 +68,35 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
 {
   DW_SlipV1 *rtDW_SlipV1 = rtM_SlipV1->dwork;
   real_T DiscreteTimeIntegrator1;
-  real_T DiscreteTimeIntegrator1_tmp;
   real_T Vmax;
-  real_T rtb_Product;
+  real_T rtb_Add_d;
+  real_T rtb_Product_d;
   real_T rtb_Product_ik;
   real_T rtb_Rr;
-  real_T rtb_Rr_j;
-  real_T rtb_error;
+  real_T rtb_Switch2_g;
   real_T rtb_vms;
+  real_T rtb_vms_h;
 
   /* Gain: '<S3>/Rr' incorporates:
    *  Inport: '<Root>/omega_rr'
    */
-  rtb_Rr = rtP_SlipV1.controlData.Rr * rtomega_rr_SlipV1;
-
-  /* Gain: '<S3>/Wr//2' incorporates:
-   *  Gain: '<S2>/Wr//2'
-   *  Inport: '<Root>/Omega'
-   */
-  rtb_error = rtP_SlipV1.controlData.Wr / 2.0 * rtyaw_rate_SlipV1;
+  rtb_Rr = 0.203 * rtomega_rr_SlipV1;
 
   /* Sum: '<S3>/Add2' incorporates:
    *  Gain: '<S3>/Wr//2'
+   *  Inport: '<Root>/Omega'
    *  Inport: '<Root>/u_bar'
    */
-  rtb_vms = rtb_error + rtu_bar_SlipV1;
+  rtb_vms = 0.605 * rtyaw_rate_SlipV1 + rtu_bar_SlipV1;
 
   /* MATLAB Function: '<S3>/Slip_est1' incorporates:
    *  Constant: '<S3>/Constant'
    */
   Vmax = fmax(fabs(rtb_vms), fabs(rtb_Rr));
-  if (Vmax > rtP_SlipV1.controlData.Vlow) {
+  if (Vmax > 1.0) {
     rtb_Rr = fabs((rtb_vms - rtb_Rr) / Vmax);
   } else {
-    rtb_Rr = fabs((rtb_vms - rtb_Rr) * 2.0 / (Vmax * Vmax /
-      rtP_SlipV1.controlData.Vlow + rtP_SlipV1.controlData.Vlow));
+    rtb_Rr = fabs((rtb_vms - rtb_Rr) * 2.0 / (Vmax * Vmax + 1.0));
   }
 
   /* End of MATLAB Function: '<S3>/Slip_est1' */
@@ -110,7 +104,12 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
   /* Sum: '<S3>/Add1' incorporates:
    *  Inport: '<Root>/Tel_Inp_SC_LambdaRef'
    */
-  rtb_Rr = rtTel_Inp_SC_LambdaRef_SlipV1 - rtb_Rr;
+  rtb_Switch2_g = rtTel_Inp_SC_LambdaRef_SlipV1 - rtb_Rr;
+
+  /* Product: '<S18>/Product1' incorporates:
+   *  Inport: '<Root>/Tel_Inp_SC_Ki'
+   */
+  rtb_Rr = rtb_Switch2_g * rtTel_Inp_SC_Ki_SlipV1;
 
   /* Product: '<S3>/Product' incorporates:
    *  Inport: '<Root>/Tmax_rr'
@@ -123,20 +122,13 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    */
   rtb_vms = rtb_Product_ik - rtTel_Inp_minT_SlipV1;
 
-  /* DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_Ki'
-   *  Product: '<S18>/Product1'
-   */
+  /* DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
   if ((rtb_vms > 0.0) && (rtDW_SlipV1->DiscreteTimeIntegrator1_PrevRes <= 0)) {
-    rtDW_SlipV1->DiscreteTimeIntegrator1_DSTATE =
-      rtP_SlipV1.DiscreteTimeIntegrator1_IC;
+    rtDW_SlipV1->DiscreteTimeIntegrator1_DSTATE = 0.0;
   }
 
-  DiscreteTimeIntegrator1_tmp = rtb_Rr * rtTel_Inp_SC_Ki_SlipV1 *
-    rtP_SlipV1.DiscreteTimeIntegrator1_gainval;
-
   /* DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
-  DiscreteTimeIntegrator1 = DiscreteTimeIntegrator1_tmp +
+  DiscreteTimeIntegrator1 = 0.00025 * rtb_Rr +
     rtDW_SlipV1->DiscreteTimeIntegrator1_DSTATE;
 
   /* Sum: '<S18>/Add' incorporates:
@@ -145,8 +137,8 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    *  Product: '<S18>/Product'
    *  RelationalOperator: '<S21>/Compare'
    */
-  Vmax = (rtb_vms > rtP_SlipV1.Constant_Value_h ?
-          rtTel_Inp_IntegralResetValue_Sl : 0.0) + DiscreteTimeIntegrator1;
+  rtb_Add_d = (rtb_vms > 0.0 ? rtTel_Inp_IntegralResetValue_Sl : 0.0) +
+    DiscreteTimeIntegrator1;
 
   /* Switch: '<S20>/Switch2' incorporates:
    *  Constant: '<S3>/Constant3'
@@ -155,13 +147,13 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    *  RelationalOperator: '<S20>/UpperRelop'
    *  Switch: '<S20>/Switch'
    */
-  if (Vmax > rtTel_Inp_UppSatLim_SlipV1) {
-    Vmax = rtTel_Inp_UppSatLim_SlipV1;
-  } else if (Vmax < rtP_SlipV1.Constant3_Value_h) {
+  if (rtb_Add_d > rtTel_Inp_UppSatLim_SlipV1) {
+    rtb_Add_d = rtTel_Inp_UppSatLim_SlipV1;
+  } else if (rtb_Add_d < -70.0) {
     /* Switch: '<S20>/Switch' incorporates:
      *  Constant: '<S3>/Constant3'
      */
-    Vmax = rtP_SlipV1.Constant3_Value_h;
+    rtb_Add_d = -70.0;
   }
 
   /* Sum: '<S13>/Sum2' incorporates:
@@ -169,7 +161,7 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    *  Product: '<S19>/Product'
    *  Switch: '<S20>/Switch2'
    */
-  rtb_Product = rtb_Rr * rtTel_Inp_SC_Kp_SlipV1 + Vmax;
+  Vmax = rtb_Switch2_g * rtTel_Inp_SC_Kp_SlipV1 + rtb_Add_d;
 
   /* Switch: '<S15>/Switch2' incorporates:
    *  Inport: '<Root>/Tel_Inp_minT'
@@ -178,13 +170,13 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    *  RelationalOperator: '<S15>/UpperRelop'
    *  Switch: '<S15>/Switch'
    */
-  if (rtb_Product > rtTm_rr_SlipV1) {
-    rtb_Product = rtTm_rr_SlipV1;
-  } else if (rtb_Product < rtTel_Inp_minT_SlipV1) {
+  if (Vmax > rtTm_rr_SlipV1) {
+    Vmax = rtTm_rr_SlipV1;
+  } else if (Vmax < rtTel_Inp_minT_SlipV1) {
     /* Switch: '<S15>/Switch' incorporates:
      *  Inport: '<Root>/Tel_Inp_minT'
      */
-    rtb_Product = rtTel_Inp_minT_SlipV1;
+    Vmax = rtTel_Inp_minT_SlipV1;
   }
 
   /* End of Switch: '<S15>/Switch2' */
@@ -194,7 +186,7 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    *  Inport: '<Root>/map_sc'
    *  Outport: '<Root>/Tmax_rr_slip'
    */
-  map(rtb_Product, rtTm_rr_SlipV1, rtmap_sc_SlipV1, &rtTmax_rr_slip_SlipV1);
+  map(Vmax, rtTm_rr_SlipV1, rtmap_sc_SlipV1, &rtTmax_rr_slip_SlipV1);
 
   /* Switch: '<S14>/Switch2' incorporates:
    *  Constant: '<S3>/Constant2'
@@ -206,12 +198,12 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
   if (rtb_Product_ik > rtTmax_rr_slip_SlipV1) {
     /* Outport: '<Root>/Tm_rr' */
     rtTm_rr_m_SlipV1 = rtTmax_rr_slip_SlipV1;
-  } else if (rtb_Product_ik < rtP_SlipV1.Constant2_Value_l) {
+  } else if (rtb_Product_ik < 0.0) {
     /* Switch: '<S14>/Switch' incorporates:
      *  Constant: '<S3>/Constant2'
      *  Outport: '<Root>/Tm_rr'
      */
-    rtTm_rr_m_SlipV1 = rtP_SlipV1.Constant2_Value_l;
+    rtTm_rr_m_SlipV1 = 0.0;
   } else {
     /* Outport: '<Root>/Tm_rr' incorporates:
      *  Switch: '<S14>/Switch'
@@ -227,30 +219,26 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    */
   rtb_Product_ik = rtDriver_req_SlipV1 * rtTm_rl_SlipV1;
 
-  /* Sum: '<S2>/Add' incorporates:
-   *  Inport: '<Root>/Tel_Inp_minT'
-   */
-  rtb_Product = rtb_Product_ik - rtTel_Inp_minT_SlipV1;
-
   /* Gain: '<S2>/Rr' incorporates:
    *  Inport: '<Root>/omega_rl'
    */
-  rtb_Rr_j = rtP_SlipV1.controlData.Rr * rtomega_rl_SlipV1;
+  rtb_Add_d = 0.203 * rtomega_rl_SlipV1;
 
   /* Sum: '<S2>/Add2' incorporates:
+   *  Gain: '<S2>/Wr//2'
+   *  Inport: '<Root>/Omega'
    *  Inport: '<Root>/u_bar'
    */
-  rtb_Rr = rtu_bar_SlipV1 - rtb_error;
+  rtb_vms_h = rtu_bar_SlipV1 - 0.605 * rtyaw_rate_SlipV1;
 
   /* MATLAB Function: '<S2>/Slip_est1' incorporates:
    *  Constant: '<S2>/Constant'
    */
-  Vmax = fmax(fabs(rtb_Rr), fabs(rtb_Rr_j));
-  if (Vmax > rtP_SlipV1.controlData.Vlow) {
-    Vmax = fabs((rtb_Rr - rtb_Rr_j) / Vmax);
+  Vmax = fmax(fabs(rtb_vms_h), fabs(rtb_Add_d));
+  if (Vmax > 1.0) {
+    Vmax = fabs((rtb_vms_h - rtb_Add_d) / Vmax);
   } else {
-    Vmax = fabs((rtb_Rr - rtb_Rr_j) * 2.0 / (Vmax * Vmax /
-      rtP_SlipV1.controlData.Vlow + rtP_SlipV1.controlData.Vlow));
+    Vmax = fabs((rtb_vms_h - rtb_Add_d) * 2.0 / (Vmax * Vmax + 1.0));
   }
 
   /* End of MATLAB Function: '<S2>/Slip_est1' */
@@ -258,23 +246,31 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
   /* Sum: '<S2>/Add1' incorporates:
    *  Inport: '<Root>/Tel_Inp_SC_LambdaRef'
    */
-  rtb_error = rtTel_Inp_SC_LambdaRef_SlipV1 - Vmax;
+  rtb_Switch2_g = rtTel_Inp_SC_LambdaRef_SlipV1 - Vmax;
 
-  /* DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_Ki'
-   *  Product: '<S9>/Product1'
+  /* Product: '<S10>/Product' incorporates:
+   *  Inport: '<Root>/Tel_Inp_SC_Kp'
    */
-  if ((rtb_Product > 0.0) && (rtDW_SlipV1->DiscreteTimeIntegrator1_PrevR_k <= 0))
-  {
-    rtDW_SlipV1->DiscreteTimeIntegrator1_DSTAT_g =
-      rtP_SlipV1.DiscreteTimeIntegrator1_IC_o;
-  }
+  rtb_Product_d = rtb_Switch2_g * rtTel_Inp_SC_Kp_SlipV1;
 
-  Vmax = rtb_error * rtTel_Inp_SC_Ki_SlipV1 *
-    rtP_SlipV1.DiscreteTimeIntegrator1_gainv_l;
+  /* Product: '<S9>/Product1' incorporates:
+   *  Inport: '<Root>/Tel_Inp_SC_Ki'
+   */
+  Vmax = rtb_Switch2_g * rtTel_Inp_SC_Ki_SlipV1;
+
+  /* Sum: '<S2>/Add' incorporates:
+   *  Inport: '<Root>/Tel_Inp_minT'
+   */
+  rtb_Add_d = rtb_Product_ik - rtTel_Inp_minT_SlipV1;
 
   /* DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
-  rtb_Rr_j = Vmax + rtDW_SlipV1->DiscreteTimeIntegrator1_DSTAT_g;
+  if ((rtb_Add_d > 0.0) && (rtDW_SlipV1->DiscreteTimeIntegrator1_PrevR_k <= 0))
+  {
+    rtDW_SlipV1->DiscreteTimeIntegrator1_DSTAT_g = 0.0;
+  }
+
+  /* DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
+  rtb_vms_h = 0.00025 * Vmax + rtDW_SlipV1->DiscreteTimeIntegrator1_DSTAT_g;
 
   /* Sum: '<S9>/Add' incorporates:
    *  Constant: '<S12>/Constant'
@@ -282,8 +278,8 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    *  Product: '<S9>/Product'
    *  RelationalOperator: '<S12>/Compare'
    */
-  rtb_Rr = (rtb_Product > rtP_SlipV1.Constant_Value ?
-            rtTel_Inp_IntegralResetValue_Sl : 0.0) + rtb_Rr_j;
+  rtb_Switch2_g = (rtb_Add_d > 0.0 ? rtTel_Inp_IntegralResetValue_Sl : 0.0) +
+    rtb_vms_h;
 
   /* Switch: '<S11>/Switch2' incorporates:
    *  Constant: '<S2>/Constant3'
@@ -292,22 +288,19 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    *  RelationalOperator: '<S11>/UpperRelop'
    *  Switch: '<S11>/Switch'
    */
-  if (rtb_Rr > rtTel_Inp_UppSatLim_SlipV1) {
-    rtb_Rr = rtTel_Inp_UppSatLim_SlipV1;
-  } else if (rtb_Rr < rtP_SlipV1.Constant3_Value) {
+  if (rtb_Switch2_g > rtTel_Inp_UppSatLim_SlipV1) {
+    rtb_Switch2_g = rtTel_Inp_UppSatLim_SlipV1;
+  } else if (rtb_Switch2_g < -70.0) {
     /* Switch: '<S11>/Switch' incorporates:
      *  Constant: '<S2>/Constant3'
      */
-    rtb_Rr = rtP_SlipV1.Constant3_Value;
+    rtb_Switch2_g = -70.0;
   }
 
   /* End of Switch: '<S11>/Switch2' */
 
-  /* Sum: '<S4>/Sum2' incorporates:
-   *  Inport: '<Root>/Tel_Inp_SC_Kp'
-   *  Product: '<S10>/Product'
-   */
-  rtb_Rr += rtb_error * rtTel_Inp_SC_Kp_SlipV1;
+  /* Sum: '<S4>/Sum2' */
+  rtb_Switch2_g += rtb_Product_d;
 
   /* Switch: '<S6>/Switch2' incorporates:
    *  Inport: '<Root>/Tel_Inp_minT'
@@ -316,13 +309,13 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    *  RelationalOperator: '<S6>/UpperRelop'
    *  Switch: '<S6>/Switch'
    */
-  if (rtb_Rr > rtTm_rl_SlipV1) {
-    rtb_Rr = rtTm_rl_SlipV1;
-  } else if (rtb_Rr < rtTel_Inp_minT_SlipV1) {
+  if (rtb_Switch2_g > rtTm_rl_SlipV1) {
+    rtb_Switch2_g = rtTm_rl_SlipV1;
+  } else if (rtb_Switch2_g < rtTel_Inp_minT_SlipV1) {
     /* Switch: '<S6>/Switch' incorporates:
      *  Inport: '<Root>/Tel_Inp_minT'
      */
-    rtb_Rr = rtTel_Inp_minT_SlipV1;
+    rtb_Switch2_g = rtTel_Inp_minT_SlipV1;
   }
 
   /* End of Switch: '<S6>/Switch2' */
@@ -332,7 +325,7 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
    *  Inport: '<Root>/map_sc'
    *  Outport: '<Root>/Tmax_rl_slip'
    */
-  map(rtb_Rr, rtTm_rl_SlipV1, rtmap_sc_SlipV1, &rtTmax_rl_slip_SlipV1);
+  map(rtb_Switch2_g, rtTm_rl_SlipV1, rtmap_sc_SlipV1, &rtTmax_rl_slip_SlipV1);
 
   /* Switch: '<S5>/Switch2' incorporates:
    *  Constant: '<S2>/Constant2'
@@ -344,12 +337,12 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
   if (rtb_Product_ik > rtTmax_rl_slip_SlipV1) {
     /* Outport: '<Root>/Tm_rl' */
     rtTm_rl_a_SlipV1 = rtTmax_rl_slip_SlipV1;
-  } else if (rtb_Product_ik < rtP_SlipV1.Constant2_Value) {
+  } else if (rtb_Product_ik < 0.0) {
     /* Switch: '<S5>/Switch' incorporates:
      *  Constant: '<S2>/Constant2'
      *  Outport: '<Root>/Tm_rl'
      */
-    rtTm_rl_a_SlipV1 = rtP_SlipV1.Constant2_Value;
+    rtTm_rl_a_SlipV1 = 0.0;
   } else {
     /* Outport: '<Root>/Tm_rl' incorporates:
      *  Switch: '<S5>/Switch'
@@ -359,13 +352,8 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
 
   /* End of Switch: '<S5>/Switch2' */
 
-  /* Outport: '<Root>/Tel_Out_Debug_Torque' incorporates:
-   *  Constant: '<S3>/Constant4'
-   */
-  rtTel_Out_Debug_Torque_SlipV1 = rtP_SlipV1.Constant4_Value;
-
   /* Update for DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
-  rtDW_SlipV1->DiscreteTimeIntegrator1_DSTATE = DiscreteTimeIntegrator1_tmp +
+  rtDW_SlipV1->DiscreteTimeIntegrator1_DSTATE = 0.00025 * rtb_Rr +
     DiscreteTimeIntegrator1;
   if (rtb_vms > 0.0) {
     rtDW_SlipV1->DiscreteTimeIntegrator1_PrevRes = 1;
@@ -377,17 +365,21 @@ void SlipV1_step(RT_MODEL_SlipV1 *const rtM_SlipV1)
     rtDW_SlipV1->DiscreteTimeIntegrator1_PrevRes = 2;
   }
 
+  /* End of Update for DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
+
   /* Update for DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
-  rtDW_SlipV1->DiscreteTimeIntegrator1_DSTAT_g = Vmax + rtb_Rr_j;
-  if (rtb_Product > 0.0) {
+  rtDW_SlipV1->DiscreteTimeIntegrator1_DSTAT_g = 0.00025 * Vmax + rtb_vms_h;
+  if (rtb_Add_d > 0.0) {
     rtDW_SlipV1->DiscreteTimeIntegrator1_PrevR_k = 1;
-  } else if (rtb_Product < 0.0) {
+  } else if (rtb_Add_d < 0.0) {
     rtDW_SlipV1->DiscreteTimeIntegrator1_PrevR_k = -1;
-  } else if (rtb_Product == 0.0) {
+  } else if (rtb_Add_d == 0.0) {
     rtDW_SlipV1->DiscreteTimeIntegrator1_PrevR_k = 0;
   } else {
     rtDW_SlipV1->DiscreteTimeIntegrator1_PrevR_k = 2;
   }
+
+  /* End of Update for DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
 }
 
 /* Model initialize function */
@@ -428,14 +420,15 @@ void SlipV1_initialize(RT_MODEL_SlipV1 *const rtM_SlipV1)
                 sizeof(DW_SlipV1));
 
   /* InitializeConditions for DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
-  rtDW_SlipV1->DiscreteTimeIntegrator1_DSTATE =
-    rtP_SlipV1.DiscreteTimeIntegrator1_IC;
   rtDW_SlipV1->DiscreteTimeIntegrator1_PrevRes = 2;
 
   /* InitializeConditions for DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
-  rtDW_SlipV1->DiscreteTimeIntegrator1_DSTAT_g =
-    rtP_SlipV1.DiscreteTimeIntegrator1_IC_o;
   rtDW_SlipV1->DiscreteTimeIntegrator1_PrevR_k = 2;
+
+  /* ConstCode for Outport: '<Root>/Tel_Out_Debug_Torque' incorporates:
+   *  Constant: '<S3>/Constant4'
+   */
+  rtTel_Out_Debug_Torque_SlipV1 = 0.0;
 }
 
 /*

@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SlipV1'.
  *
- * Model version                  : 6.31
+ * Model version                  : 6.32
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Fri Mar  8 13:25:54 2024
+ * C/C++ source code generated on : Sat Mar  9 12:19:17 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -42,29 +42,6 @@
 /* Forward declaration for rtModel */
 typedef struct tag_RTM_SlipV1 RT_MODEL_SlipV1;
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_XXZzH7IZw0BprRxUKGpB6E_
-#define DEFINED_TYPEDEF_FOR_struct_XXZzH7IZw0BprRxUKGpB6E_
-
-typedef struct {
-  real_T L;
-  real_T Vlow;
-  real_T Wr;
-  real_T tau_red;
-  real_T eff_red;
-  real_T Rf;
-  real_T Rr;
-  real_T maxTorque;
-  real_T ms;
-  real_T izz;
-  real_T ixz;
-  real_T static_toe_f;
-  real_T static_toe_r;
-  real_T static_camber_f;
-  real_T static_camber_r;
-} struct_XXZzH7IZw0BprRxUKGpB6E;
-
-#endif
-
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
   real_T DiscreteTimeIntegrator1_DSTATE;/* '<S18>/Discrete-Time Integrator1' */
@@ -73,65 +50,11 @@ typedef struct {
   int8_T DiscreteTimeIntegrator1_PrevR_k;/* '<S9>/Discrete-Time Integrator1' */
 } DW_SlipV1;
 
-/* Parameters (default storage) */
-struct P_SlipV1_ {
-  struct_XXZzH7IZw0BprRxUKGpB6E controlData;/* Variable: controlData
-                                             * Referenced by:
-                                             *   '<S2>/Constant'
-                                             *   '<S2>/Rr'
-                                             *   '<S2>/Wr//2'
-                                             *   '<S3>/Constant'
-                                             *   '<S3>/Rr'
-                                             *   '<S3>/Wr//2'
-                                             */
-  real_T Constant3_Value;              /* Expression: -70
-                                        * Referenced by: '<S2>/Constant3'
-                                        */
-  real_T Constant2_Value;              /* Expression: 0
-                                        * Referenced by: '<S2>/Constant2'
-                                        */
-  real_T Constant3_Value_h;            /* Expression: -70
-                                        * Referenced by: '<S3>/Constant3'
-                                        */
-  real_T Constant2_Value_l;            /* Expression: 0
-                                        * Referenced by: '<S3>/Constant2'
-                                        */
-  real_T Constant_Value;               /* Expression: 0
-                                        * Referenced by: '<S12>/Constant'
-                                        */
-  real_T Constant_Value_h;             /* Expression: 0
-                                        * Referenced by: '<S21>/Constant'
-                                        */
-  real_T DiscreteTimeIntegrator1_gainval;
-                          /* Computed Parameter: DiscreteTimeIntegrator1_gainval
-                           * Referenced by: '<S18>/Discrete-Time Integrator1'
-                           */
-  real_T DiscreteTimeIntegrator1_IC;   /* Expression: 0
-                                        * Referenced by: '<S18>/Discrete-Time Integrator1'
-                                        */
-  real_T DiscreteTimeIntegrator1_gainv_l;
-                          /* Computed Parameter: DiscreteTimeIntegrator1_gainv_l
-                           * Referenced by: '<S9>/Discrete-Time Integrator1'
-                           */
-  real_T DiscreteTimeIntegrator1_IC_o; /* Expression: 0
-                                        * Referenced by: '<S9>/Discrete-Time Integrator1'
-                                        */
-  real_T Constant4_Value;              /* Expression: 0
-                                        * Referenced by: '<S3>/Constant4'
-                                        */
-};
-
-/* Parameters (default storage) */
-typedef struct P_SlipV1_ P_SlipV1;
-
 /* Real-time Model Data Structure */
 struct tag_RTM_SlipV1 {
   const char_T * volatile errorStatus;
   DW_SlipV1 *dwork;
 };
-
-/* Block parameters (default storage) */
-extern P_SlipV1 rtP_SlipV1;
 
 /* Model entry point functions */
 extern void SlipV1_initialize(RT_MODEL_SlipV1 *const rtM_SlipV1);
