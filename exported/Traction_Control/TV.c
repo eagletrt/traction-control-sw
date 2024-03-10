@@ -3,13 +3,13 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * File: Torque.c
+ * File: TV.c
  *
- * Code generated for Simulink model 'Torque'.
+ * Code generated for Simulink model 'TV'.
  *
- * Model version                  : 6.32
+ * Model version                  : 6.35
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Mar  9 12:22:29 2024
+ * C/C++ source code generated on : Sun Mar 10 15:17:09 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -19,37 +19,33 @@
  * Validation result: Not run
  */
 
-#include "Torque.h"
+#include "TV.h"
 #include <math.h>
 #include "rtwtypes.h"
 
 /* Exported data definition */
 
 /* Data with Exported storage */
-real_T rtDriver_req_Torque;            /* '<Root>/driver_request' */
-real_T rtSteeringangle_Torque;         /* '<Root>/delta' */
-real_T rtTel_Inp_Ki_Torque;            /* '<Root>/Tel_Inp_Ki' */
-real_T rtTel_Inp_Kp_Torque;            /* '<Root>/Tel_Inp_Kp' */
-real_T rtTel_Inp_Kus_Torque;           /* '<Root>/Tel_Inp_Kus' */
-real_T rtTel_Out_Debug_Torque_Torque;  /* '<Root>/Tel_Out_Debug_Torque' */
-real_T rtTm_rl_Torque;                 /* '<Root>/Tmax_rl' */
-real_T rtTm_rl_a_Torque;               /* '<Root>/Tm_rl' */
-real_T rtTm_rr_Torque;                 /* '<Root>/Tmax_rr' */
-real_T rtTm_rr_m_Torque;               /* '<Root>/Tm_rr' */
-real_T rtbrake_Torque;                 /* '<Root>/Brake' */
-real_T rtlambda_rr_Torque;             /* '<Root>/Tmax_rr_Slip' */
-real_T rtlambda_rr_n_Torque;           /* '<Root>/Tmax_rl_Slip' */
-real_T rtmap_sc_Torque;                /* '<Root>/map_sc' */
-real_T rtmap_tv_Torque;                /* '<Root>/map_TV' */
-real_T rtomega_rl_Torque;              /* '<Root>/omega_rl' */
-real_T rtomega_rr_Torque;              /* '<Root>/omega_rr' */
-real_T rtu_bar_Torque;                 /* '<Root>/u_bar' */
-real_T rtyaw_rate_Torque;              /* '<Root>/Omega' */
+real_T TV_Driver_req;                  /* '<Root>/Inp_driver_request' */
+real_T TV_Inp_Ki;                      /* '<Root>/Inp_Ki' */
+real_T TV_Inp_Kp;                      /* '<Root>/Inp_Kp' */
+real_T TV_Inp_Kus;                     /* '<Root>/Inp_Kus' */
+real_T TV_Out_Debug_Torque;            /* '<Root>/Out_Debug_Torque' */
+real_T TV_Out_Tm_rl;                   /* '<Root>/Out_Tm_rl' */
+real_T TV_Out_Tm_rr;                   /* '<Root>/Out_Tm_rr' */
+real_T TV_Steeringangle;               /* '<Root>/Inp_delta' */
+real_T TV_Tm_rl;                       /* '<Root>/Inp_Tmax_rl' */
+real_T TV_Tm_rr;                       /* '<Root>/Inp_Tmax_rr' */
+real_T TV_lambda_rr;                   /* '<Root>/Inp_Tmax_rr_Slip' */
+real_T TV_lambda_rr_n;                 /* '<Root>/Inp_Tmax_rl_Slip' */
+real_T TV_map_tv;                      /* '<Root>/Inp_map_TV' */
+real_T TV_u_bar;                       /* '<Root>/Inp_u_bar' */
+real_T TV_yaw_rate;                    /* '<Root>/Inp_Omega' */
 
 /* Model step function */
-void Torque_step(RT_MODEL_Torque *const rtM_Torque)
+void TV_step(RT_MODEL_TV *const TV_M)
 {
-  DW_Torque *rtDW_Torque = rtM_Torque->dwork;
+  DW_TV *TV_DW = TV_M->dwork;
   real_T coeff;
   real_T rtb_Delta_T_g;
   real_T rtb_IProdOut;
@@ -63,24 +59,24 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
   int8_T tmp_0;
 
   /* MATLAB Function: '<S3>/SteeringModel' incorporates:
-   *  Inport: '<Root>/delta'
+   *  Inport: '<Root>/Inp_delta'
    */
-  rtb_IProdOut = pow(rtSteeringangle_Torque, 10.0);
-  rtb_Delta_T_g = pow(rtSteeringangle_Torque, 9.0);
-  rtb_Saturation = pow(rtSteeringangle_Torque, 8.0);
-  rtb_IProdOut_tmp = pow(rtSteeringangle_Torque, 7.0);
-  rtb_Tm_req = pow(rtSteeringangle_Torque, 6.0);
-  coeff = pow(rtSteeringangle_Torque, 5.0);
-  rtb_IProdOut_tmp_0 = pow(rtSteeringangle_Torque, 4.0);
-  rtb_IProdOut_tmp_1 = pow(rtSteeringangle_Torque, 3.0);
-  rtb_IProdOut_tmp_2 = rtSteeringangle_Torque * rtSteeringangle_Torque;
+  rtb_IProdOut = pow(TV_Steeringangle, 10.0);
+  rtb_Delta_T_g = pow(TV_Steeringangle, 9.0);
+  rtb_Saturation = pow(TV_Steeringangle, 8.0);
+  rtb_IProdOut_tmp = pow(TV_Steeringangle, 7.0);
+  rtb_Tm_req = pow(TV_Steeringangle, 6.0);
+  coeff = pow(TV_Steeringangle, 5.0);
+  rtb_IProdOut_tmp_0 = pow(TV_Steeringangle, 4.0);
+  rtb_IProdOut_tmp_1 = pow(TV_Steeringangle, 3.0);
+  rtb_IProdOut_tmp_2 = TV_Steeringangle * TV_Steeringangle;
 
   /* Sum: '<S3>/Sum1' incorporates:
    *  Constant: '<S7>/Constant'
-   *  Inport: '<Root>/Omega'
-   *  Inport: '<Root>/Tel_Inp_Kus'
-   *  Inport: '<Root>/delta'
-   *  Inport: '<Root>/u_bar'
+   *  Inport: '<Root>/Inp_Kus'
+   *  Inport: '<Root>/Inp_Omega'
+   *  Inport: '<Root>/Inp_delta'
+   *  Inport: '<Root>/Inp_u_bar'
    *  MATLAB Function: '<S3>/SteeringModel'
    *  MATLAB Function: '<S7>/Yaw-Rate'
    */
@@ -89,23 +85,22 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
     rtb_IProdOut_tmp) - 8.483242635E-6 * rtb_Tm_req) + 5.3472838E-5 * coeff) -
                        0.0002074730388 * rtb_IProdOut_tmp_0) + 0.001981845031 *
                       rtb_IProdOut_tmp_1) - rtb_IProdOut_tmp_2 * 0.006788067431)
-                    + 0.217964925 * rtSteeringangle_Torque) + 2.836E-7) +
+                    + 0.217964925 * TV_Steeringangle) + 2.836E-7) +
                   ((((((((((3.534215197E-8 * rtb_IProdOut + 1.618025757E-7 *
     rtb_Delta_T_g) + 3.167586246E-7 * rtb_Saturation) + 1.704975313E-6 *
     rtb_IProdOut_tmp) + 8.483283483E-6 * rtb_Tm_req) + 5.347236085E-5 * coeff) +
                        0.0002074729834 * rtb_IProdOut_tmp_0) + 0.001981845682 *
                       rtb_IProdOut_tmp_1) + rtb_IProdOut_tmp_2 * 0.006788067316)
-                    + 0.2179649246 * rtSteeringangle_Torque) - 2.845E-7)) / 2.0 *
-    rtu_bar_Torque / (rtu_bar_Torque * rtu_bar_Torque * rtTel_Inp_Kus_Torque +
-                      1.53) - rtyaw_rate_Torque;
+                    + 0.2179649246 * TV_Steeringangle) - 2.845E-7)) / 2.0 *
+    TV_u_bar / (TV_u_bar * TV_u_bar * TV_Inp_Kus + 1.53) - TV_yaw_rate;
 
   /* Product: '<S46>/PProd Out' incorporates:
-   *  Inport: '<Root>/Tel_Inp_Kp'
+   *  Inport: '<Root>/Inp_Kp'
    */
-  rtb_Saturation = rtb_IProdOut * rtTel_Inp_Kp_Torque;
+  rtb_Saturation = rtb_IProdOut * TV_Inp_Kp;
 
   /* Sum: '<S51>/Sum Fdbk' */
-  rtb_Delta_T_g = rtb_Saturation + rtDW_Torque->Integrator_DSTATE;
+  rtb_Delta_T_g = rtb_Saturation + TV_DW->Integrator_DSTATE;
 
   /* DeadZone: '<S34>/DeadZone' */
   if (rtb_Delta_T_g > 300.0) {
@@ -120,12 +115,12 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
 
   /* Product: '<S38>/IProd Out' incorporates:
    *  Constant: '<S5>/Constant'
-   *  Inport: '<Root>/Tel_Inp_Ki'
-   *  Inport: '<Root>/driver_request'
+   *  Inport: '<Root>/Inp_Ki'
+   *  Inport: '<Root>/Inp_driver_request'
    *  Product: '<S3>/Product3'
    *  RelationalOperator: '<S5>/Compare'
    */
-  rtb_IProdOut *= rtDriver_req_Torque >= 0.01 ? rtTel_Inp_Ki_Torque : 0.0;
+  rtb_IProdOut *= TV_Driver_req >= 0.01 ? TV_Inp_Ki : 0.0;
 
   /* Switch: '<S32>/Switch1' incorporates:
    *  Constant: '<S32>/Clamping_zero'
@@ -167,7 +162,7 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
   /* End of Switch: '<S32>/Switch' */
 
   /* DiscreteIntegrator: '<S41>/Integrator' */
-  rtb_Delta_T_g = 0.00025 * rtb_IProdOut + rtDW_Torque->Integrator_DSTATE;
+  rtb_Delta_T_g = 0.00025 * rtb_IProdOut + TV_DW->Integrator_DSTATE;
 
   /* DiscreteIntegrator: '<S41>/Integrator' */
   if (rtb_Delta_T_g > 20.0) {
@@ -190,91 +185,87 @@ void Torque_step(RT_MODEL_Torque *const rtM_Torque)
 
   /* Product: '<S3>/Product1' incorporates:
    *  Gain: '<S3>/Delta_T = 2*Nz*r // (Wr*tau_red*eff)'
-   *  Inport: '<Root>/map_TV'
+   *  Inport: '<Root>/Inp_map_TV'
    *  Saturate: '<S48>/Saturation'
    */
-  rtb_Saturation = 0.080176150557382225 * rtb_Saturation * rtmap_tv_Torque;
+  rtb_Saturation = 0.080176150557382225 * rtb_Saturation * TV_map_tv;
 
   /* Product: '<S1>/Product1' incorporates:
    *  Constant: '<S1>/Constant3'
-   *  Inport: '<Root>/Tmax_rl'
-   *  Inport: '<Root>/Tmax_rr'
-   *  Inport: '<Root>/driver_request'
+   *  Inport: '<Root>/Inp_Tmax_rl'
+   *  Inport: '<Root>/Inp_Tmax_rr'
+   *  Inport: '<Root>/Inp_driver_request'
    *  Sum: '<S1>/Add'
    */
-  rtb_Tm_req = (rtTm_rl_Torque + rtTm_rr_Torque) * rtDriver_req_Torque * 0.5;
+  rtb_Tm_req = (TV_Tm_rl + TV_Tm_rr) * TV_Driver_req * 0.5;
 
   /* MATLAB Function: '<S1>/MATLAB Function' incorporates:
-   *  Inport: '<Root>/Tmax_rl_Slip'
-   *  Inport: '<Root>/Tmax_rr_Slip'
-   *  Inport: '<Root>/driver_request'
+   *  Inport: '<Root>/Inp_Tmax_rl_Slip'
+   *  Inport: '<Root>/Inp_Tmax_rr_Slip'
+   *  Inport: '<Root>/Inp_driver_request'
    */
-  coeff = fmin(fmax(rtDriver_req_Torque * 10.0, 0.0), 1.0);
+  coeff = fmin(fmax(TV_Driver_req * 10.0, 0.0), 1.0);
   rtb_IProdOut_tmp = (rtb_Saturation * 0.5 + rtb_Tm_req) * coeff;
   rtb_Tm_req = (rtb_Tm_req - rtb_Saturation * 0.5) * coeff;
-  coeff = fmax(fmax(rtb_IProdOut_tmp - rtlambda_rr_Torque, 0.0), fmax(rtb_Tm_req
-    - rtlambda_rr_n_Torque, 0.0));
+  coeff = fmax(fmax(rtb_IProdOut_tmp - TV_lambda_rr, 0.0), fmax(rtb_Tm_req -
+    TV_lambda_rr_n, 0.0));
 
-  /* Outport: '<Root>/Tm_rr' incorporates:
+  /* Outport: '<Root>/Out_Tm_rr' incorporates:
    *  MATLAB Function: '<S1>/MATLAB Function'
    */
-  rtTm_rr_m_Torque = rtb_IProdOut_tmp - coeff;
+  TV_Out_Tm_rr = rtb_IProdOut_tmp - coeff;
 
-  /* Outport: '<Root>/Tm_rl' incorporates:
+  /* Outport: '<Root>/Out_Tm_rl' incorporates:
    *  MATLAB Function: '<S1>/MATLAB Function'
    */
-  rtTm_rl_a_Torque = rtb_Tm_req - coeff;
+  TV_Out_Tm_rl = rtb_Tm_req - coeff;
 
-  /* Outport: '<Root>/Tel_Out_Debug_Torque' */
-  rtTel_Out_Debug_Torque_Torque = rtb_Saturation;
+  /* Outport: '<Root>/Out_Debug_Torque' */
+  TV_Out_Debug_Torque = rtb_Saturation;
 
   /* Update for DiscreteIntegrator: '<S41>/Integrator' */
-  rtDW_Torque->Integrator_DSTATE = 0.00025 * rtb_IProdOut + rtb_Delta_T_g;
-  if (rtDW_Torque->Integrator_DSTATE > 20.0) {
-    rtDW_Torque->Integrator_DSTATE = 20.0;
-  } else if (rtDW_Torque->Integrator_DSTATE < -20.0) {
-    rtDW_Torque->Integrator_DSTATE = -20.0;
+  TV_DW->Integrator_DSTATE = 0.00025 * rtb_IProdOut + rtb_Delta_T_g;
+  if (TV_DW->Integrator_DSTATE > 20.0) {
+    TV_DW->Integrator_DSTATE = 20.0;
+  } else if (TV_DW->Integrator_DSTATE < -20.0) {
+    TV_DW->Integrator_DSTATE = -20.0;
   }
 
   /* End of Update for DiscreteIntegrator: '<S41>/Integrator' */
 }
 
 /* Model initialize function */
-void Torque_initialize(RT_MODEL_Torque *const rtM_Torque)
+void TV_initialize(RT_MODEL_TV *const TV_M)
 {
-  DW_Torque *rtDW_Torque = rtM_Torque->dwork;
+  DW_TV *TV_DW = TV_M->dwork;
 
   /* Registration code */
 
   /* Storage classes */
-  rtDriver_req_Torque = 0.0;
-  rtu_bar_Torque = 0.0;
-  rtomega_rr_Torque = 0.0;
-  rtomega_rl_Torque = 0.0;
-  rtyaw_rate_Torque = 0.0;
-  rtSteeringangle_Torque = 0.0;
-  rtbrake_Torque = 0.0;
-  rtTm_rl_Torque = 0.0;
-  rtTm_rr_Torque = 0.0;
-  rtmap_tv_Torque = 0.0;
-  rtmap_sc_Torque = 0.0;
-  rtTel_Inp_Kus_Torque = 0.0;
-  rtTel_Inp_Kp_Torque = 0.0;
-  rtTel_Inp_Ki_Torque = 0.0;
-  rtlambda_rr_Torque = 0.0;
-  rtlambda_rr_n_Torque = 0.0;
+  TV_Driver_req = 0.0;
+  TV_u_bar = 0.0;
+  TV_yaw_rate = 0.0;
+  TV_Steeringangle = 0.0;
+  TV_Tm_rl = 0.0;
+  TV_Tm_rr = 0.0;
+  TV_map_tv = 0.0;
+  TV_Inp_Kus = 0.0;
+  TV_Inp_Kp = 0.0;
+  TV_Inp_Ki = 0.0;
+  TV_lambda_rr = 0.0;
+  TV_lambda_rr_n = 0.0;
 
   /* Storage classes */
-  rtTm_rr_m_Torque = 0.0;
-  rtTm_rl_a_Torque = 0.0;
-  rtTel_Out_Debug_Torque_Torque = 0.0;
+  TV_Out_Tm_rr = 0.0;
+  TV_Out_Tm_rl = 0.0;
+  TV_Out_Debug_Torque = 0.0;
 
   /* states (dwork) */
-  (void) memset((void *)rtDW_Torque, 0,
-                sizeof(DW_Torque));
+  (void) memset((void *)TV_DW, 0,
+                sizeof(DW_TV));
 
   /* InitializeConditions for DiscreteIntegrator: '<S41>/Integrator' */
-  rtDW_Torque->Integrator_DSTATE = 0.0;
+  TV_DW->Integrator_DSTATE = 0.0;
 }
 
 /*

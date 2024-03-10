@@ -16,8 +16,8 @@
 #include "lib/can/lib/secondary/secondary_watchdog.h"
 #include "lib/can/lib/simulator/simulator_network.h"
 
-#include "exported/Slip_Control/SlipV1.h"
-#include "exported/Traction_Control/Torque.h"
+#include "exported/Slip_Control/SLIP.h"
+#include "exported/Traction_Control/TV.h"
 
 bool running;
 can_t can[CAN_SOCKET_COUNT];
@@ -26,12 +26,12 @@ double u_bar;
 
 can_data_t can_data;
 
-DW_Torque torque_rtDW;
-RT_MODEL_Torque torque_model;
+DW_TV torque_rtDW;
+RT_MODEL_TV torque_model;
 
 char SlipError;
-DW_SlipV1 slip_rtDW;
-RT_MODEL_SlipV1 slip_model;
+DW_SLIP slip_rtDW;
+RT_MODEL_SLIP slip_model;
 
 bool init_model(void);
 double torque_max(can_data_t *can_data);

@@ -1,9 +1,6 @@
 #ifndef __DATA_H__
 #define __DATA_H__
 
-#include "exported/Slip_Control/SlipV1.h"
-#include "exported/Traction_Control/Torque.h"
-
 typedef struct {
 	double steering_angle;
 	double throttle;

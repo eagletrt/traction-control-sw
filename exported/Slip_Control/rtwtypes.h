@@ -5,11 +5,11 @@
  *
  * File: rtwtypes.h
  *
- * Code generated for Simulink model 'SlipV1'.
+ * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.32
+ * Model version                  : 6.35
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Mar  9 12:19:17 2024
+ * C/C++ source code generated on : Sun Mar 10 15:13:56 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7

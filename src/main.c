@@ -53,10 +53,10 @@ int main(void) {
 
 			// Slip Control
 			slip_model_set_data(&can_data);
-			SlipV1_step(&slip_model);
+			SLIP_step(&slip_model);
 			// Torque Vectoring
 			torque_model_set_data(&can_data);
-			Torque_step(&torque_model);
+			TV_step(&torque_model);
 
 			pthread_mutex_unlock(&model_mutex);
 			BENCHMARK_TOCK();
@@ -94,10 +94,10 @@ void can_thread(can_socket_t socket) {
 
 bool init_model(void) {
 	torque_model.dwork = &torque_rtDW;
-	Torque_initialize(&torque_model);
+	TV_initialize(&torque_model);
 
 	slip_model.dwork = &slip_rtDW;
-	SlipV1_initialize(&slip_model);
+	SLIP_initialize(&slip_model);
 
 	return true;
 }
@@ -113,53 +113,49 @@ void velocity_estimation(can_data_t *can_data, double *u_bar) {
 	*u_bar = v_g * cos(delta);
 }
 
-void torque_model_set_data(can_data_t *can_data) {
-	// All0 Data
-	rtbrake_Torque = can_data->brake;
-	rtDriver_req_Torque = can_data->throttle;
-	rtSteeringangle_Torque = can_data->steering_angle;
+void slip_model_set_data(can_data_t *can_data) {
+	// rtbrake_SlipV1 = can_data->brake;
+	// rtSteeringangle_SlipV1 = can_data->steering_angle;
+	// rtmap_tv_SlipV1 = can_data->map_tv;
 
-	rtmap_sc_Torque = can_data->map_sc;
-	rtmap_tv_Torque = can_data->map_tv;
+	SLIP_map_sc = can_data->map_sc;
+	SLIP_Driver_req = can_data->throttle;
+	SLIP_yaw_rate = can_data->gyro_z;
+	SLIP_omega_rl = can_data->omega_rl;
+	SLIP_omega_rr = can_data->omega_rr;
 
-	rtTel_Inp_Ki_Torque = TV_PID_KI;
-	rtTel_Inp_Kp_Torque = TV_PID_KP;
-	rtTel_Inp_Kus_Torque = TV_KUF;
+	SLIP_Tm_rl = torque_max(can_data);
+	SLIP_Tm_rr = torque_max(can_data);
 
-	rtyaw_rate_Torque = can_data->gyro_z;
+	SLIP_u_bar = u_bar;
 
-	rtTm_rl_Torque = rtTm_rl_SlipV1;
-	rtTm_rr_Torque = rtTm_rr_SlipV1;
-
-	rtu_bar_Torque = u_bar;
-	rtomega_rl_Torque = can_data->omega_rl;
-	rtomega_rr_Torque = can_data->omega_rr;
+	SLIP_Inp_Ki = 2500.0;
+	SLIP_Inp_Kp = 100.0;
+	SLIP_Inp_LambdaRef = 0.05;
+	SLIP_Inp_UppSatLim = 70.0;
+	SLIP_Inp_minT = 20.0;
+	SLIP_Inp_IntegralResetValue = 0;
 }
 
-void slip_model_set_data(can_data_t *can_data) {
-	// SlipV1 Data
-	rtbrake_SlipV1 = can_data->brake;
-	rtDriver_req_SlipV1 = can_data->throttle;
-	rtSteeringangle_SlipV1 = can_data->steering_angle;
+void torque_model_set_data(can_data_t *can_data) {
+	// rtbrake_Torque = can_data->brake;
+	// rtmap_sc_Torque = can_data->map_sc;
 
-	rtmap_sc_SlipV1 = can_data->map_sc;
-	rtmap_tv_SlipV1 = can_data->map_tv;
+	TV_map_tv = can_data->map_tv;
+	TV_Driver_req = can_data->throttle;
+	TV_Steeringangle = can_data->steering_angle;
+	TV_yaw_rate = can_data->gyro_z;
+	TV_u_bar = u_bar;
 
-	rtTel_Inp_SC_Ki_SlipV1 = 2500.0;
-	rtTel_Inp_SC_Kp_SlipV1 = 100.0;
-	rtTel_Inp_SC_LambdaRef_SlipV1 = 0.05;
-	rtTel_Inp_minT_SlipV1 = 20.0;
-	rtTel_Inp_UppSatLim_SlipV1 = 70.0;
-	rtTel_Inp_IntegralResetValue_Sl = 0;
+	TV_Inp_Ki = TV_PID_KI;
+	TV_Inp_Kp = TV_PID_KP;
+	TV_Inp_Kus = TV_KUF;
 
-	rtyaw_rate_SlipV1 = can_data->gyro_z;
+	TV_Tm_rl = SLIP_Out_Tm_rl;
+	TV_Tm_rr = SLIP_Out_Tm_rr;
 
-	rtTm_rl_SlipV1 = torque_max(can_data);
-	rtTm_rr_SlipV1 = torque_max(can_data);
-
-	rtu_bar_SlipV1 = u_bar;
-	rtomega_rl_SlipV1 = can_data->omega_rl;
-	rtomega_rr_SlipV1 = can_data->omega_rr;
+	TV_lambda_rr = SLIP_Out_Tmax_rl_slip;
+	TV_lambda_rr_n = SLIP_Out_Tmax_rr_slip;
 }
 
 void can_send_data() {
