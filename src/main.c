@@ -163,13 +163,25 @@ void can_send_data() {
 	uint64_t timestamp = get_timestamp_u();
 	static uint64_t out_timestamp = 0, state_timestamp = 0;
 
-	if (timestamp - PRIMARY_INTERVAL_CONTROL_OUTPUT * 1e3 > out_timestamp) {
+	if (timestamp - 10 * 1e3 > out_timestamp) {
 		out_timestamp = timestamp;
 
-		real_T t_rl = rtTm_rl_a_Torque;
-		real_T t_rr = rtTm_rr_m_Torque;
-		real_T tmax_rl = rtTm_rl_Torque;
-		real_T tmax_rr = rtTm_rr_Torque;
+		real_T t_rl;
+		real_T t_rr;
+		real_T tmax_rl;
+		real_T tmax_rr;
+
+		if (true) { // only slip
+			t_rl = SLIP_Out_Tm_rl;
+			t_rr = SLIP_Out_Tm_rr;
+			tmax_rl = SLIP_Out_Tmax_rl_slip;
+			tmax_rr = SLIP_Out_Tmax_rr_slip;
+		} else {
+			t_rl = TV_Out_Tm_rl;
+			t_rr = TV_Out_Tm_rr;
+			tmax_rl = TV_Tm_rl;
+			tmax_rr = TV_Tm_rr;
+		}
 
 #if 1 == SIMULATOR
 		static simulator_control_output_converted_t out_src;
@@ -196,10 +208,10 @@ void can_send_data() {
 #endif
 	}
 
-	if (timestamp - SECONDARY_INTERVAL_CONTROL_STATE * 1e3 > state_timestamp) {
+	if (timestamp - 10 * 1e3 > state_timestamp) {
 		state_timestamp = timestamp;
-		real_T map_sc = rtmap_sc_SlipV1;
-		real_T map_tv = rtmap_tv_Torque;
+		real_T map_sc = SLIP_map_sc;
+		real_T map_tv = TV_map_tv;
 
 #if 1 == SIMULATOR
 		static simulator_control_state_converted_t state_src;
