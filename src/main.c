@@ -215,7 +215,7 @@ void can_send_data() {
 
 #if 1 == SIMULATOR
 		static simulator_control_state_converted_t state_src;
-		state_src.map_pw = u_bar;
+		state_src.map_pw = can_data.map_pw;
 		state_src.map_sc = map_sc;
 		state_src.map_tv = map_tv;
 		static simulator_control_state_t state_src_raw;
@@ -224,7 +224,7 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_STATE_FRAME_ID, data, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
 #else
 		static secondary_control_state_converted_t state_src;
-		state_src.map_pw = u_bar;
+		state_src.map_pw = can_data.map_pw;
 		state_src.map_sc = map_sc;
 		state_src.map_tv = map_tv;
 		static secondary_control_state_t state_src_raw;
