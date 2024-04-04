@@ -66,34 +66,39 @@ static inline void can_messages_parse_simulator(can_message_t *message, can_data
 	case SIMULATOR_IMU_ANGULAR_RATE_FRAME_ID: {
 		simulator_imu_angular_rate_converted_t *angular_rate =
 				(simulator_imu_angular_rate_converted_t *)can_devices.message;
-		can_data->gyro_x = convert_gyro(angular_rate->ang_rate_x);
-		can_data->gyro_y = convert_gyro(angular_rate->ang_rate_y);
-		can_data->gyro_z = convert_gyro(angular_rate->ang_rate_z);
+		can_data->gyro_x = convert_gyro(angular_rate->x);
+		can_data->gyro_y = convert_gyro(angular_rate->y);
+		can_data->gyro_z = convert_gyro(angular_rate->z);
 		break;
 	}
 	case SIMULATOR_IMU_ACCELERATION_FRAME_ID: {
 		simulator_imu_acceleration_converted_t *acceleration =
 				(simulator_imu_acceleration_converted_t *)can_devices.message;
-		can_data->accel_x = convert_accel(acceleration->accel_x);
-		can_data->accel_y = convert_accel(acceleration->accel_y);
-		can_data->accel_z = convert_accel(acceleration->accel_z);
+		can_data->accel_x = convert_accel(acceleration->x);
+		can_data->accel_y = convert_accel(acceleration->y);
+		can_data->accel_z = convert_accel(acceleration->z);
 		break;
 	}
-	case SIMULATOR_PEDALS_OUTPUT_FRAME_ID: {
-		simulator_pedals_output_converted_t *pedals = (simulator_pedals_output_converted_t *)can_devices.message;
-		can_data->throttle = convert_throttle(pedals->apps);
-		can_data->brake = convert_brake((pedals->bse_front + pedals->bse_rear) / 2.0);
+	case SIMULATOR_PEDAL_THROTTLE_FRAME_ID: {
+		simulator_pedal_throttle_converted_t *pedals = (simulator_pedal_throttle_converted_t *)can_devices.message;
+		can_data->throttle = convert_throttle(pedals->throttle);
 		break;
 	}
-	case SIMULATOR_STEERING_ANGLE_FRAME_ID: {
-		simulator_steering_angle_converted_t *steering_angle = (simulator_steering_angle_converted_t *)can_devices.message;
-		can_data->steering_angle = convert_steering_angle(steering_angle->angle);
+	case SIMULATOR_PEDAL_BRAKES_PRESSURE_FRAME_ID: {
+		simulator_pedal_brakes_pressure_converted_t *brakes =
+				(simulator_pedal_brakes_pressure_converted_t *)can_devices.message;
+		can_data->brake_f = convert_brake(brakes->front);
+		can_data->brake_r = convert_brake(brakes->rear);
+	}
+	case SIMULATOR_STEER_ANGLE_FRAME_ID: {
+		simulator_steer_angle_converted_t *steer_angle = (simulator_steer_angle_converted_t *)can_devices.message;
+		can_data->steering_angle = convert_steering_angle(steer_angle->angle);
 		break;
 	}
 	case SIMULATOR_SPEED_FRAME_ID: {
 		simulator_speed_converted_t *speed = (simulator_speed_converted_t *)can_devices.message;
-		can_data->omega_fl = speed->encoder_l;
-		can_data->omega_fr = speed->encoder_r;
+		can_data->omega_fl = speed->fl;
+		can_data->omega_fr = speed->fr;
 		break;
 	}
 	}
@@ -105,17 +110,12 @@ static inline void can_messages_parse_primary(can_message_t *message, can_data_t
 	primary_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
 
 	switch (message->frame.can_id) {
-	case PRIMARY_SPEED_FRAME_ID: {
-		primary_speed_converted_t *speed = (primary_speed_converted_t *)can_devices.message;
-		can_data->omega_fl = speed->encoder_l;
-		can_data->omega_fr = speed->encoder_r;
-		break;
-	}
-	case PRIMARY_STEER_STATUS_FRAME_ID: {
-		primary_steer_status_converted_t *steer_status = (primary_steer_status_converted_t *)can_devices.message;
-		can_data->map_pw = steer_status->map_pw;
-		can_data->map_sc = steer_status->map_sc;
-		can_data->map_tv = steer_status->map_tv;
+
+	case PRIMARY_ECU_POWER_MAPS_FRAME_ID: {
+		primary_ecu_power_maps_converted_t *power_maps = (primary_ecu_power_maps_converted_t *)can_devices.message;
+		can_data->map_pw = power_maps->map_pw;
+		can_data->map_sc = power_maps->map_sc;
+		can_data->map_tv = power_maps->map_tv;
 		break;
 	}
 	default:
@@ -128,32 +128,43 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 	secondary_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
 
 	switch (message->frame.can_id) {
-	case SECONDARY_PEDALS_OUTPUT_FRAME_ID: {
-		secondary_pedals_output_converted_t *pedals_output = (secondary_pedals_output_converted_t *)can_devices.message;
-		can_data->throttle = convert_throttle(pedals_output->apps);
-		can_data->brake_f = convert_brake(pedals_output->bse_front);
-		can_data->brake_r = convert_brake(pedals_output->bse_rear);
+	case SECONDARY_ANGULAR_VELOCITY_FRAME_ID: {
+		secondary_angular_velocity_converted_t *speed = (secondary_angular_velocity_converted_t *)can_devices.message;
+		can_data->omega_fl = speed->fl;
+		can_data->omega_fr = speed->fr;
+		break;
+	}
+	case SECONDARY_PEDAL_THROTTLE_FRAME_ID: {
+		secondary_pedal_throttle_converted_t *pedals_output = (secondary_pedal_throttle_converted_t *)can_devices.message;
+		can_data->throttle = convert_throttle(pedals_output->throttle);
+		break;
+	}
+	case SECONDARY_PEDAL_BRAKES_PRESSURE_FRAME_ID: {
+		secondary_pedal_brakes_pressure_converted_t *pedals_output =
+				(secondary_pedal_brakes_pressure_converted_t *)can_devices.message;
+		can_data->brake_f = convert_brake(pedals_output->front);
+		can_data->brake_r = convert_brake(pedals_output->rear);
 		break;
 	}
 	case SECONDARY_IMU_ACCELERATION_FRAME_ID: {
 		secondary_imu_acceleration_converted_t *acceleration =
 				(secondary_imu_acceleration_converted_t *)can_devices.message;
-		can_data->accel_x = convert_accel(acceleration->accel_x);
-		can_data->accel_y = convert_accel(acceleration->accel_y);
-		can_data->accel_z = convert_accel(acceleration->accel_z);
+		can_data->accel_x = convert_accel(acceleration->x);
+		can_data->accel_y = convert_accel(acceleration->y);
+		can_data->accel_z = convert_accel(acceleration->z);
 		break;
 	}
 	case SECONDARY_IMU_ANGULAR_RATE_FRAME_ID: {
 		secondary_imu_angular_rate_converted_t *angular_rate =
 				(secondary_imu_angular_rate_converted_t *)can_devices.message;
-		can_data->gyro_x = convert_gyro(angular_rate->ang_rate_x);
-		can_data->gyro_y = convert_gyro(angular_rate->ang_rate_y);
-		can_data->gyro_z = convert_gyro(angular_rate->ang_rate_z);
+		can_data->gyro_x = convert_gyro(angular_rate->x);
+		can_data->gyro_y = convert_gyro(angular_rate->y);
+		can_data->gyro_z = convert_gyro(angular_rate->z);
 		break;
 	}
-	case SECONDARY_STEERING_ANGLE_FRAME_ID: {
-		secondary_steering_angle_converted_t *steering_angle = (secondary_steering_angle_converted_t *)can_devices.message;
-		can_data->steering_angle = convert_steering_angle(steering_angle->angle);
+	case SECONDARY_STEER_ANGLE_FRAME_ID: {
+		secondary_steer_angle_converted_t *steer_angle = (secondary_steer_angle_converted_t *)can_devices.message;
+		can_data->steering_angle = convert_steering_angle(steer_angle->angle);
 		break;
 	}
 	default:

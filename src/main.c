@@ -209,8 +209,8 @@ void can_send_data() {
 #if 1 == SIMULATOR
 		static simulator_control_output_converted_t out_src;
 		out_src.estimated_velocity = u_bar;
-		out_src.tmax_l = tm_rl;
-		out_src.tmax_r = tm_rr;
+		out_src.torque_max_l = tmax_rl;
+		out_src.torque_max_r = tmax_rr;
 		out_src.torque_l = t_rl;
 		out_src.torque_r = t_rr;
 		static simulator_control_output_t out_src_raw;
@@ -220,8 +220,8 @@ void can_send_data() {
 #else
 		static primary_control_output_converted_t out_src;
 		out_src.estimated_velocity = u_bar;
-		out_src.tmax_l = tmax_rl;
-		out_src.tmax_r = tmax_rr;
+		out_src.torque_max_l = tmax_rl;
+		out_src.torque_max_r = tmax_rr;
 		out_src.torque_l = t_rl;
 		out_src.torque_r = t_rr;
 		static primary_control_output_t out_src_raw;
@@ -244,25 +244,25 @@ void can_send_data() {
 		simulator_control_state_pack(data, &state_src_raw, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_STATE_FRAME_ID, data, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
 #else
-		static secondary_control_state_converted_t state_src;
+		static primary_control_status_converted_t state_src;
 		state_src.map_pw = can_data.map_pw;
 		state_src.map_sc = map_sc;
 		state_src.map_tv = map_tv;
-		static secondary_control_state_t state_src_raw;
-		secondary_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
-		secondary_control_state_pack(data, &state_src_raw, SECONDARY_CONTROL_STATE_BYTE_SIZE);
-		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_CONTROL_STATE_FRAME_ID, data, SECONDARY_CONTROL_STATE_BYTE_SIZE);
+		static primary_control_status_t state_src_raw;
+		primary_control_status_conversion_to_raw_struct(&state_src_raw, &state_src);
+		primary_control_status_pack(data, &state_src_raw, PRIMARY_CONTROL_STATUS_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_STATUS_FRAME_ID, data, PRIMARY_CONTROL_STATUS_BYTE_SIZE);
 #endif
 	}
 	if (timestamp - 10 * 1e3 > debug_timestamp) {
 		debug_timestamp = timestamp;
-		static secondary_debug_signal_converted_t debug_src;
+		static primary_debug_signal_1_converted_t debug_src;
 		debug_src.field_1 = Regen_Out_brake_balance;
 
-		static secondary_debug_signal_t debug_src_raw;
-		secondary_debug_signal_conversion_to_raw_struct(&debug_src_raw, &debug_src);
-		secondary_debug_signal_pack(data, &debug_src_raw, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
-		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_DEBUG_SIGNAL_FRAME_ID, data, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
+		static primary_debug_signal_1_t debug_src_raw;
+		primary_debug_signal_1_conversion_to_raw_struct(&debug_src_raw, &debug_src);
+		primary_debug_signal_1_pack(data, &debug_src_raw, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
 	}
 }
 
