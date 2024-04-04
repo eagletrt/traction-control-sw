@@ -58,6 +58,10 @@ int main(void) {
 			torque_model_set_data(&can_data);
 			TV_step(&torque_model);
 
+			// Regen
+			regen_model_set_data(&can_data);
+			Regen_step(&regen_model);
+
 			pthread_mutex_unlock(&model_mutex);
 			BENCHMARK_TOCK();
 		}
@@ -113,6 +117,17 @@ void velocity_estimation(can_data_t *can_data, double *u_bar) {
 	*u_bar = v_g * cos(delta);
 }
 
+void regen_model_set_data(can_data_t *can_data) {
+	Regen_Driver_req = can_data->throttle;
+	Regen_Inp_map_sc = can_data->map_sc;
+	Regen_Inp_omega_inv_rl = can_data->omega_rl;
+	Regen_Inp_omega_inv_rr = can_data->omega_rr;
+	Regen_Inp_pressure_f = can_data->brake_f;
+	Regen_Inp_pressure_r = can_data->brake_r;
+	Regen_Tm_rl = torque_max(can_data);
+	Regen_Tm_rr = torque_max(can_data);
+}
+
 void slip_model_set_data(can_data_t *can_data) {
 	// rtbrake_SlipV1 = can_data->brake;
 	// rtSteeringangle_SlipV1 = can_data->steering_angle;
@@ -129,9 +144,9 @@ void slip_model_set_data(can_data_t *can_data) {
 
 	SLIP_u_bar = u_bar;
 
-	SLIP_Inp_Ki = 2500.0;
+	SLIP_Inp_Ki = 5000.0;
 	SLIP_Inp_Kp = 100.0;
-	SLIP_Inp_LambdaRef = 0.05;
+	SLIP_Inp_LambdaRef = 0.2;
 	SLIP_Inp_UppSatLim = 70.0;
 	SLIP_Inp_minT = 20.0;
 	SLIP_Inp_IntegralResetValue = 0;
@@ -151,8 +166,8 @@ void torque_model_set_data(can_data_t *can_data) {
 	TV_Inp_Kp = TV_PID_KP;
 	TV_Inp_Kus = TV_KUF;
 
-	TV_Tm_rl = SLIP_Out_Tm_rl;
-	TV_Tm_rr = SLIP_Out_Tm_rr;
+	TV_Tm_rl = torque_max(can_data);
+	TV_Tm_rr = torque_max(can_data);
 
 	TV_lambda_rr = SLIP_Out_Tmax_rl_slip;
 	TV_lambda_rr_n = SLIP_Out_Tmax_rr_slip;
@@ -161,27 +176,35 @@ void torque_model_set_data(can_data_t *can_data) {
 void can_send_data() {
 	static uint8_t data[8];
 	uint64_t timestamp = get_timestamp_u();
-	static uint64_t out_timestamp = 0, state_timestamp = 0;
+	static uint64_t out_timestamp = 0, state_timestamp = 0, debug_timestamp = 0;
+
+	real_T map_sc = SLIP_map_sc;
+	real_T map_tv = TV_map_tv;
+
+	real_T t_rl;
+	real_T t_rr;
+	real_T tmax_rl;
+	real_T tmax_rr;
+
+#if 1 // REGEN
+	t_rl = Regen_Out_Tm_rl;
+	t_rr = Regen_Out_Tm_rr;
+	tmax_rl = Regen_Tm_rl;
+	tmax_rr = Regen_Tm_rr;
+#elif 0 // ONLY SLIP
+	t_rl = SLIP_Out_Tm_rl;
+	t_rr = SLIP_Out_Tm_rr;
+	tmax_rl = SLIP_Out_Tmax_rl_slip;
+	tmax_rr = SLIP_Out_Tmax_rr_slip;
+#else
+	t_rl = TV_Out_Tm_rl;
+	t_rr = TV_Out_Tm_rr;
+	tmax_rl = TV_Tm_rl;
+	tmax_rr = TV_Tm_rr;
+#endif
 
 	if (timestamp - 10 * 1e3 > out_timestamp) {
 		out_timestamp = timestamp;
-
-		real_T t_rl;
-		real_T t_rr;
-		real_T tmax_rl;
-		real_T tmax_rr;
-
-		if (true) { // only slip
-			t_rl = SLIP_Out_Tm_rl;
-			t_rr = SLIP_Out_Tm_rr;
-			tmax_rl = SLIP_Out_Tmax_rl_slip;
-			tmax_rr = SLIP_Out_Tmax_rr_slip;
-		} else {
-			t_rl = TV_Out_Tm_rl;
-			t_rr = TV_Out_Tm_rr;
-			tmax_rl = TV_Tm_rl;
-			tmax_rr = TV_Tm_rr;
-		}
 
 #if 1 == SIMULATOR
 		static simulator_control_output_converted_t out_src;
@@ -210,8 +233,6 @@ void can_send_data() {
 
 	if (timestamp - 10 * 1e3 > state_timestamp) {
 		state_timestamp = timestamp;
-		real_T map_sc = SLIP_map_sc;
-		real_T map_tv = TV_map_tv;
 
 #if 1 == SIMULATOR
 		static simulator_control_state_converted_t state_src;
@@ -232,6 +253,16 @@ void can_send_data() {
 		secondary_control_state_pack(data, &state_src_raw, SECONDARY_CONTROL_STATE_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_CONTROL_STATE_FRAME_ID, data, SECONDARY_CONTROL_STATE_BYTE_SIZE);
 #endif
+	}
+	if (timestamp - 10 * 1e3 > debug_timestamp) {
+		debug_timestamp = timestamp;
+		static secondary_debug_signal_converted_t debug_src;
+		debug_src.field_1 = Regen_Out_brake_balance;
+
+		static secondary_debug_signal_t debug_src_raw;
+		secondary_debug_signal_conversion_to_raw_struct(&debug_src_raw, &debug_src);
+		secondary_debug_signal_pack(data, &debug_src_raw, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_DEBUG_SIGNAL_FRAME_ID, data, SECONDARY_DEBUG_SIGNAL_BYTE_SIZE);
 	}
 }
 

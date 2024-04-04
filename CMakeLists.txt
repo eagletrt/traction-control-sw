@@ -15,14 +15,13 @@ include_directories(
 
     # exported
     ${CMAKE_CURRENT_LIST_DIR}/exported/lib
-    # VelocityEstimation
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Velocity_Estimation
 )
 
 add_library(
     exported
     STATIC
 
+    ${CMAKE_CURRENT_LIST_DIR}/exported/Regen/Regen.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SLIP.c
     ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/TV.c
 )

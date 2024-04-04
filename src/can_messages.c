@@ -131,7 +131,8 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 	case SECONDARY_PEDALS_OUTPUT_FRAME_ID: {
 		secondary_pedals_output_converted_t *pedals_output = (secondary_pedals_output_converted_t *)can_devices.message;
 		can_data->throttle = convert_throttle(pedals_output->apps);
-		can_data->brake = convert_brake((pedals_output->bse_front + pedals_output->bse_rear) / 2.0);
+		can_data->brake_f = convert_brake(pedals_output->bse_front);
+		can_data->brake_r = convert_brake(pedals_output->bse_rear);
 		break;
 	}
 	case SECONDARY_IMU_ACCELERATION_FRAME_ID: {

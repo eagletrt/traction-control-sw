@@ -4,7 +4,8 @@
 typedef struct {
 	double steering_angle;
 	double throttle;
-	double brake;
+	double brake_f;
+	double brake_r;
 	double accel_x;
 	double accel_y;
 	double accel_z;
