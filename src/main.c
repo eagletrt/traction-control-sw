@@ -186,7 +186,7 @@ void can_send_data() {
 	real_T tmax_rl;
 	real_T tmax_rr;
 
-#if 1 // REGEN
+#if 0 // REGEN
 	t_rl = Regen_Out_Tm_rl;
 	t_rr = Regen_Out_Tm_rr;
 	tmax_rl = Regen_Tm_rl;
