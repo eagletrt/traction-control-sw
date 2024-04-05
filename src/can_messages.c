@@ -111,8 +111,8 @@ static inline void can_messages_parse_primary(can_message_t *message, can_data_t
 
 	switch (message->frame.can_id) {
 
-	case PRIMARY_ECU_POWER_MAPS_FRAME_ID: {
-		primary_ecu_power_maps_converted_t *power_maps = (primary_ecu_power_maps_converted_t *)can_devices.message;
+	case PRIMARY_ECU_SET_POWER_MAPS_FRAME_ID: {
+		primary_ecu_set_power_maps_converted_t *power_maps = (primary_ecu_set_power_maps_converted_t *)can_devices.message;
 		can_data->map_pw = power_maps->map_pw;
 		can_data->map_sc = power_maps->map_sc;
 		can_data->map_tv = power_maps->map_tv;

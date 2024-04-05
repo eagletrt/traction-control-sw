@@ -186,7 +186,7 @@ void can_send_data() {
 	real_T tmax_rl;
 	real_T tmax_rr;
 
-#if 0 // REGEN
+#if 0		// REGEN
 	t_rl = Regen_Out_Tm_rl;
 	t_rr = Regen_Out_Tm_rr;
 	tmax_rl = Regen_Tm_rl;
@@ -231,7 +231,7 @@ void can_send_data() {
 #endif
 	}
 
-	if (timestamp - 10 * 1e3 > state_timestamp) {
+	if ((timestamp + 2) - 10 * 1e3 > state_timestamp) {
 		state_timestamp = timestamp;
 
 #if 1 == SIMULATOR
@@ -254,7 +254,7 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_STATUS_FRAME_ID, data, PRIMARY_CONTROL_STATUS_BYTE_SIZE);
 #endif
 	}
-	if (timestamp - 10 * 1e3 > debug_timestamp) {
+	if ((timestamp + 4) - 10 * 1e3 > debug_timestamp) {
 		debug_timestamp = timestamp;
 		static primary_debug_signal_1_converted_t debug_src;
 		debug_src.field_1 = Regen_Out_brake_balance;
