@@ -118,7 +118,7 @@ void velocity_estimation(can_data_t *can_data, double *u_bar) {
 }
 
 void regen_model_set_data(can_data_t *can_data) {
-	Regen_Driver_req = can_data->throttle;
+	Regen_Driver_req = can_data->throttle * can_data->map_pw;
 	Regen_Inp_map_sc = can_data->map_sc;
 	Regen_Inp_omega_inv_rl = can_data->omega_rl;
 	Regen_Inp_omega_inv_rr = can_data->omega_rr;
@@ -134,7 +134,7 @@ void slip_model_set_data(can_data_t *can_data) {
 	// rtmap_tv_SlipV1 = can_data->map_tv;
 
 	SLIP_map_sc = can_data->map_sc;
-	SLIP_Driver_req = can_data->throttle;
+	SLIP_Driver_req = can_data->throttle * can_data->map_pw;
 	SLIP_yaw_rate = can_data->gyro_z;
 	SLIP_omega_rl = can_data->omega_rl;
 	SLIP_omega_rr = can_data->omega_rr;
@@ -157,7 +157,7 @@ void torque_model_set_data(can_data_t *can_data) {
 	// rtmap_sc_Torque = can_data->map_sc;
 
 	TV_map_tv = can_data->map_tv;
-	TV_Driver_req = can_data->throttle;
+	TV_Driver_req = can_data->throttle * can_data->map_pw;
 	TV_Steeringangle = can_data->steering_angle;
 	TV_yaw_rate = can_data->gyro_z;
 	TV_u_bar = u_bar;
