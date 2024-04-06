@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.57
+ * Model version                  : 6.58
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Apr  6 10:26:31 2024
+ * C/C++ source code generated on : Sat Apr  6 13:58:17 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -131,19 +131,19 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
     rtb_vms;
 
   /* Switch: '<S20>/Switch2' incorporates:
-   *  Constant: '<S3>/Constant3'
    *  Inport: '<Root>/Inp_UppSatLim'
+   *  Inport: '<Root>/Inp_minT'
    *  RelationalOperator: '<S20>/LowerRelop1'
    *  RelationalOperator: '<S20>/UpperRelop'
    *  Switch: '<S20>/Switch'
    */
   if (Vmax > SLIP_Inp_UppSatLim) {
     Vmax = SLIP_Inp_UppSatLim;
-  } else if (Vmax < 0.0) {
+  } else if (Vmax < SLIP_Inp_minT) {
     /* Switch: '<S20>/Switch' incorporates:
-     *  Constant: '<S3>/Constant3'
+     *  Inport: '<Root>/Inp_minT'
      */
-    Vmax = 0.0;
+    Vmax = SLIP_Inp_minT;
   }
 
   /* Sum: '<S13>/Sum2' incorporates:
@@ -269,19 +269,19 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
                    0.0) + rtb_Rr_j;
 
   /* Switch: '<S11>/Switch2' incorporates:
-   *  Constant: '<S2>/Constant3'
    *  Inport: '<Root>/Inp_UppSatLim'
+   *  Inport: '<Root>/Inp_minT'
    *  RelationalOperator: '<S11>/LowerRelop1'
    *  RelationalOperator: '<S11>/UpperRelop'
    *  Switch: '<S11>/Switch'
    */
   if (rtb_Switch2_g > SLIP_Inp_UppSatLim) {
     rtb_Switch2_g = SLIP_Inp_UppSatLim;
-  } else if (rtb_Switch2_g < 0.0) {
+  } else if (rtb_Switch2_g < SLIP_Inp_minT) {
     /* Switch: '<S11>/Switch' incorporates:
-     *  Constant: '<S2>/Constant3'
+     *  Inport: '<Root>/Inp_minT'
      */
-    rtb_Switch2_g = 0.0;
+    rtb_Switch2_g = SLIP_Inp_minT;
   }
 
   /* End of Switch: '<S11>/Switch2' */

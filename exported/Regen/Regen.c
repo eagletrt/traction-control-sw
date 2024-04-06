@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Regen'.
  *
- * Model version                  : 6.57
+ * Model version                  : 6.58
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Apr  6 09:22:03 2024
+ * C/C++ source code generated on : Sat Apr  6 13:56:23 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -72,25 +72,22 @@ real_T Regen_pressure_r;               /* '<Root>/Inp_pressure_r' */
 void Regen_step(RT_MODEL_Regen *const Regen_M)
 {
   real_T Fx_f;
-  real_T Fx_f_tmp;
-  real_T Fx_f_tmp_0;
-  real_T rtb_Gain2;
+  real_T rtb_Switch2;
   real_T tmp;
 
   /* MATLAB Function: '<S1>/MATLAB Function2' incorporates:
    *  Inport: '<Root>/Inp_pressure_f'
-   *  MATLAB Function: '<S1>/MATLAB Function4'
    */
-  Fx_f_tmp = -Regen_pressure_f * 0.1 * 490.62500000000006 * 4.0 * 0.42;
-  Fx_f = Fx_f_tmp * 69.0 / 203.0;
+  Fx_f = -Regen_pressure_f * 0.1 * 490.62500000000006 * 4.0 * 0.42 * 69.0 /
+    203.0;
 
   /* MATLAB Function: '<S1>/MATLAB Function3' incorporates:
    *  Inport: '<Root>/Inp_omega_inv_rl'
    */
   if (Regen_Inp_omega_inv_rl <= 300.0) {
-    rtb_Gain2 = -20.42861;
+    rtb_Switch2 = -20.42861;
   } else {
-    rtb_Gain2 = 0.0607143 * Regen_Inp_omega_inv_rl - 38.6429;
+    rtb_Switch2 = 0.0607143 * Regen_Inp_omega_inv_rl - 38.6429;
   }
 
   /* MATLAB Function: '<S1>/MATLAB Function1' incorporates:
@@ -102,36 +99,35 @@ void Regen_step(RT_MODEL_Regen *const Regen_M)
     tmp = 0.0607143 * Regen_Inp_omega_inv_rr - 38.6429;
   }
 
-  /* MATLAB Function: '<S1>/MATLAB Function2' incorporates:
-   *  Inport: '<Root>/Inp_pressure_r'
-   *  MATLAB Function: '<S1>/MATLAB Function4'
-   */
-  Fx_f_tmp_0 = -Regen_pressure_r * 0.1 * 490.62500000000006 * 2.0 * 0.42;
-
   /* MinMax: '<S1>/Min' incorporates:
    *  Gain: '<S1>/Gain1'
    *  Inport: '<Root>/Inp_map_sc'
+   *  Inport: '<Root>/Inp_pressure_r'
    *  MATLAB Function: '<S1>/MATLAB Function1'
    *  MATLAB Function: '<S1>/MATLAB Function2'
    *  MATLAB Function: '<S1>/MATLAB Function3'
    *  Product: '<S1>/Product2'
    */
   Fx_f = fmax(fmax((((3198.788742857143 - sqrt(4.092899768571832E+7 -
-    4.1425668E+7 * Fx_f / 875.0) / 2.0) - Fx_f) * 203.0 / 78.75 - Fx_f_tmp_0) *
-                   78.75 * 0.001 * (2.0 * Regen_Inp_map_sc), rtb_Gain2), tmp);
+    4.1425668E+7 * Fx_f / 875.0) / 2.0) - Fx_f) * 203.0 / 78.75 -
+                    -Regen_pressure_r * 0.1 * 490.62500000000006 * 2.0 * 0.42) *
+                   78.75 * 0.001 * (2.0 * Regen_Inp_map_sc), rtb_Switch2), tmp);
 
   /* Switch: '<S7>/Switch2' incorporates:
    *  Constant: '<S1>/Constant1'
    *  RelationalOperator: '<S7>/LowerRelop1'
+   *  Switch: '<S7>/Switch'
    */
   if (Fx_f > 59.737156511350051) {
-    Fx_f = 59.737156511350051;
+    rtb_Switch2 = 59.737156511350051;
+  } else {
+    rtb_Switch2 = Fx_f;
   }
 
-  /* End of Switch: '<S7>/Switch2' */
-
-  /* Gain: '<S1>/Gain2' */
-  rtb_Gain2 = 0.5 * Fx_f;
+  /* Gain: '<S1>/Gain2' incorporates:
+   *  Switch: '<S7>/Switch2'
+   */
+  rtb_Switch2 *= 0.5;
 
   /* Outport: '<Root>/Out_Tm_rr' incorporates:
    *  Inport: '<Root>/Inp_Tmax_rr'
@@ -139,7 +135,7 @@ void Regen_step(RT_MODEL_Regen *const Regen_M)
    *  Product: '<S1>/Product1'
    *  Sum: '<S1>/Add'
    */
-  Regen_Out_Tm_rr = Regen_Driver_req * Regen_Tm_rr + rtb_Gain2;
+  Regen_Out_Tm_rr = Regen_Driver_req * Regen_Tm_rr + rtb_Switch2;
 
   /* Outport: '<Root>/Out_Tm_rl' incorporates:
    *  Inport: '<Root>/Inp_Tmax_rl'
@@ -147,17 +143,10 @@ void Regen_step(RT_MODEL_Regen *const Regen_M)
    *  Product: '<S1>/Product'
    *  Sum: '<S1>/Add1'
    */
-  Regen_Out_Tm_rl = Regen_Tm_rl * Regen_Driver_req + rtb_Gain2;
+  Regen_Out_Tm_rl = Regen_Tm_rl * Regen_Driver_req + rtb_Switch2;
 
-  /* MATLAB Function: '<S1>/MATLAB Function4' */
-  rtb_Gain2 = Fx_f_tmp * 0.069;
-
-  /* Outport: '<Root>/Out_brake_balance' incorporates:
-   *  MATLAB Function: '<S1>/MATLAB Function'
-   *  MATLAB Function: '<S1>/MATLAB Function4'
-   */
-  Regen_Out_brake_balance = rtb_Gain2 / ((Fx_f * 4.5 * 0.93 + rtb_Gain2) +
-    Fx_f_tmp_0 * 0.07875);
+  /* Outport: '<Root>/Out_brake_balance' */
+  Regen_Out_brake_balance = Fx_f;
   UNUSED_PARAMETER(Regen_M);
 }
 

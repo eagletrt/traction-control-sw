@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Regen'.
  *
- * Model version                  : 6.57
+ * Model version                  : 6.58
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Apr  6 09:22:03 2024
+ * C/C++ source code generated on : Sat Apr  6 13:56:23 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
