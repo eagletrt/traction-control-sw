@@ -9,7 +9,7 @@
  *
  * Model version                  : 6.57
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Apr  6 09:38:34 2024
+ * C/C++ source code generated on : Sat Apr  6 10:26:31 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -44,10 +44,10 @@ typedef struct tag_RTM_SLIP RT_MODEL_SLIP;
 
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
-  real_T DiscreteTimeIntegrator1_DSTATE;/* '<S19>/Discrete-Time Integrator1' */
-  real_T DiscreteTimeIntegrator1_DSTAT_g;/* '<S10>/Discrete-Time Integrator1' */
-  int8_T DiscreteTimeIntegrator1_PrevRes;/* '<S19>/Discrete-Time Integrator1' */
-  int8_T DiscreteTimeIntegrator1_PrevR_k;/* '<S10>/Discrete-Time Integrator1' */
+  real_T DiscreteTimeIntegrator1_DSTATE;/* '<S18>/Discrete-Time Integrator1' */
+  real_T DiscreteTimeIntegrator1_DSTAT_g;/* '<S9>/Discrete-Time Integrator1' */
+  int8_T DiscreteTimeIntegrator1_PrevRes;/* '<S18>/Discrete-Time Integrator1' */
+  int8_T DiscreteTimeIntegrator1_PrevR_k;/* '<S9>/Discrete-Time Integrator1' */
 } DW_SLIP;
 
 /* Real-time Model Data Structure */
@@ -86,27 +86,26 @@ extern real_T SLIP_yaw_rate;           /* '<Root>/Inp_Omega' */
 /*-
  * These blocks were eliminated from the model due to optimizations:
  *
- * Block '<S1>/Scope' : Unused code path elimination
- * Block '<S10>/Scope' : Unused code path elimination
- * Block '<S12>/Data Type Duplicate' : Unused code path elimination
- * Block '<S12>/Data Type Propagation' : Unused code path elimination
+ * Block '<S9>/Scope' : Unused code path elimination
+ * Block '<S11>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S11>/Data Type Propagation' : Unused code path elimination
+ * Block '<S5>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S5>/Data Type Propagation' : Unused code path elimination
  * Block '<S6>/Data Type Duplicate' : Unused code path elimination
  * Block '<S6>/Data Type Propagation' : Unused code path elimination
- * Block '<S7>/Data Type Duplicate' : Unused code path elimination
- * Block '<S7>/Data Type Propagation' : Unused code path elimination
- * Block '<S19>/Scope' : Unused code path elimination
- * Block '<S21>/Data Type Duplicate' : Unused code path elimination
- * Block '<S21>/Data Type Propagation' : Unused code path elimination
+ * Block '<S18>/Scope' : Unused code path elimination
+ * Block '<S20>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S20>/Data Type Propagation' : Unused code path elimination
+ * Block '<S14>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S14>/Data Type Propagation' : Unused code path elimination
  * Block '<S15>/Data Type Duplicate' : Unused code path elimination
  * Block '<S15>/Data Type Propagation' : Unused code path elimination
- * Block '<S16>/Data Type Duplicate' : Unused code path elimination
- * Block '<S16>/Data Type Propagation' : Unused code path elimination
- * Block '<S4>/Scope' : Unused code path elimination
- * Block '<S4>/Scope1' : Unused code path elimination
- * Block '<S4>/Scope2' : Unused code path elimination
- * Block '<S4>/Scope3' : Unused code path elimination
- * Block '<S4>/Scope4' : Unused code path elimination
- * Block '<S4>/Scope5' : Unused code path elimination
+ * Block '<S3>/Scope' : Unused code path elimination
+ * Block '<S3>/Scope1' : Unused code path elimination
+ * Block '<S3>/Scope2' : Unused code path elimination
+ * Block '<S3>/Scope3' : Unused code path elimination
+ * Block '<S3>/Scope4' : Unused code path elimination
+ * Block '<S3>/Scope5' : Unused code path elimination
  */
 
 /*-
@@ -128,27 +127,26 @@ extern real_T SLIP_yaw_rate;           /* '<Root>/Inp_Omega' */
  *
  * '<Root>' : 'Fenice_Vehicle_Model/Vehicle Controller'
  * '<S1>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP'
- * '<S2>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/MATLAB Function'
- * '<S3>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel'
- * '<S4>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel'
- * '<S5>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID'
- * '<S6>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Saturation Dynamic1'
- * '<S7>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Saturation Dynamic2'
- * '<S8>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Slip_est1'
- * '<S9>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/map'
- * '<S10>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID/Integral Part'
- * '<S11>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID/Proportional Part'
- * '<S12>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID/Saturation Dynamic1'
- * '<S13>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID/Integral Part/IsNegative'
- * '<S14>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID'
- * '<S15>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Saturation Dynamic1'
- * '<S16>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Saturation Dynamic2'
- * '<S17>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Slip_est1'
- * '<S18>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/map'
- * '<S19>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID/Integral Part'
- * '<S20>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID/Proportional Part'
- * '<S21>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID/Saturation Dynamic1'
- * '<S22>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID/Integral Part/IsNegative'
+ * '<S2>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel'
+ * '<S3>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel'
+ * '<S4>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID'
+ * '<S5>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Saturation Dynamic1'
+ * '<S6>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Saturation Dynamic2'
+ * '<S7>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Slip_est1'
+ * '<S8>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/map'
+ * '<S9>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID/Integral Part'
+ * '<S10>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID/Proportional Part'
+ * '<S11>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID/Saturation Dynamic1'
+ * '<S12>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Left Wheel/Low Level PID/Integral Part/IsNegative'
+ * '<S13>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID'
+ * '<S14>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Saturation Dynamic1'
+ * '<S15>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Saturation Dynamic2'
+ * '<S16>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Slip_est1'
+ * '<S17>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/map'
+ * '<S18>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID/Integral Part'
+ * '<S19>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID/Proportional Part'
+ * '<S20>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID/Saturation Dynamic1'
+ * '<S21>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/TCS Rear Right Wheel/Low Level PID/Integral Part/IsNegative'
  */
 #endif                                 /* RTW_HEADER_SLIP_h_ */
 
