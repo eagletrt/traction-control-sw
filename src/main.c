@@ -119,7 +119,7 @@ void velocity_estimation(can_data_t *can_data, double *u_bar) {
 
 void regen_model_set_data(can_data_t *can_data) {
 	Regen_Driver_req = can_data->throttle * can_data->map_pw;
-	Regen_Inp_map_sc = can_data->map_sc;
+	Regen_Inp_map_sc = - can_data->map_sc;
 	Regen_Inp_omega_inv_rl = can_data->omega_rl;
 	Regen_Inp_omega_inv_rr = can_data->omega_rr;
 	Regen_pressure_f = can_data->brake_f;
@@ -144,11 +144,11 @@ void slip_model_set_data(can_data_t *can_data) {
 
 	SLIP_u_bar = u_bar;
 
-	SLIP_Inp_Ki = 5000.0;
-	SLIP_Inp_Kp = 100.0;
+	SLIP_Inp_Ki = 40000.0;
+	SLIP_Inp_Kp = 50.0;
 	SLIP_Inp_LambdaRef = 0.2;
 	SLIP_Inp_UppSatLim = 70.0;
-	SLIP_Inp_minT = 20.0;
+	SLIP_Inp_minT = 45.0;
 	SLIP_Inp_IntegralResetValue = 0;
 }
 
@@ -186,7 +186,7 @@ void can_send_data() {
 	real_T tmax_rl;
 	real_T tmax_rr;
 
-#if 0		// REGEN
+#if 1		// REGEN
 	t_rl = Regen_Out_Tm_rl;
 	t_rr = Regen_Out_Tm_rr;
 	tmax_rl = Regen_Tm_rl;
@@ -258,6 +258,7 @@ void can_send_data() {
 		debug_timestamp = timestamp;
 		static primary_debug_signal_1_converted_t debug_src;
 		debug_src.field_1 = Regen_Out_brake_balance;
+		debug_src.field_2 = Regen_Out_Tm_rl;
 
 		static primary_debug_signal_1_t debug_src_raw;
 		primary_debug_signal_1_conversion_to_raw_struct(&debug_src_raw, &debug_src);
