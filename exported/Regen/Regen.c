@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'Regen'.
  *
- * Model version                  : 6.50
+ * Model version                  : 6.57
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Wed Apr  3 16:54:51 2024
+ * C/C++ source code generated on : Sat Apr  6 09:22:03 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -30,13 +30,13 @@ real_T Regen_Driver_req;               /* '<Root>/Inp_driver_request' */
 real_T Regen_Inp_map_sc;               /* '<Root>/Inp_map_sc' */
 real_T Regen_Inp_omega_inv_rl;         /* '<Root>/Inp_omega_inv_rl' */
 real_T Regen_Inp_omega_inv_rr;         /* '<Root>/Inp_omega_inv_rr' */
-real_T Regen_Inp_pressure_f;           /* '<Root>/Inp_pressure_f' */
-real_T Regen_Inp_pressure_r;           /* '<Root>/Inp_pressure_r' */
 real_T Regen_Out_Tm_rl;                /* '<Root>/Out_Tm_rl' */
 real_T Regen_Out_Tm_rr;                /* '<Root>/Out_Tm_rr' */
 real_T Regen_Out_brake_balance;        /* '<Root>/Out_brake_balance' */
 real_T Regen_Tm_rl;                    /* '<Root>/Inp_Tmax_rl' */
 real_T Regen_Tm_rr;                    /* '<Root>/Inp_Tmax_rr' */
+real_T Regen_pressure_f;               /* '<Root>/Inp_pressure_f' */
+real_T Regen_pressure_r;               /* '<Root>/Inp_pressure_r' */
 
 /*===========*
  * Constants *
@@ -72,36 +72,41 @@ real_T Regen_Tm_rr;                    /* '<Root>/Inp_Tmax_rr' */
 void Regen_step(RT_MODEL_Regen *const Regen_M)
 {
   real_T Fx_f;
-  real_T Fx_f_hyd;
-  real_T Fx_r_hyd;
+  real_T Fx_f_tmp;
+  real_T Fx_f_tmp_0;
+  real_T rtb_Gain2;
   real_T tmp;
-  real_T tmp_0;
 
   /* MATLAB Function: '<S1>/MATLAB Function2' incorporates:
    *  Inport: '<Root>/Inp_pressure_f'
-   *  Inport: '<Root>/Inp_pressure_r'
+   *  MATLAB Function: '<S1>/MATLAB Function4'
    */
-  Fx_f_hyd = Regen_Inp_pressure_f * 0.1 * 490.62500000000006 * 2.0 * 0.42;
-  Fx_r_hyd = Regen_Inp_pressure_r * 0.1 * 490.62500000000006 * 4.0 * 0.42;
-  Fx_f = Fx_f_hyd * 69.0 / 203.0;
+  Fx_f_tmp = -Regen_pressure_f * 0.1 * 490.62500000000006 * 4.0 * 0.42;
+  Fx_f = Fx_f_tmp * 69.0 / 203.0;
 
   /* MATLAB Function: '<S1>/MATLAB Function3' incorporates:
    *  Inport: '<Root>/Inp_omega_inv_rl'
    */
   if (Regen_Inp_omega_inv_rl <= 300.0) {
-    tmp = -20.42861;
+    rtb_Gain2 = -20.42861;
   } else {
-    tmp = 0.0607143 * Regen_Inp_omega_inv_rl - 38.6429;
+    rtb_Gain2 = 0.0607143 * Regen_Inp_omega_inv_rl - 38.6429;
   }
 
   /* MATLAB Function: '<S1>/MATLAB Function1' incorporates:
    *  Inport: '<Root>/Inp_omega_inv_rr'
    */
   if (Regen_Inp_omega_inv_rr <= 300.0) {
-    tmp_0 = -20.42861;
+    tmp = -20.42861;
   } else {
-    tmp_0 = 0.0607143 * Regen_Inp_omega_inv_rr - 38.6429;
+    tmp = 0.0607143 * Regen_Inp_omega_inv_rr - 38.6429;
   }
+
+  /* MATLAB Function: '<S1>/MATLAB Function2' incorporates:
+   *  Inport: '<Root>/Inp_pressure_r'
+   *  MATLAB Function: '<S1>/MATLAB Function4'
+   */
+  Fx_f_tmp_0 = -Regen_pressure_r * 0.1 * 490.62500000000006 * 2.0 * 0.42;
 
   /* MinMax: '<S1>/Min' incorporates:
    *  Gain: '<S1>/Gain1'
@@ -112,8 +117,21 @@ void Regen_step(RT_MODEL_Regen *const Regen_M)
    *  Product: '<S1>/Product2'
    */
   Fx_f = fmax(fmax((((3198.788742857143 - sqrt(4.092899768571832E+7 -
-    4.1425668E+7 * Fx_f / 875.0) / 2.0) - Fx_f) * 203.0 / 78.75 - Fx_r_hyd) *
-                   78.75 * 0.001 * (2.0 * Regen_Inp_map_sc), tmp), tmp_0);
+    4.1425668E+7 * Fx_f / 875.0) / 2.0) - Fx_f) * 203.0 / 78.75 - Fx_f_tmp_0) *
+                   78.75 * 0.001 * (2.0 * Regen_Inp_map_sc), rtb_Gain2), tmp);
+
+  /* Switch: '<S7>/Switch2' incorporates:
+   *  Constant: '<S1>/Constant1'
+   *  RelationalOperator: '<S7>/LowerRelop1'
+   */
+  if (Fx_f > 59.737156511350051) {
+    Fx_f = 59.737156511350051;
+  }
+
+  /* End of Switch: '<S7>/Switch2' */
+
+  /* Gain: '<S1>/Gain2' */
+  rtb_Gain2 = 0.5 * Fx_f;
 
   /* Outport: '<Root>/Out_Tm_rr' incorporates:
    *  Inport: '<Root>/Inp_Tmax_rr'
@@ -121,7 +139,7 @@ void Regen_step(RT_MODEL_Regen *const Regen_M)
    *  Product: '<S1>/Product1'
    *  Sum: '<S1>/Add'
    */
-  Regen_Out_Tm_rr = Regen_Driver_req * Regen_Tm_rr + Fx_f;
+  Regen_Out_Tm_rr = Regen_Driver_req * Regen_Tm_rr + rtb_Gain2;
 
   /* Outport: '<Root>/Out_Tm_rl' incorporates:
    *  Inport: '<Root>/Inp_Tmax_rl'
@@ -129,14 +147,17 @@ void Regen_step(RT_MODEL_Regen *const Regen_M)
    *  Product: '<S1>/Product'
    *  Sum: '<S1>/Add1'
    */
-  Regen_Out_Tm_rl = Regen_Tm_rl * Regen_Driver_req + Fx_f;
+  Regen_Out_Tm_rl = Regen_Tm_rl * Regen_Driver_req + rtb_Gain2;
+
+  /* MATLAB Function: '<S1>/MATLAB Function4' */
+  rtb_Gain2 = Fx_f_tmp * 0.069;
 
   /* Outport: '<Root>/Out_brake_balance' incorporates:
    *  MATLAB Function: '<S1>/MATLAB Function'
-   *  MATLAB Function: '<S1>/MATLAB Function2'
+   *  MATLAB Function: '<S1>/MATLAB Function4'
    */
-  Regen_Out_brake_balance = Fx_f_hyd / ((Fx_f * 1000.0 / 78.75 + Fx_r_hyd) +
-    Fx_f_hyd);
+  Regen_Out_brake_balance = rtb_Gain2 / ((Fx_f * 4.5 * 0.93 + rtb_Gain2) +
+    Fx_f_tmp_0 * 0.07875);
   UNUSED_PARAMETER(Regen_M);
 }
 
@@ -149,8 +170,8 @@ void Regen_initialize(RT_MODEL_Regen *const Regen_M)
   rtmSetErrorStatus(Regen_M, (NULL));
 
   /* Storage classes */
-  Regen_Inp_pressure_f = 0.0;
-  Regen_Inp_pressure_r = 0.0;
+  Regen_pressure_f = 0.0;
+  Regen_pressure_r = 0.0;
   Regen_Inp_omega_inv_rl = 0.0;
   Regen_Inp_omega_inv_rr = 0.0;
   Regen_Driver_req = 0.0;
