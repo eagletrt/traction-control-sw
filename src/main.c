@@ -148,8 +148,7 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_Inp_Kp = 50.0;
 	SLIP_Inp_LambdaRef = 0.2;
 	SLIP_Inp_UppSatLim = 70.0;
-	SLIP_Inp_minT = 45.0;
-	SLIP_Inp_IntegralResetValue = 0;
+	SLIP_Inp_IntegralOffset = 20.0;
 }
 
 void torque_model_set_data(can_data_t *can_data) {
