@@ -119,7 +119,7 @@ void velocity_estimation(can_data_t *can_data, double *u_bar) {
 
 void regen_model_set_data(can_data_t *can_data) {
 	Regen_Driver_req = can_data->throttle * can_data->map_pw;
-	Regen_Inp_map_sc = - can_data->map_sc;
+	Regen_Inp_map_sc = can_data->map_sc;
 	Regen_Inp_omega_inv_rl = can_data->omega_rl;
 	Regen_Inp_omega_inv_rr = can_data->omega_rr;
 	Regen_pressure_f = can_data->brake_f;
@@ -186,7 +186,7 @@ void can_send_data() {
 	real_T tmax_rl;
 	real_T tmax_rr;
 
-#if 1		// REGEN
+#if 1 // REGEN
 	t_rl = Regen_Out_Tm_rl;
 	t_rr = Regen_Out_Tm_rr;
 	tmax_rl = Regen_Tm_rl;

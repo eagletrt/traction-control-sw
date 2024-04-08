@@ -209,6 +209,6 @@ static inline double inverter_convert_speed(double val) {
 }
 static inline double convert_gyro(double val) { return -val * M_PI / 180.0; };
 static inline double convert_accel(double val) { return -val * 9.81; };
-static inline double convert_brake(double val) { return val / 100.0; };
+static inline double convert_brake(double val) { return val; };
 static inline double convert_throttle(double val) { return val; };
 static inline double convert_steering_angle(double val) { return val * (M_PI / 180.0); };
