@@ -9,7 +9,7 @@
  *
  * Model version                  : 6.58
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Apr  6 13:56:23 2024
+ * C/C++ source code generated on : Sat Apr  6 15:18:37 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -71,6 +71,7 @@ extern real_T Regen_pressure_r;        /* '<Root>/Inp_pressure_r' */
  *
  * Block '<S7>/Data Type Duplicate' : Unused code path elimination
  * Block '<S7>/Data Type Propagation' : Unused code path elimination
+ * Block '<S1>/Scope1' : Unused code path elimination
  * Block '<S1>/Scope2' : Unused code path elimination
  * Block '<S1>/Scope3' : Unused code path elimination
  * Block '<S1>/Scope4' : Unused code path elimination

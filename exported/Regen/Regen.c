@@ -9,7 +9,7 @@
  *
  * Model version                  : 6.58
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Apr  6 13:56:23 2024
+ * C/C++ source code generated on : Sat Apr  6 15:18:37 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -84,7 +84,10 @@ void Regen_step(RT_MODEL_Regen *const Regen_M)
   /* MATLAB Function: '<S1>/MATLAB Function3' incorporates:
    *  Inport: '<Root>/Inp_omega_inv_rl'
    */
-  if (Regen_Inp_omega_inv_rl <= 300.0) {
+  if (Regen_Inp_omega_inv_rl <= 1.0) {
+    rtb_Switch2 = 0.0;
+  } else if ((Regen_Inp_omega_inv_rl <= 300.0) && (Regen_Inp_omega_inv_rl > 1.0))
+  {
     rtb_Switch2 = -20.42861;
   } else {
     rtb_Switch2 = 0.0607143 * Regen_Inp_omega_inv_rl - 38.6429;
@@ -93,7 +96,10 @@ void Regen_step(RT_MODEL_Regen *const Regen_M)
   /* MATLAB Function: '<S1>/MATLAB Function1' incorporates:
    *  Inport: '<Root>/Inp_omega_inv_rr'
    */
-  if (Regen_Inp_omega_inv_rr <= 300.0) {
+  if (Regen_Inp_omega_inv_rr <= 1.0) {
+    tmp = 0.0;
+  } else if ((Regen_Inp_omega_inv_rr <= 300.0) && (Regen_Inp_omega_inv_rr > 1.0))
+  {
     tmp = -20.42861;
   } else {
     tmp = 0.0607143 * Regen_Inp_omega_inv_rr - 38.6429;
