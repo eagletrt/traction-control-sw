@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.58
+ * Model version                  : 6.60
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Apr  6 13:58:17 2024
+ * C/C++ source code generated on : Sat Apr  6 21:16:21 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -27,12 +27,11 @@
 
 /* Data with Exported storage */
 real_T SLIP_Driver_req;                /* '<Root>/Inp_driver_request' */
-real_T SLIP_Inp_IntegralResetValue;    /* '<Root>/Inp_IntegralResetValue' */
+real_T SLIP_Inp_IntegralOffset;        /* '<Root>/Inp_IntegralOffset' */
 real_T SLIP_Inp_Ki;                    /* '<Root>/Inp_Ki' */
 real_T SLIP_Inp_Kp;                    /* '<Root>/Inp_Kp' */
 real_T SLIP_Inp_LambdaRef;             /* '<Root>/Inp_LambdaRef' */
 real_T SLIP_Inp_UppSatLim;             /* '<Root>/Inp_UppSatLim' */
-real_T SLIP_Inp_minT;                  /* '<Root>/Inp_minT' */
 real_T SLIP_Out_Debug_slip;            /* '<Root>/Out_Debug_slip' */
 real_T SLIP_Out_Tm_rl;                 /* '<Root>/Out_Tm_rl' */
 real_T SLIP_Out_Tm_rr;                 /* '<Root>/Out_Tm_rr' */
@@ -65,9 +64,9 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
 {
   DW_SLIP *SLIP_DW = SLIP_M->dwork;
   real_T Vmax;
+  real_T rtb_Add_h;
   real_T rtb_Rr;
   real_T rtb_Rr_j;
-  real_T rtb_Switch2_g;
   real_T rtb_error;
   real_T rtb_vms;
 
@@ -98,14 +97,14 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   /* Sum: '<S3>/Add1' incorporates:
    *  Inport: '<Root>/Inp_LambdaRef'
    */
-  rtb_Switch2_g = SLIP_Inp_LambdaRef - rtb_Rr;
+  rtb_error = SLIP_Inp_LambdaRef - rtb_Rr;
 
-  /* Product: '<S18>/Product1' incorporates:
+  /* Product: '<S17>/Product1' incorporates:
    *  Inport: '<Root>/Inp_Ki'
    */
-  rtb_Rr = rtb_Switch2_g * SLIP_Inp_Ki;
+  rtb_Rr = rtb_error * SLIP_Inp_Ki;
 
-  /* DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' incorporates:
+  /* DiscreteIntegrator: '<S17>/Discrete-Time Integrator1' incorporates:
    *  Constant: '<S3>/Constant1'
    *  Inport: '<Root>/Inp_driver_request'
    *  Sum: '<S3>/Add'
@@ -115,61 +114,60 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
     SLIP_DW->DiscreteTimeIntegrator1_DSTATE = 0.0;
   }
 
-  /* DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
+  /* DiscreteIntegrator: '<S17>/Discrete-Time Integrator1' */
   rtb_vms = 0.00025 * rtb_Rr + SLIP_DW->DiscreteTimeIntegrator1_DSTATE;
 
-  /* Sum: '<S18>/Add' incorporates:
-   *  Constant: '<S21>/Constant'
-   *  Constant: '<S3>/Constant1'
-   *  Inport: '<Root>/Inp_IntegralResetValue'
-   *  Inport: '<Root>/Inp_driver_request'
-   *  Product: '<S18>/Product'
-   *  RelationalOperator: '<S21>/Compare'
-   *  Sum: '<S3>/Add'
-   */
-  Vmax = (SLIP_Driver_req - 0.03 > 0.0 ? SLIP_Inp_IntegralResetValue : 0.0) +
-    rtb_vms;
+  /* DiscreteIntegrator: '<S17>/Discrete-Time Integrator1' */
+  if (rtb_vms < 0.0) {
+    /* DiscreteIntegrator: '<S17>/Discrete-Time Integrator1' */
+    rtb_vms = 0.0;
+  }
 
-  /* Switch: '<S20>/Switch2' incorporates:
+  /* Sum: '<S17>/Add' incorporates:
+   *  Inport: '<Root>/Inp_IntegralOffset'
+   */
+  Vmax = rtb_vms + SLIP_Inp_IntegralOffset;
+
+  /* Switch: '<S19>/Switch2' incorporates:
+   *  Constant: '<S12>/Constant'
    *  Inport: '<Root>/Inp_UppSatLim'
-   *  Inport: '<Root>/Inp_minT'
-   *  RelationalOperator: '<S20>/LowerRelop1'
-   *  RelationalOperator: '<S20>/UpperRelop'
-   *  Switch: '<S20>/Switch'
+   *  RelationalOperator: '<S19>/LowerRelop1'
+   *  RelationalOperator: '<S19>/UpperRelop'
+   *  Switch: '<S19>/Switch'
    */
   if (Vmax > SLIP_Inp_UppSatLim) {
     Vmax = SLIP_Inp_UppSatLim;
-  } else if (Vmax < SLIP_Inp_minT) {
-    /* Switch: '<S20>/Switch' incorporates:
-     *  Inport: '<Root>/Inp_minT'
+  } else if (Vmax < 0.0) {
+    /* Switch: '<S19>/Switch' incorporates:
+     *  Constant: '<S12>/Constant'
      */
-    Vmax = SLIP_Inp_minT;
+    Vmax = 0.0;
   }
 
-  /* Sum: '<S13>/Sum2' incorporates:
+  /* Sum: '<S12>/Sum2' incorporates:
    *  Inport: '<Root>/Inp_Kp'
-   *  Product: '<S19>/Product'
-   *  Switch: '<S20>/Switch2'
+   *  Product: '<S18>/Product'
+   *  Switch: '<S19>/Switch2'
    */
-  Vmax += rtb_Switch2_g * SLIP_Inp_Kp;
+  Vmax += rtb_error * SLIP_Inp_Kp;
 
-  /* Switch: '<S15>/Switch2' incorporates:
+  /* Switch: '<S14>/Switch2' incorporates:
+   *  Constant: '<S3>/Constant3'
    *  Inport: '<Root>/Inp_Tmax_rr'
-   *  Inport: '<Root>/Inp_minT'
-   *  RelationalOperator: '<S15>/LowerRelop1'
-   *  RelationalOperator: '<S15>/UpperRelop'
-   *  Switch: '<S15>/Switch'
+   *  RelationalOperator: '<S14>/LowerRelop1'
+   *  RelationalOperator: '<S14>/UpperRelop'
+   *  Switch: '<S14>/Switch'
    */
   if (Vmax > SLIP_Tm_rr) {
     Vmax = SLIP_Tm_rr;
-  } else if (Vmax < SLIP_Inp_minT) {
-    /* Switch: '<S15>/Switch' incorporates:
-     *  Inport: '<Root>/Inp_minT'
+  } else if (Vmax < 0.0) {
+    /* Switch: '<S14>/Switch' incorporates:
+     *  Constant: '<S3>/Constant3'
      */
-    Vmax = SLIP_Inp_minT;
+    Vmax = 0.0;
   }
 
-  /* End of Switch: '<S15>/Switch2' */
+  /* End of Switch: '<S14>/Switch2' */
 
   /* MATLAB Function: '<S3>/map' incorporates:
    *  Inport: '<Root>/Inp_Tmax_rr'
@@ -184,30 +182,30 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    */
   Vmax = SLIP_Driver_req * SLIP_Tm_rr;
 
-  /* Switch: '<S14>/Switch2' incorporates:
+  /* Switch: '<S13>/Switch2' incorporates:
    *  Constant: '<S3>/Constant2'
    *  Outport: '<Root>/Out_Tmax_rr_slip'
-   *  RelationalOperator: '<S14>/LowerRelop1'
-   *  RelationalOperator: '<S14>/UpperRelop'
-   *  Switch: '<S14>/Switch'
+   *  RelationalOperator: '<S13>/LowerRelop1'
+   *  RelationalOperator: '<S13>/UpperRelop'
+   *  Switch: '<S13>/Switch'
    */
   if (Vmax > SLIP_Out_Tmax_rr_slip) {
     /* Outport: '<Root>/Out_Tm_rr' */
     SLIP_Out_Tm_rr = SLIP_Out_Tmax_rr_slip;
   } else if (Vmax < 0.0) {
-    /* Switch: '<S14>/Switch' incorporates:
+    /* Switch: '<S13>/Switch' incorporates:
      *  Constant: '<S3>/Constant2'
      *  Outport: '<Root>/Out_Tm_rr'
      */
     SLIP_Out_Tm_rr = 0.0;
   } else {
     /* Outport: '<Root>/Out_Tm_rr' incorporates:
-     *  Switch: '<S14>/Switch'
+     *  Switch: '<S13>/Switch'
      */
     SLIP_Out_Tm_rr = Vmax;
   }
 
-  /* End of Switch: '<S14>/Switch2' */
+  /* End of Switch: '<S13>/Switch2' */
 
   /* Gain: '<S2>/Rr' incorporates:
    *  Inport: '<Root>/Inp_omega_rl'
@@ -219,16 +217,16 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Inport: '<Root>/Inp_Omega'
    *  Inport: '<Root>/Inp_u_bar'
    */
-  rtb_Switch2_g = SLIP_u_bar - 0.605 * SLIP_yaw_rate;
+  rtb_error = SLIP_u_bar - 0.605 * SLIP_yaw_rate;
 
   /* MATLAB Function: '<S2>/Slip_est1' incorporates:
    *  Constant: '<S2>/Constant'
    */
-  Vmax = fmax(fabs(rtb_Switch2_g), fabs(rtb_Rr_j));
+  Vmax = fmax(fabs(rtb_error), fabs(rtb_Rr_j));
   if (Vmax > 1.0) {
-    Vmax = fabs((rtb_Switch2_g - rtb_Rr_j) / Vmax);
+    Vmax = fabs((rtb_error - rtb_Rr_j) / Vmax);
   } else {
-    Vmax = fabs((rtb_Switch2_g - rtb_Rr_j) * 2.0 / (Vmax * Vmax + 1.0));
+    Vmax = fabs((rtb_error - rtb_Rr_j) * 2.0 / (Vmax * Vmax + 1.0));
   }
 
   /* End of MATLAB Function: '<S2>/Slip_est1' */
@@ -249,39 +247,38 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Sum: '<S2>/Add'
    */
   if ((SLIP_Driver_req - 0.03 > 0.0) &&
-      (SLIP_DW->DiscreteTimeIntegrator1_PrevR_k <= 0)) {
-    SLIP_DW->DiscreteTimeIntegrator1_DSTAT_g = 0.0;
+      (SLIP_DW->DiscreteTimeIntegrator1_PrevR_n <= 0)) {
+    SLIP_DW->DiscreteTimeIntegrator1_DSTAT_o = 0.0;
   }
 
   /* DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
-  rtb_Rr_j = 0.00025 * Vmax + SLIP_DW->DiscreteTimeIntegrator1_DSTAT_g;
+  rtb_Rr_j = 0.00025 * Vmax + SLIP_DW->DiscreteTimeIntegrator1_DSTAT_o;
+
+  /* DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
+  if (rtb_Rr_j < 0.0) {
+    /* DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
+    rtb_Rr_j = 0.0;
+  }
 
   /* Sum: '<S9>/Add' incorporates:
-   *  Constant: '<S12>/Constant'
-   *  Constant: '<S2>/Constant1'
-   *  Inport: '<Root>/Inp_IntegralResetValue'
-   *  Inport: '<Root>/Inp_driver_request'
-   *  Product: '<S9>/Product'
-   *  RelationalOperator: '<S12>/Compare'
-   *  Sum: '<S2>/Add'
+   *  Inport: '<Root>/Inp_IntegralOffset'
    */
-  rtb_Switch2_g = (SLIP_Driver_req - 0.03 > 0.0 ? SLIP_Inp_IntegralResetValue :
-                   0.0) + rtb_Rr_j;
+  rtb_Add_h = rtb_Rr_j + SLIP_Inp_IntegralOffset;
 
   /* Switch: '<S11>/Switch2' incorporates:
+   *  Constant: '<S4>/Constant'
    *  Inport: '<Root>/Inp_UppSatLim'
-   *  Inport: '<Root>/Inp_minT'
    *  RelationalOperator: '<S11>/LowerRelop1'
    *  RelationalOperator: '<S11>/UpperRelop'
    *  Switch: '<S11>/Switch'
    */
-  if (rtb_Switch2_g > SLIP_Inp_UppSatLim) {
-    rtb_Switch2_g = SLIP_Inp_UppSatLim;
-  } else if (rtb_Switch2_g < SLIP_Inp_minT) {
+  if (rtb_Add_h > SLIP_Inp_UppSatLim) {
+    rtb_Add_h = SLIP_Inp_UppSatLim;
+  } else if (rtb_Add_h < 0.0) {
     /* Switch: '<S11>/Switch' incorporates:
-     *  Inport: '<Root>/Inp_minT'
+     *  Constant: '<S4>/Constant'
      */
-    rtb_Switch2_g = SLIP_Inp_minT;
+    rtb_Add_h = 0.0;
   }
 
   /* End of Switch: '<S11>/Switch2' */
@@ -290,22 +287,22 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Inport: '<Root>/Inp_Kp'
    *  Product: '<S10>/Product'
    */
-  rtb_Switch2_g += rtb_error * SLIP_Inp_Kp;
+  rtb_error = rtb_error * SLIP_Inp_Kp + rtb_Add_h;
 
   /* Switch: '<S6>/Switch2' incorporates:
+   *  Constant: '<S2>/Constant3'
    *  Inport: '<Root>/Inp_Tmax_rl'
-   *  Inport: '<Root>/Inp_minT'
    *  RelationalOperator: '<S6>/LowerRelop1'
    *  RelationalOperator: '<S6>/UpperRelop'
    *  Switch: '<S6>/Switch'
    */
-  if (rtb_Switch2_g > SLIP_Tm_rl) {
-    rtb_Switch2_g = SLIP_Tm_rl;
-  } else if (rtb_Switch2_g < SLIP_Inp_minT) {
+  if (rtb_error > SLIP_Tm_rl) {
+    rtb_error = SLIP_Tm_rl;
+  } else if (rtb_error < 0.0) {
     /* Switch: '<S6>/Switch' incorporates:
-     *  Inport: '<Root>/Inp_minT'
+     *  Constant: '<S2>/Constant3'
      */
-    rtb_Switch2_g = SLIP_Inp_minT;
+    rtb_error = 0.0;
   }
 
   /* End of Switch: '<S6>/Switch2' */
@@ -315,13 +312,13 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Inport: '<Root>/Inp_map_sc'
    *  Outport: '<Root>/Out_Tmax_rl_slip'
    */
-  map(rtb_Switch2_g, SLIP_Tm_rl, SLIP_map_sc, &SLIP_Out_Tmax_rl_slip);
+  map(rtb_error, SLIP_Tm_rl, SLIP_map_sc, &SLIP_Out_Tmax_rl_slip);
 
   /* Product: '<S2>/Product' incorporates:
    *  Inport: '<Root>/Inp_Tmax_rl'
    *  Inport: '<Root>/Inp_driver_request'
    */
-  rtb_Switch2_g = SLIP_Driver_req * SLIP_Tm_rl;
+  rtb_error = SLIP_Driver_req * SLIP_Tm_rl;
 
   /* Switch: '<S5>/Switch2' incorporates:
    *  Constant: '<S2>/Constant2'
@@ -330,10 +327,10 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  RelationalOperator: '<S5>/UpperRelop'
    *  Switch: '<S5>/Switch'
    */
-  if (rtb_Switch2_g > SLIP_Out_Tmax_rl_slip) {
+  if (rtb_error > SLIP_Out_Tmax_rl_slip) {
     /* Outport: '<Root>/Out_Tm_rl' */
     SLIP_Out_Tm_rl = SLIP_Out_Tmax_rl_slip;
-  } else if (rtb_Switch2_g < 0.0) {
+  } else if (rtb_error < 0.0) {
     /* Switch: '<S5>/Switch' incorporates:
      *  Constant: '<S2>/Constant2'
      *  Outport: '<Root>/Out_Tm_rl'
@@ -343,45 +340,54 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
     /* Outport: '<Root>/Out_Tm_rl' incorporates:
      *  Switch: '<S5>/Switch'
      */
-    SLIP_Out_Tm_rl = rtb_Switch2_g;
+    SLIP_Out_Tm_rl = rtb_error;
   }
 
   /* End of Switch: '<S5>/Switch2' */
 
-  /* Update for DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' incorporates:
-   *  Constant: '<S2>/Constant1'
+  /* Update for DiscreteIntegrator: '<S17>/Discrete-Time Integrator1' incorporates:
    *  Constant: '<S3>/Constant1'
-   *  DiscreteIntegrator: '<S9>/Discrete-Time Integrator1'
    *  Inport: '<Root>/Inp_driver_request'
-   *  Sum: '<S2>/Add'
    *  Sum: '<S3>/Add'
    */
   SLIP_DW->DiscreteTimeIntegrator1_DSTATE = 0.00025 * rtb_Rr + rtb_vms;
-  if (SLIP_Driver_req - 0.03 > 0.0) {
-    SLIP_DW->DiscreteTimeIntegrator1_PrevRes = 1;
-    SLIP_DW->DiscreteTimeIntegrator1_PrevR_k = 1;
-  } else {
-    if (SLIP_Driver_req - 0.03 < 0.0) {
-      SLIP_DW->DiscreteTimeIntegrator1_PrevRes = -1;
-    } else if (SLIP_Driver_req - 0.03 == 0.0) {
-      SLIP_DW->DiscreteTimeIntegrator1_PrevRes = 0;
-    } else {
-      SLIP_DW->DiscreteTimeIntegrator1_PrevRes = 2;
-    }
-
-    if (SLIP_Driver_req - 0.03 < 0.0) {
-      SLIP_DW->DiscreteTimeIntegrator1_PrevR_k = -1;
-    } else if (SLIP_Driver_req - 0.03 == 0.0) {
-      SLIP_DW->DiscreteTimeIntegrator1_PrevR_k = 0;
-    } else {
-      SLIP_DW->DiscreteTimeIntegrator1_PrevR_k = 2;
-    }
+  if (SLIP_DW->DiscreteTimeIntegrator1_DSTATE < 0.0) {
+    SLIP_DW->DiscreteTimeIntegrator1_DSTATE = 0.0;
   }
 
-  /* End of Update for DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
+  if (SLIP_Driver_req - 0.03 > 0.0) {
+    SLIP_DW->DiscreteTimeIntegrator1_PrevRes = 1;
+  } else if (SLIP_Driver_req - 0.03 < 0.0) {
+    SLIP_DW->DiscreteTimeIntegrator1_PrevRes = -1;
+  } else if (SLIP_Driver_req - 0.03 == 0.0) {
+    SLIP_DW->DiscreteTimeIntegrator1_PrevRes = 0;
+  } else {
+    SLIP_DW->DiscreteTimeIntegrator1_PrevRes = 2;
+  }
 
-  /* Update for DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
-  SLIP_DW->DiscreteTimeIntegrator1_DSTAT_g = 0.00025 * Vmax + rtb_Rr_j;
+  /* End of Update for DiscreteIntegrator: '<S17>/Discrete-Time Integrator1' */
+
+  /* Update for DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' incorporates:
+   *  Constant: '<S2>/Constant1'
+   *  Inport: '<Root>/Inp_driver_request'
+   *  Sum: '<S2>/Add'
+   */
+  SLIP_DW->DiscreteTimeIntegrator1_DSTAT_o = 0.00025 * Vmax + rtb_Rr_j;
+  if (SLIP_DW->DiscreteTimeIntegrator1_DSTAT_o < 0.0) {
+    SLIP_DW->DiscreteTimeIntegrator1_DSTAT_o = 0.0;
+  }
+
+  if (SLIP_Driver_req - 0.03 > 0.0) {
+    SLIP_DW->DiscreteTimeIntegrator1_PrevR_n = 1;
+  } else if (SLIP_Driver_req - 0.03 < 0.0) {
+    SLIP_DW->DiscreteTimeIntegrator1_PrevR_n = -1;
+  } else if (SLIP_Driver_req - 0.03 == 0.0) {
+    SLIP_DW->DiscreteTimeIntegrator1_PrevR_n = 0;
+  } else {
+    SLIP_DW->DiscreteTimeIntegrator1_PrevR_n = 2;
+  }
+
+  /* End of Update for DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
 }
 
 /* Model initialize function */
@@ -403,9 +409,8 @@ void SLIP_initialize(RT_MODEL_SLIP *const SLIP_M)
   SLIP_Inp_LambdaRef = 0.0;
   SLIP_Inp_Kp = 0.0;
   SLIP_Inp_Ki = 0.0;
-  SLIP_Inp_minT = 0.0;
   SLIP_Inp_UppSatLim = 0.0;
-  SLIP_Inp_IntegralResetValue = 0.0;
+  SLIP_Inp_IntegralOffset = 0.0;
 
   /* Storage classes */
   SLIP_Out_Tm_rr = 0.0;
@@ -418,11 +423,11 @@ void SLIP_initialize(RT_MODEL_SLIP *const SLIP_M)
   (void) memset((void *)SLIP_DW, 0,
                 sizeof(DW_SLIP));
 
-  /* InitializeConditions for DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
+  /* InitializeConditions for DiscreteIntegrator: '<S17>/Discrete-Time Integrator1' */
   SLIP_DW->DiscreteTimeIntegrator1_PrevRes = 2;
 
   /* InitializeConditions for DiscreteIntegrator: '<S9>/Discrete-Time Integrator1' */
-  SLIP_DW->DiscreteTimeIntegrator1_PrevR_k = 2;
+  SLIP_DW->DiscreteTimeIntegrator1_PrevR_n = 2;
 
   /* ConstCode for Outport: '<Root>/Out_Debug_slip' incorporates:
    *  Constant: '<S3>/Constant4'
