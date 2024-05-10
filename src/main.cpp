@@ -4,6 +4,7 @@ extern "C" {
 #include "inc/defines.h"
 #include "inc/benchmark.h"
 }
+#include "external/soc/core/src/soc/soc.hpp"
 
 #include <math.h>
 #include <unistd.h>

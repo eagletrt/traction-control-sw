@@ -29,7 +29,7 @@
 // MACRO FUNCTIONS
 #define eprintf(m, ...) fprintf(stderr, "\033[1;31m*** ERROR: \033[0m" m, ##__VA_ARGS__)
 
-#define wprintf(m, ...) fprintf(stderr, "\033[1;33m*** WARNING: \033[0m" m, ##__VA_ARGS__)
+// #define wprintf(m, ...) fprintf(stderr, "\033[1;33m*** WARNING: \033[0m" m, ##__VA_ARGS__)
 
 #define UNUSED(x) (void)(x)
 

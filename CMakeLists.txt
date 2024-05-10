@@ -15,6 +15,9 @@ include_directories(
 
     # exported
     ${CMAKE_CURRENT_LIST_DIR}/exported/lib
+
+    # external
+    ${CMAKE_CURRENT_LIST_DIR}/external/soc/external
 )
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/external/soc)
