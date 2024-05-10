@@ -1,6 +1,9 @@
-#include "inc/main.h"
+#include "inc/main.hpp"
+#include "inc/can_messages.h"
+extern "C" {
 #include "inc/defines.h"
 #include "inc/benchmark.h"
+}
 
 #include <math.h>
 #include <unistd.h>
@@ -25,22 +28,25 @@ int main(void) {
 	kill_can_thread = false;
 	pthread_mutex_init(&model_mutex, NULL);
 
-	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
+	can_init(&can[CAN_SOCKET_PRIMARY], "vcan0");
 	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
 		return EXIT_FAILURE;
 	}
-	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_PRIMARY);
+	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, can_thread, &can[CAN_SOCKET_PRIMARY]);
 #if 0 == SIMULATOR
-	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
+	can_init(&can[CAN_SOCKET_SECONDARY], "vcan1");
 	if (can_open_socket(&can[CAN_SOCKET_SECONDARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_SECONDARY].device);
 		return EXIT_FAILURE;
 	}
-	pthread_create(&can_threads[CAN_SOCKET_SECONDARY], NULL, (void *)can_thread, (void *)CAN_SOCKET_SECONDARY);
+	pthread_create(&can_threads[CAN_SOCKET_SECONDARY], NULL, can_thread, &can[CAN_SOCKET_SECONDARY]);
 #endif
 
-	fprintf(stdout, "\n");
+	usleep(1000);
+
+	printf("Starting...\n");
+
 	running = true;
 	while (running) {
 		BENCHMARK_TICK();
@@ -77,15 +83,24 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-void can_thread(can_socket_t socket) {
+void *can_thread(void *data) {
+	can_socket_t socket;
 	can_message_t message;
 	struct can_frame frame;
 
+	if (data == &can[CAN_SOCKET_PRIMARY]) {
+		socket = CAN_SOCKET_PRIMARY;
+		printf("Start CAN primary reader\n");
+	} else {
+		socket = CAN_SOCKET_SECONDARY;
+		printf("Start CAN secondary reader\n");
+	}
+
 	message.socket = socket;
-	message.can = &can[socket];
+	message.can = (can_t *)data;
 	while (!kill_can_thread) {
-		if (can_receive(&can[socket], &frame) < 0) {
-			eprintf("Error reading from socket %s\n", can[socket].device);
+		if (can_receive(message.can, &frame) < 0) {
+			eprintf("Error reading from socket %s\n", message.can->device);
 			continue;
 		}
 		message.frame = frame;
@@ -94,6 +109,7 @@ void can_thread(can_socket_t socket) {
 		can_messages_parse(&message, &can_data);
 		pthread_mutex_unlock(&model_mutex);
 	}
+	return NULL;
 }
 
 bool init_model(void) {

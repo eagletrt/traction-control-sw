@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 
+extern "C" {
 #include "inc/can.h"
 #include "inc/data.h"
 #include "inc/can_messages.h"
@@ -19,6 +20,7 @@
 #include "exported/Regen/Regen.h"
 #include "exported/Slip_Control/SLIP.h"
 #include "exported/Traction_Control/TV.h"
+}
 
 bool running;
 can_t can[CAN_SOCKET_COUNT];
@@ -47,7 +49,7 @@ bool kill_can_thread;
 pthread_mutex_t model_mutex;
 pthread_t can_threads[CAN_SOCKET_COUNT];
 
-void can_thread(can_socket_t socket);
+void *can_thread(void *);
 void can_send_data();
 void sig_handler(int signo);
 

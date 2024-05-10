@@ -56,3 +56,4 @@ build/
 build_cross/
 benchmark.json
 .vscode/
+.cache/

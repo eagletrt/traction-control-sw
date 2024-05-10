@@ -17,6 +17,8 @@ include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/exported/lib
 )
 
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/external/soc)
+
 add_library(
     exported
     STATIC
@@ -43,5 +45,5 @@ target_link_libraries(traction-control-lib can-lib m pthread)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
 
-add_executable(traction-control src/main.c)
-target_link_libraries(traction-control exported traction-control-lib)
+add_executable(traction-control src/main.cpp)
+target_link_libraries(traction-control exported traction-control-lib soclib)
