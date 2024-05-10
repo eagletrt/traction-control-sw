@@ -49,35 +49,44 @@ int main(void) {
 	printf("Starting...\n");
 
 	running = true;
+	uint64_t last_soc_step = get_timestamp_u();
 	while (running) {
 		BENCHMARK_TICK();
+		uint64_t t_loop_start = get_timestamp_u();
 		{
 			BENCHMARK_TICK();
 			pthread_mutex_lock(&model_mutex);
-
-			// Velocity Estimation
 			velocity_estimation(&can_data, &u_bar);
+			torque_model_set_data(&can_data);
+			slip_model_set_data(&can_data);
+			regen_model_set_data(&can_data);
+			pthread_mutex_unlock(&model_mutex);
 
 			// Slip Control
-			slip_model_set_data(&can_data);
 			SLIP_step(&slip_model);
 			// Torque Vectoring
-			torque_model_set_data(&can_data);
 			TV_step(&torque_model);
-
 			// Regen
-			regen_model_set_data(&can_data);
 			Regen_step(&regen_model);
 
-			pthread_mutex_unlock(&model_mutex);
+			uint64_t soc_dt_us = get_timestamp_u() - last_soc_step;
+			if (1e6 / SOC_UPDATE_FREQUENCY <= soc_dt_us) {
+				soc.setDT(soc_dt_us / 1e6);
+				soc.setTemperature(can_data.hv_mean_temp);
+				soc.predict(can_data.hv_total_current / 4.0);
+				soc.update(can_data.hv_min_cell_voltage);
+				last_soc_step = get_timestamp_u();
+			}
+
 			BENCHMARK_TOCK();
 		}
 
 		can_send_data();
 
 		BENCHMARK_TOCK();
+		uint64_t loop_duration = get_timestamp_u() - t_loop_start;
 
-		usleep(1.0 / RUN_FREQUENCY * 1e6);
+		usleep(1e6 / RUN_FREQUENCY - loop_duration);
 	}
 
 	BENCHMARK_END();
@@ -192,7 +201,11 @@ void torque_model_set_data(can_data_t *can_data) {
 void can_send_data() {
 	static uint8_t data[8];
 	uint64_t timestamp = get_timestamp_u();
-	static uint64_t out_timestamp = 0, state_timestamp = 0, debug_timestamp = 0;
+	static uint64_t out_timestamp = 0;
+	static uint64_t state_timestamp = 0;
+	static uint64_t debug_timestamp = 0;
+	static uint64_t soc_state_timestamp = 0;
+	static uint64_t soc_cov_timestamp = 0;
 
 	real_T map_sc = SLIP_map_sc;
 	real_T map_tv = TV_map_tv;
@@ -219,7 +232,7 @@ void can_send_data() {
 	tmax_rr = TV_Tm_rr;
 #endif
 
-	if (timestamp - 10 * 1e3 > out_timestamp) {
+	if (timestamp - out_timestamp > 1e4) {
 		out_timestamp = timestamp;
 
 #if 1 == SIMULATOR
@@ -247,7 +260,7 @@ void can_send_data() {
 #endif
 	}
 
-	if ((timestamp + 2) - 10 * 1e3 > state_timestamp) {
+	if (timestamp - state_timestamp > 1e4) {
 		state_timestamp = timestamp;
 
 #if 1 == SIMULATOR
@@ -270,7 +283,7 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_STATUS_FRAME_ID, data, PRIMARY_CONTROL_STATUS_BYTE_SIZE);
 #endif
 	}
-	if ((timestamp + 4) - 10 * 1e3 > debug_timestamp) {
+	if (timestamp - debug_timestamp > 1e4) {
 		debug_timestamp = timestamp;
 		static primary_debug_signal_1_converted_t debug_src;
 		debug_src.field_1 = Regen_Out_brake_balance;
@@ -280,6 +293,34 @@ void can_send_data() {
 		primary_debug_signal_1_conversion_to_raw_struct(&debug_src_raw, &debug_src);
 		primary_debug_signal_1_pack(data, &debug_src_raw, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
+	}
+	if (timestamp - soc_state_timestamp > 1e5) {
+		soc_state_timestamp = timestamp;
+		const auto &state = soc.getState();
+		static secondary_hv_soc_estimation_state_converted_t hv_soc_estimation_state;
+		hv_soc_estimation_state.soc = state(_SOC);
+		hv_soc_estimation_state.rc1 = state(_RC1);
+		hv_soc_estimation_state.rc2 = state(_RC2);
+
+		secondary_hv_soc_estimation_state_t raw;
+		secondary_hv_soc_estimation_state_conversion_to_raw_struct(&raw, &hv_soc_estimation_state);
+		secondary_hv_soc_estimation_state_pack(data, &raw, SECONDARY_HV_SOC_ESTIMATION_STATE_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_HV_SOC_ESTIMATION_STATE_FRAME_ID, data,
+						 SECONDARY_HV_SOC_ESTIMATION_STATE_BYTE_SIZE);
+	}
+	if (timestamp - soc_cov_timestamp > 1e5) {
+		soc_cov_timestamp = timestamp;
+		const auto &covariance = soc.getCovariance();
+		static secondary_hv_soc_estimation_covariance_converted_t hv_soc_estimation_covariance;
+		hv_soc_estimation_covariance.soc = covariance(_SOC, _SOC);
+		hv_soc_estimation_covariance.rc1 = covariance(_RC1, _RC1);
+		hv_soc_estimation_covariance.rc2 = covariance(_RC2, _RC2);
+
+		secondary_hv_soc_estimation_covariance_t raw;
+		secondary_hv_soc_estimation_covariance_conversion_to_raw_struct(&raw, &hv_soc_estimation_covariance);
+		secondary_hv_soc_estimation_covariance_pack(data, &raw, SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_FRAME_ID, data,
+						 SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
 	}
 }
 

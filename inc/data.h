@@ -19,6 +19,9 @@ typedef struct {
 	double map_pw;
 	double map_sc;
 	double map_tv;
+	double hv_min_cell_voltage;
+	double hv_total_current;
+	double hv_mean_temp;
 } can_data_t;
 
 #endif // __DATA_H__

@@ -1,6 +1,7 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
+#include "external/soc/core/src/soc/soc.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -36,6 +37,8 @@ DW_SLIP slip_rtDW;
 RT_MODEL_SLIP slip_model;
 
 RT_MODEL_Regen regen_model;
+
+SOC soc;
 
 bool init_model(void);
 double torque_max(can_data_t *can_data);

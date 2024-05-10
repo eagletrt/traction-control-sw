@@ -14,7 +14,8 @@
 #define SIMULATOR 0
 
 #define BENCHMARK 0
-#define RUN_FREQUENCY 500 // Hz
+#define RUN_FREQUENCY 500				// Hz
+#define SOC_UPDATE_FREQUENCY 20 // Hz
 
 #define SLIP_PEAK 60.0
 #define SLIP_SPEED_CUTOFF 3.0

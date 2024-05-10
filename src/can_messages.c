@@ -118,6 +118,23 @@ static inline void can_messages_parse_primary(can_message_t *message, can_data_t
 		can_data->map_tv = power_maps->map_tv;
 		break;
 	}
+	case PRIMARY_HV_CURRENT_FRAME_ID: {
+		primary_hv_current_converted_t *hv_current = (primary_hv_current_converted_t *)can_devices.message;
+		can_data->hv_total_current = hv_current->current;
+		break;
+	}
+	case PRIMARY_HV_CELLS_VOLTAGE_STATS_FRAME_ID: {
+		primary_hv_cells_voltage_stats_converted_t *hv_cells_volts_stats =
+				(primary_hv_cells_voltage_stats_converted_t *)can_devices.message;
+		can_data->hv_min_cell_voltage = hv_cells_volts_stats->min;
+		break;
+	}
+	case PRIMARY_HV_CELLS_TEMP_STATS_FRAME_ID: {
+		primary_hv_cells_temp_stats_converted_t *hv_cells_temps_stats =
+				(primary_hv_cells_temp_stats_converted_t *)can_devices.message;
+		can_data->hv_min_cell_voltage = hv_cells_temps_stats->min;
+		break;
+	}
 	default:
 		break;
 	}
