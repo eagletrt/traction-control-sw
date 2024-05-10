@@ -11,11 +11,11 @@ extern "C" {
 #include "inc/data.h"
 #include "inc/can_messages.h"
 
-#include "lib/can/lib/primary/primary_network.h"
-#include "lib/can/lib/primary/primary_watchdog.h"
-#include "lib/can/lib/secondary/secondary_network.h"
-#include "lib/can/lib/secondary/secondary_watchdog.h"
-#include "lib/can/lib/simulator/simulator_network.h"
+#include "external/can/lib/primary/primary_network.h"
+#include "external/can/lib/primary/primary_watchdog.h"
+#include "external/can/lib/secondary/secondary_network.h"
+#include "external/can/lib/secondary/secondary_watchdog.h"
+#include "external/can/lib/simulator/simulator_network.h"
 
 #include "exported/Regen/Regen.h"
 #include "exported/Slip_Control/SLIP.h"

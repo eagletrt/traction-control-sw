@@ -7,7 +7,7 @@ add_compile_definitions(CANLIB_TIMESTAMP)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB traction-control-lib-src ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
-file(GLOB can-lib-src ${CMAKE_CURRENT_LIST_DIR}/lib/can/**/**/*.c)
+file(GLOB can-lib-src ${CMAKE_CURRENT_LIST_DIR}/external/can/**/**/*.c)
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}

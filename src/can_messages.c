@@ -4,10 +4,10 @@
 #include "inc/benchmark.h"
 
 #define CANLIB_DEVICE_IMPLEMENTATION
-#include "lib/can/lib/primary/primary_network.h"
-#include "lib/can/lib/secondary/secondary_network.h"
-#include "lib/can/lib/inverters/inverters_network.h"
-#include "lib/can/lib/simulator/simulator_network.h"
+#include "external/can/lib/primary/primary_network.h"
+#include "external/can/lib/secondary/secondary_network.h"
+#include "external/can/lib/inverters/inverters_network.h"
+#include "external/can/lib/simulator/simulator_network.h"
 
 #include <assert.h>
 
