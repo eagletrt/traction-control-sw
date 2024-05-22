@@ -71,11 +71,13 @@ int main(void) {
 
 			uint64_t soc_dt_us = get_timestamp_u() - last_soc_step;
 			if (1e6 / SOC_UPDATE_FREQUENCY <= soc_dt_us) {
+				auto t1 = get_timestamp_u();
 				soc.setDT(soc_dt_us / 1e6);
 				soc.setTemperature(can_data.hv_mean_temp);
 				soc.predict(can_data.hv_total_current / 4.0);
 				soc.update(can_data.hv_min_cell_voltage);
 				last_soc_step = get_timestamp_u();
+				printf("%" PRIu64 "\n", get_timestamp_u() - t1);
 			}
 
 			BENCHMARK_TOCK();
