@@ -3,11 +3,11 @@
 #include "inc/can_messages.h"
 #include "inc/benchmark.h"
 
-#define CANLIB_DEVICE_IMPLEMENTATION
 #include "external/can/lib/primary/primary_network.h"
 #include "external/can/lib/secondary/secondary_network.h"
 #include "external/can/lib/inverters/inverters_network.h"
 #include "external/can/lib/simulator/simulator_network.h"
+#include "external/can/lib/canlib_device.h"
 
 #include <assert.h>
 
