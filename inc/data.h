@@ -22,6 +22,9 @@ typedef struct {
 	double hv_min_cell_voltage;
 	double hv_total_current;
 	double hv_mean_temp;
+	double lv_min_cell_voltage;
+	double lv_total_current;
+	double lv_mean_temp;
 } can_data_t;
 
 #endif // __DATA_H__

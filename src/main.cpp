@@ -71,10 +71,17 @@ int main(void) {
 
 			uint64_t soc_dt_us = get_timestamp_u() - last_soc_step;
 			if (1e6 / SOC_UPDATE_FREQUENCY <= soc_dt_us) {
-				soc.setDT(soc_dt_us / 1e6);
-				soc.setTemperature(can_data.hv_mean_temp);
-				soc.predict(can_data.hv_total_current / 4.0);
-				soc.update(can_data.hv_min_cell_voltage);
+				// HV
+				hvSOC.setDT(soc_dt_us / 1e6);
+				hvSOC.setTemperature(can_data.hv_mean_temp);
+				hvSOC.predict(can_data.hv_total_current / 4.0);
+				hvSOC.update(can_data.hv_min_cell_voltage);
+				// LV
+				lvSOC.setDT(soc_dt_us / 1e6);
+				lvSOC.setTemperature(can_data.lv_mean_temp);
+				lvSOC.predict(can_data.lv_total_current / 4.0);
+				lvSOC.update(can_data.lv_min_cell_voltage);
+
 				last_soc_step = get_timestamp_u();
 			}
 
@@ -204,8 +211,10 @@ void can_send_data() {
 	static uint64_t out_timestamp = 0;
 	static uint64_t state_timestamp = 0;
 	static uint64_t debug_timestamp = 0;
-	static uint64_t soc_state_timestamp = 0;
-	static uint64_t soc_cov_timestamp = 0;
+	static uint64_t hv_soc_state_timestamp = 0;
+	static uint64_t hv_soc_cov_timestamp = 0;
+	static uint64_t lv_soc_state_timestamp = 0;
+	static uint64_t lv_soc_cov_timestamp = 0;
 
 	real_T map_sc = SLIP_map_sc;
 	real_T map_tv = TV_map_tv;
@@ -294,9 +303,9 @@ void can_send_data() {
 		primary_debug_signal_1_pack(data, &debug_src_raw, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
 	}
-	if (timestamp - soc_state_timestamp > 1e5) {
-		soc_state_timestamp = timestamp;
-		const auto &state = soc.getState();
+	if (timestamp - hv_soc_state_timestamp > 1e5) {
+		hv_soc_state_timestamp = timestamp;
+		const auto &state = hvSOC.getState();
 		static secondary_hv_soc_estimation_state_converted_t hv_soc_estimation_state;
 		hv_soc_estimation_state.soc = state(_SOC);
 		hv_soc_estimation_state.rc1 = state(_RC1);
@@ -308,9 +317,9 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_HV_SOC_ESTIMATION_STATE_FRAME_ID, data,
 						 SECONDARY_HV_SOC_ESTIMATION_STATE_BYTE_SIZE);
 	}
-	if (timestamp - soc_cov_timestamp > 1e5) {
-		soc_cov_timestamp = timestamp;
-		const auto &covariance = soc.getCovariance();
+	if (timestamp - hv_soc_cov_timestamp > 1e5) {
+		hv_soc_cov_timestamp = timestamp;
+		const auto &covariance = hvSOC.getCovariance();
 		static secondary_hv_soc_estimation_covariance_converted_t hv_soc_estimation_covariance;
 		hv_soc_estimation_covariance.soc = covariance(_SOC, _SOC);
 		hv_soc_estimation_covariance.rc1 = covariance(_RC1, _RC1);
@@ -321,6 +330,34 @@ void can_send_data() {
 		secondary_hv_soc_estimation_covariance_pack(data, &raw, SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_FRAME_ID, data,
 						 SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
+	}
+	if (timestamp - lv_soc_state_timestamp > 1e5) {
+		lv_soc_state_timestamp = timestamp;
+		const auto &state = lvSOC.getState();
+		static secondary_lv_soc_estimation_state_converted_t lv_soc_estimation_state;
+		lv_soc_estimation_state.soc = state(_SOC);
+		lv_soc_estimation_state.rc1 = state(_RC1);
+		lv_soc_estimation_state.rc2 = state(_RC2);
+
+		secondary_lv_soc_estimation_state_t raw;
+		secondary_lv_soc_estimation_state_conversion_to_raw_struct(&raw, &lv_soc_estimation_state);
+		secondary_lv_soc_estimation_state_pack(data, &raw, SECONDARY_LV_SOC_ESTIMATION_STATE_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_LV_SOC_ESTIMATION_STATE_FRAME_ID, data,
+						 SECONDARY_LV_SOC_ESTIMATION_STATE_BYTE_SIZE);
+	}
+	if (timestamp - lv_soc_cov_timestamp > 1e5) {
+		lv_soc_cov_timestamp = timestamp;
+		const auto &covariance = lvSOC.getCovariance();
+		static secondary_lv_soc_estimation_covariance_converted_t lv_soc_estimation_covariance;
+		lv_soc_estimation_covariance.soc = covariance(_SOC, _SOC);
+		lv_soc_estimation_covariance.rc1 = covariance(_RC1, _RC1);
+		lv_soc_estimation_covariance.rc2 = covariance(_RC2, _RC2);
+
+		secondary_lv_soc_estimation_covariance_t raw;
+		secondary_lv_soc_estimation_covariance_conversion_to_raw_struct(&raw, &lv_soc_estimation_covariance);
+		secondary_lv_soc_estimation_covariance_pack(data, &raw, SECONDARY_LV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_LV_SOC_ESTIMATION_COVARIANCE_FRAME_ID, data,
+						 SECONDARY_LV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
 	}
 }
 

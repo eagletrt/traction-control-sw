@@ -38,7 +38,8 @@ RT_MODEL_SLIP slip_model;
 
 RT_MODEL_Regen regen_model;
 
-SOC soc;
+SOC hvSOC;
+SOC lvSOC;
 
 bool init_model(void);
 double torque_max(can_data_t *can_data);

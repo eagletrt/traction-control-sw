@@ -135,6 +135,23 @@ static inline void can_messages_parse_primary(can_message_t *message, can_data_t
 		can_data->hv_mean_temp = hv_cells_temps_stats->min;
 		break;
 	}
+	case PRIMARY_LV_CURRENT_BATTERY_FRAME_ID: {
+		primary_lv_current_battery_converted_t *lv_current = (primary_lv_current_battery_converted_t *)can_devices.message;
+		can_data->lv_total_current = lv_current->lv_current;
+		break;
+	}
+	case PRIMARY_LV_CELLS_VOLTAGE_STATS_FRAME_ID: {
+		primary_lv_cells_voltage_stats_converted_t *lv_cells_volts_stats =
+				(primary_lv_cells_voltage_stats_converted_t *)can_devices.message;
+		can_data->lv_min_cell_voltage = lv_cells_volts_stats->min;
+		break;
+	}
+	case PRIMARY_LV_CELLS_TEMP_STATS_FRAME_ID: {
+		primary_lv_cells_temp_stats_converted_t *lv_cells_temps_stats =
+				(primary_lv_cells_temp_stats_converted_t *)can_devices.message;
+		can_data->lv_mean_temp = lv_cells_temps_stats->min;
+		break;
+	}
 	default:
 		break;
 	}
