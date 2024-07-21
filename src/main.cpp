@@ -1,7 +1,7 @@
 #include "inc/main.hpp"
-#include "inc/can_messages.h"
 extern "C" {
 #include "inc/defines.h"
+#include "inc/can_messages.h"
 #include "inc/benchmark.h"
 }
 #include "external/soc/core/src/soc/soc.hpp"
@@ -174,10 +174,10 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_omega_rl = can_data->omega_rl;
 	SLIP_omega_rr = can_data->omega_rr;
 
-	SLIP_Tm_rl = torque_max(can_data);
-	SLIP_Tm_rr = torque_max(can_data);
+	SLIP_Tmax_rl = torque_max(can_data);
+	SLIP_Tmax_rr = torque_max(can_data);
 
-	SLIP_u_bar = can_data->u;
+	SLIP_u = can_data->u;
 
 	SLIP_Inp_Ki = 40000.0;
 	SLIP_Inp_Kp = 50.0;
@@ -226,12 +226,12 @@ void can_send_data() {
 	real_T tmax_rl;
 	real_T tmax_rr;
 
-#if 1 // REGEN
+#if 0		// REGEN
 	t_rl = Regen_Out_Tm_rl;
 	t_rr = Regen_Out_Tm_rr;
 	tmax_rl = Regen_Tm_rl;
 	tmax_rr = Regen_Tm_rr;
-#elif 0 // ONLY SLIP
+#elif 1 // ONLY SLIP
 	t_rl = SLIP_Out_Tm_rl;
 	t_rr = SLIP_Out_Tm_rr;
 	tmax_rl = SLIP_Out_Tmax_rl_slip;

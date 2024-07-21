@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.60
+ * Model version                  : 6.194
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Apr  6 21:16:21 2024
+ * C/C++ source code generated on : Sun Jul 21 11:37:30 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -45,9 +45,9 @@ typedef struct tag_RTM_SLIP RT_MODEL_SLIP;
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
   real_T DiscreteTimeIntegrator1_DSTATE;/* '<S17>/Discrete-Time Integrator1' */
-  real_T DiscreteTimeIntegrator1_DSTAT_o;/* '<S9>/Discrete-Time Integrator1' */
+  real_T DiscreteTimeIntegrator1_DSTAT_j;/* '<S9>/Discrete-Time Integrator1' */
   int8_T DiscreteTimeIntegrator1_PrevRes;/* '<S17>/Discrete-Time Integrator1' */
-  int8_T DiscreteTimeIntegrator1_PrevR_n;/* '<S9>/Discrete-Time Integrator1' */
+  int8_T DiscreteTimeIntegrator1_PrevR_h;/* '<S9>/Discrete-Time Integrator1' */
 } DW_SLIP;
 
 /* Real-time Model Data Structure */
@@ -74,17 +74,18 @@ extern real_T SLIP_Out_Tm_rl;          /* '<Root>/Out_Tm_rl' */
 extern real_T SLIP_Out_Tm_rr;          /* '<Root>/Out_Tm_rr' */
 extern real_T SLIP_Out_Tmax_rl_slip;   /* '<Root>/Out_Tmax_rl_slip' */
 extern real_T SLIP_Out_Tmax_rr_slip;   /* '<Root>/Out_Tmax_rr_slip' */
-extern real_T SLIP_Tm_rl;              /* '<Root>/Inp_Tmax_rl' */
-extern real_T SLIP_Tm_rr;              /* '<Root>/Inp_Tmax_rr' */
+extern real_T SLIP_Tmax_rl;            /* '<Root>/Inp_Tmax_rl' */
+extern real_T SLIP_Tmax_rr;            /* '<Root>/Inp_Tmax_rr' */
 extern real_T SLIP_map_sc;             /* '<Root>/Inp_map_sc' */
 extern real_T SLIP_omega_rl;           /* '<Root>/Inp_omega_rl' */
 extern real_T SLIP_omega_rr;           /* '<Root>/Inp_omega_rr' */
-extern real_T SLIP_u_bar;              /* '<Root>/Inp_u_bar' */
+extern real_T SLIP_u;                  /* '<Root>/Inp_u_bar' */
 extern real_T SLIP_yaw_rate;           /* '<Root>/Inp_Omega' */
 
 /*-
  * These blocks were eliminated from the model due to optimizations:
  *
+ * Block '<S1>/Scope' : Unused code path elimination
  * Block '<S9>/Scope' : Unused code path elimination
  * Block '<S11>/Data Type Duplicate' : Unused code path elimination
  * Block '<S11>/Data Type Propagation' : Unused code path elimination
@@ -110,6 +111,7 @@ extern real_T SLIP_yaw_rate;           /* '<Root>/Inp_Omega' */
  * Block '<S3>/Scope3' : Unused code path elimination
  * Block '<S3>/Scope4' : Unused code path elimination
  * Block '<S3>/Scope5' : Unused code path elimination
+ * Block '<S3>/Scope6' : Unused code path elimination
  */
 
 /*-

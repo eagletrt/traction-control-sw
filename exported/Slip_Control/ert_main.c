@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.60
+ * Model version                  : 6.194
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Apr  6 21:16:21 2024
+ * C/C++ source code generated on : Sun Jul 21 11:37:30 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -91,7 +91,7 @@ int_T main(int_T argc, const char *argv[])
   SLIP_initialize(SLIP_M);
 
   /* Attach rt_OneStep to a timer or interrupt service routine with
-   * period 0.0005 seconds (base rate of the model) here.
+   * period 0.0001 seconds (base rate of the model) here.
    * The call syntax for rt_OneStep is
    *
    *  rt_OneStep(SLIP_M);
