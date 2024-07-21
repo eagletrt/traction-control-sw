@@ -12,6 +12,7 @@ typedef struct {
 	double gyro_x;
 	double gyro_y;
 	double gyro_z;
+	double u;
 	double omega_fl;
 	double omega_fr;
 	double omega_rl;

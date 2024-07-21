@@ -56,7 +56,9 @@ int main(void) {
 		{
 			BENCHMARK_TICK();
 			pthread_mutex_lock(&model_mutex);
-			velocity_estimation(&can_data, &u_bar);
+			if (USE_TLM_VELOCITY_ESTIMATION == 0) {
+				velocity_estimation(&can_data);
+			}
 			torque_model_set_data(&can_data);
 			slip_model_set_data(&can_data);
 			regen_model_set_data(&can_data);
@@ -144,10 +146,10 @@ double torque_max(can_data_t *can_data) {
 	return 100.0;
 }
 
-void velocity_estimation(can_data_t *can_data, double *u_bar) {
+void velocity_estimation(can_data_t *can_data) {
 	double delta = can_data->steering_angle / STEER_CONVERSION_FACTOR;
 	double v_g = WHEEL_RADIUS * (can_data->omega_fl + can_data->omega_fr) / 2.0;
-	*u_bar = v_g * cos(delta);
+	can_data->u = v_g * cos(delta);
 }
 
 void regen_model_set_data(can_data_t *can_data) {
@@ -175,7 +177,7 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_Tm_rl = torque_max(can_data);
 	SLIP_Tm_rr = torque_max(can_data);
 
-	SLIP_u_bar = u_bar;
+	SLIP_u_bar = can_data->u;
 
 	SLIP_Inp_Ki = 40000.0;
 	SLIP_Inp_Kp = 50.0;
@@ -192,7 +194,7 @@ void torque_model_set_data(can_data_t *can_data) {
 	TV_Driver_req = can_data->throttle * can_data->map_pw;
 	TV_Steeringangle = can_data->steering_angle;
 	TV_yaw_rate = can_data->gyro_z;
-	TV_u_bar = u_bar;
+	TV_u_bar = can_data->u;
 
 	TV_Inp_Ki = TV_PID_KI;
 	TV_Inp_Kp = TV_PID_KP;
@@ -257,7 +259,7 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_OUTPUT_FRAME_ID, data, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
 #else
 		static primary_control_output_converted_t out_src;
-		out_src.estimated_velocity = u_bar;
+		out_src.estimated_velocity = can_data.u;
 		out_src.torque_max_l = tmax_rl;
 		out_src.torque_max_r = tmax_rr;
 		out_src.torque_l = t_rl;

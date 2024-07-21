@@ -44,9 +44,10 @@ void can_messages_parse(can_message_t *message, can_data_t *can_data) {
 	}
 #else
 	if (message->socket == CAN_SOCKET_PRIMARY) {
-		if (inverters_id_is_message(message->frame.can_id)) {
-			can_messages_parse_inverters(message, can_data);
-		} else if (primary_id_is_message(message->frame.can_id)) {
+		// if (inverters_id_is_message(message->frame.can_id)) {
+		// 	can_messages_parse_inverters(message, can_data);
+		// } else
+		if (primary_id_is_message(message->frame.can_id)) {
 			can_messages_parse_primary(message, can_data);
 		}
 	} else if (message->socket == CAN_SOCKET_SECONDARY) {
@@ -168,6 +169,13 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 		can_data->omega_fr = speed->fr;
 		break;
 	}
+	case SECONDARY_REAR_ANGULAR_VELOCITY_FRAME_ID: {
+		secondary_rear_angular_velocity_converted_t *speed =
+				(secondary_rear_angular_velocity_converted_t *)can_devices.message;
+		can_data->omega_rl = speed->rl;
+		can_data->omega_rr = speed->rr;
+		break;
+	}
 	case SECONDARY_PEDAL_THROTTLE_FRAME_ID: {
 		secondary_pedal_throttle_converted_t *pedals_output = (secondary_pedal_throttle_converted_t *)can_devices.message;
 		can_data->throttle = convert_throttle(pedals_output->throttle);
@@ -199,6 +207,13 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 	case SECONDARY_STEER_ANGLE_FRAME_ID: {
 		secondary_steer_angle_converted_t *steer_angle = (secondary_steer_angle_converted_t *)can_devices.message;
 		can_data->steering_angle = convert_steering_angle(steer_angle->angle);
+		break;
+	}
+	case SECONDARY_VEHICLE_SPEED_FRAME_ID: {
+		secondary_vehicle_speed_converted_t *speed = (secondary_vehicle_speed_converted_t *)can_devices.message;
+		if (USE_TLM_VELOCITY_ESTIMATION == 1) {
+			can_data->u = speed->u;
+		}
 		break;
 	}
 	default:

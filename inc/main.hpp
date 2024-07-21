@@ -26,8 +26,6 @@ extern "C" {
 bool running;
 can_t can[CAN_SOCKET_COUNT];
 
-double u_bar;
-
 can_data_t can_data;
 
 DW_TV torque_rtDW;
@@ -43,7 +41,7 @@ SOC lvSOC;
 
 bool init_model(void);
 double torque_max(can_data_t *can_data);
-void velocity_estimation(can_data_t *can_data, double *u_bar);
+void velocity_estimation(can_data_t *can_data);
 void torque_model_set_data(can_data_t *can_data);
 void regen_model_set_data(can_data_t *can_data);
 void slip_model_set_data(can_data_t *can_data);
