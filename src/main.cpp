@@ -170,14 +170,15 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_map_sc = can_data->map_sc;
 	SLIP_omega_rl = can_data->omega_rl;
 	SLIP_omega_rr = can_data->omega_rr;
+	velocity_estimation(can_data);
 	SLIP_u = can_data->u;
 	SLIP_yaw_rate = can_data->gyro_z;
 
-	SLIP_Inp_Ki = 40000.0;
-	SLIP_Inp_Kp = 50.0;
-	SLIP_Inp_LambdaRef = 0.2;
+	SLIP_Inp_Ki = 15000.0;
+	SLIP_Inp_Kp = 0.0;
+	SLIP_Inp_LambdaRef = 0.6;
 	SLIP_Inp_UppSatLim = 70.0;
-	SLIP_Inp_IntegralOffset = 20.0;
+	SLIP_Inp_IntegralOffset = 35.0;
 }
 
 void torque_model_set_data(can_data_t *can_data) {
