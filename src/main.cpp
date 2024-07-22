@@ -29,14 +29,14 @@ int main(void) {
 	kill_can_thread = false;
 	pthread_mutex_init(&model_mutex, NULL);
 
-	can_init(&can[CAN_SOCKET_PRIMARY], "vcan0");
+	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
 	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
 		return EXIT_FAILURE;
 	}
 	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, can_thread, &can[CAN_SOCKET_PRIMARY]);
 #if 0 == SIMULATOR
-	can_init(&can[CAN_SOCKET_SECONDARY], "vcan1");
+	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
 	if (can_open_socket(&can[CAN_SOCKET_SECONDARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_SECONDARY].device);
 		return EXIT_FAILURE;
@@ -67,9 +67,9 @@ int main(void) {
 			// Slip Control
 			SLIP_step(&slip_model);
 			// Torque Vectoring
-			TV_step(&torque_model);
+			// TV_step(&torque_model);
 			// Regen
-			Regen_step(&regen_model);
+			// Regen_step(&regen_model);
 
 			uint64_t soc_dt_us = get_timestamp_u() - last_soc_step;
 			if (1e6 / SOC_UPDATE_FREQUENCY <= soc_dt_us) {
@@ -164,20 +164,14 @@ void regen_model_set_data(can_data_t *can_data) {
 }
 
 void slip_model_set_data(can_data_t *can_data) {
-	// rtbrake_SlipV1 = can_data->brake;
-	// rtSteeringangle_SlipV1 = can_data->steering_angle;
-	// rtmap_tv_SlipV1 = can_data->map_tv;
-
-	SLIP_map_sc = can_data->map_sc;
 	SLIP_Driver_req = can_data->throttle * can_data->map_pw;
-	SLIP_yaw_rate = can_data->gyro_z;
-	SLIP_omega_rl = can_data->omega_rl;
-	SLIP_omega_rr = can_data->omega_rr;
-
 	SLIP_Tmax_rl = torque_max(can_data);
 	SLIP_Tmax_rr = torque_max(can_data);
-
+	SLIP_map_sc = can_data->map_sc;
+	SLIP_omega_rl = can_data->omega_rl;
+	SLIP_omega_rr = can_data->omega_rr;
 	SLIP_u = can_data->u;
+	SLIP_yaw_rate = can_data->gyro_z;
 
 	SLIP_Inp_Ki = 40000.0;
 	SLIP_Inp_Kp = 50.0;
@@ -212,7 +206,7 @@ void can_send_data() {
 	uint64_t timestamp = get_timestamp_u();
 	static uint64_t out_timestamp = 0;
 	static uint64_t state_timestamp = 0;
-	static uint64_t debug_timestamp = 0;
+	// static uint64_t debug_timestamp = 0;
 	static uint64_t hv_soc_state_timestamp = 0;
 	static uint64_t hv_soc_cov_timestamp = 0;
 	static uint64_t lv_soc_state_timestamp = 0;
@@ -294,17 +288,17 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_STATUS_FRAME_ID, data, PRIMARY_CONTROL_STATUS_BYTE_SIZE);
 #endif
 	}
-	if (timestamp - debug_timestamp > 1e4) {
-		debug_timestamp = timestamp;
-		static primary_debug_signal_1_converted_t debug_src;
-		debug_src.field_1 = Regen_Out_brake_balance;
-		debug_src.field_2 = Regen_Out_Tm_rl;
-
-		static primary_debug_signal_1_t debug_src_raw;
-		primary_debug_signal_1_conversion_to_raw_struct(&debug_src_raw, &debug_src);
-		primary_debug_signal_1_pack(data, &debug_src_raw, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
-		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
-	}
+	// if (timestamp - debug_timestamp > 1e4) {
+	// 	debug_timestamp = timestamp;
+	// 	static primary_debug_signal_1_converted_t debug_src;
+	// 	debug_src.field_1 = Regen_Out_brake_balance;
+	// 	debug_src.field_2 = Regen_Out_Tm_rl;
+	//
+	// 	static primary_debug_signal_1_t debug_src_raw;
+	// 	primary_debug_signal_1_conversion_to_raw_struct(&debug_src_raw, &debug_src);
+	// 	primary_debug_signal_1_pack(data, &debug_src_raw, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
+	// 	can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
+	// }
 	if (timestamp - hv_soc_state_timestamp > 1e5) {
 		hv_soc_state_timestamp = timestamp;
 		const auto &state = hvSOC.getState();

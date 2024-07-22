@@ -13,6 +13,7 @@
 
 #define SIMULATOR 0
 #define USE_TLM_VELOCITY_ESTIMATION 1
+#define USE_INVERTERS_SPEED 1
 
 #define BENCHMARK 0
 #define RUN_FREQUENCY 500				// Hz

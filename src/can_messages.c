@@ -18,11 +18,13 @@ static inline double convert_brake(double val);
 static inline double convert_throttle(double val);
 static inline double convert_steering_angle(double val);
 
+#if SIMULATOR == 1
+static inline void can_messages_parse_simulator(can_message_t *message, can_data_t *can_data);
+#else
 static inline void can_messages_parse_primary(can_message_t *message, can_data_t *can_data);
 static inline void can_messages_parse_secondary(can_message_t *message, can_data_t *can_data);
 static inline void can_messages_parse_inverters(can_message_t *message, can_data_t *can_data);
-static inline void can_messages_parse_simulator(can_message_t *message, can_data_t *can_data);
-
+#endif
 uint8_t raw_mem[512];
 uint8_t converted_mem[512];
 device_t can_devices;
@@ -44,10 +46,9 @@ void can_messages_parse(can_message_t *message, can_data_t *can_data) {
 	}
 #else
 	if (message->socket == CAN_SOCKET_PRIMARY) {
-		// if (inverters_id_is_message(message->frame.can_id)) {
-		// 	can_messages_parse_inverters(message, can_data);
-		// } else
-		if (primary_id_is_message(message->frame.can_id)) {
+		if (inverters_id_is_message(message->frame.can_id)) {
+			can_messages_parse_inverters(message, can_data);
+		} else if (primary_id_is_message(message->frame.can_id)) {
 			can_messages_parse_primary(message, can_data);
 		}
 	} else if (message->socket == CAN_SOCKET_SECONDARY) {
@@ -58,6 +59,7 @@ void can_messages_parse(can_message_t *message, can_data_t *can_data) {
 #endif // SIMULATOR
 }
 
+#if SIMULATOR == 1
 static inline void can_messages_parse_simulator(can_message_t *message, can_data_t *can_data) {
 	assert(message && can_data);
 
@@ -104,7 +106,7 @@ static inline void can_messages_parse_simulator(can_message_t *message, can_data
 	}
 	}
 }
-
+#else
 static inline void can_messages_parse_primary(can_message_t *message, can_data_t *can_data) {
 	assert(message && can_data);
 
@@ -170,10 +172,12 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 		break;
 	}
 	case SECONDARY_REAR_ANGULAR_VELOCITY_FRAME_ID: {
+#if USE_INVERTERS_SPEED == 0
 		secondary_rear_angular_velocity_converted_t *speed =
 				(secondary_rear_angular_velocity_converted_t *)can_devices.message;
 		can_data->omega_rl = speed->rl;
 		can_data->omega_rr = speed->rr;
+#endif
 		break;
 	}
 	case SECONDARY_PEDAL_THROTTLE_FRAME_ID: {
@@ -230,7 +234,9 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 		inverters_inv_l_rcv_converted_t *rcv = (inverters_inv_l_rcv_converted_t *)can_devices.message;
 		switch (rcv->rcv_mux) {
 		case INVERTERS_INV_L_RCV_RCV_MUX_ID_A8_N_ACTUAL_FILT_CHOICE:
+#if USE_INVERTERS_SPEED == 1
 			can_data->omega_rl = -inverter_convert_speed(rcv->n_actual_filt);
+#endif
 			break;
 		default:
 			break;
@@ -241,7 +247,9 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 		inverters_inv_r_rcv_converted_t *rcv = (inverters_inv_r_rcv_converted_t *)can_devices.message;
 		switch (rcv->rcv_mux) {
 		case INVERTERS_INV_R_RCV_RCV_MUX_ID_A8_N_ACTUAL_FILT_CHOICE:
+#if USE_INVERTERS_SPEED == 1
 			can_data->omega_rr = inverter_convert_speed(rcv->n_actual_filt);
+#endif
 			break;
 		default:
 			break;
@@ -252,6 +260,7 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 		break;
 	}
 }
+#endif
 
 static inline double inverter_convert_speed(double val) {
 	return (val * 4.5 * (M_PI / 60.0) * (INV_MAX_SPEED / 32767.f));
