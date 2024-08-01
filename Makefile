@@ -7,7 +7,7 @@ build:
 
 bf: format build
 
-restart:
+restart: build
 	sudo systemctl restart traction-control.service
 
 clean:
@@ -19,3 +19,6 @@ run: build
 
 format:
 	clang-format -i src/*.c inc/*.h -style=file:.clang-format
+
+sync:
+	rsync -r src inc control@control:~/traction-control-sw/ --progress

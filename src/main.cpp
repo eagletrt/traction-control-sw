@@ -204,9 +204,9 @@ void torque_model_set_data(can_data_t *can_data) {
 bool regen_enable(double brake_front, double throttle) {
 	static bool prev_brake_status = false;
 	static bool prev_throttle_status = false;
-	if (brake_front > (REGEN_BRAKE_FRONT_ON_THRESHOLD - REGEN_BRAKE_HYSTERESIS)) {
+	if (brake_front > (REGEN_BRAKE_FRONT_ON_THRESHOLD + REGEN_BRAKE_HYSTERESIS)) {
 		prev_brake_status = true;
-	} else if (brake_front < (REGEN_BRAKE_FRONT_ON_THRESHOLD + REGEN_BRAKE_HYSTERESIS)) {
+	} else if (brake_front < (REGEN_BRAKE_FRONT_ON_THRESHOLD - REGEN_BRAKE_HYSTERESIS)) {
 		prev_brake_status = false;
 	}
 	if (throttle < (REGEN_THROTTLE_ON_THRESHOLD - REGEN_THROTTLE_HYSTERESYS)) {
@@ -236,8 +236,8 @@ void can_send_data() {
 	real_T tmax_rl;
 	real_T tmax_rr;
 	if (REGEN_ENABLE && regen_enable(can_data.brake_f, can_data.throttle)) {
-		torque_rl = Regen_Out_Tm_rl;
-		torque_rr = Regen_Out_Tm_rr;
+		torque_rl = Regen_Out_Tm_rl + 100;
+		torque_rr = Regen_Out_Tm_rr + 100;
 		tmax_rl = Regen_Tm_rl;
 		tmax_rr = Regen_Tm_rr;
 	} else {

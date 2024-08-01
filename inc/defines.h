@@ -20,10 +20,12 @@
 #define SOC_UPDATE_FREQUENCY 20 // Hz
 
 #define REGEN_ENABLE 1
-#define REGEN_BRAKE_FRONT_ON_THRESHOLD 3.0f // enables regen over this value
-#define REGEN_THROTTLE_ON_THRESHOLD 5.0f		// enables regen under this value
+#define REGEN_BRAKE_FRONT_ON_THRESHOLD 1.5f // enables regen over this value
+#define REGEN_THROTTLE_ON_THRESHOLD 0.05f		// enables regen under this value
 #define REGEN_BRAKE_HYSTERESIS 0.5f
-#define REGEN_THROTTLE_HYSTERESYS 2.0f
+#define REGEN_THROTTLE_HYSTERESYS 0.02f
+static_assert(REGEN_THROTTLE_ON_THRESHOLD > REGEN_THROTTLE_HYSTERESYS);
+static_assert(REGEN_BRAKE_FRONT_ON_THRESHOLD > REGEN_BRAKE_HYSTERESIS);
 
 #define SLIP_PEAK 60.0
 #define SLIP_SPEED_CUTOFF 3.0
