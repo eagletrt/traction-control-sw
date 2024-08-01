@@ -12,12 +12,18 @@
 #include <stdbool.h>
 
 #define SIMULATOR 0
-#define USE_TLM_VELOCITY_ESTIMATION 0
+#define USE_TLM_VELOCITY_ESTIMATION 1
 #define USE_INVERTERS_SPEED 1
 
 #define BENCHMARK 0
 #define RUN_FREQUENCY 500				// Hz
 #define SOC_UPDATE_FREQUENCY 20 // Hz
+
+#define REGEN_ENABLE 1
+#define REGEN_BRAKE_FRONT_ON_THRESHOLD 3.0f // enables regen over this value
+#define REGEN_THROTTLE_ON_THRESHOLD 5.0f		// enables regen under this value
+#define REGEN_BRAKE_HYSTERESIS 0.5f
+#define REGEN_THROTTLE_HYSTERESYS 2.0f
 
 #define SLIP_PEAK 60.0
 #define SLIP_SPEED_CUTOFF 3.0

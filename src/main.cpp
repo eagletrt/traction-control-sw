@@ -35,14 +35,12 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, can_thread, &can[CAN_SOCKET_PRIMARY]);
-#if 0 == SIMULATOR
 	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
 	if (can_open_socket(&can[CAN_SOCKET_SECONDARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_SECONDARY].device);
 		return EXIT_FAILURE;
 	}
 	pthread_create(&can_threads[CAN_SOCKET_SECONDARY], NULL, can_thread, &can[CAN_SOCKET_SECONDARY]);
-#endif
 
 	usleep(1000);
 
@@ -59,17 +57,18 @@ int main(void) {
 			if (USE_TLM_VELOCITY_ESTIMATION == 0) {
 				velocity_estimation(&can_data);
 			}
-			torque_model_set_data(&can_data);
 			slip_model_set_data(&can_data);
+			torque_model_set_data(&can_data);
 			regen_model_set_data(&can_data);
 			pthread_mutex_unlock(&model_mutex);
 
 			// Slip Control
 			SLIP_step(&slip_model);
 			// Torque Vectoring
-			// TV_step(&torque_model);
-			// Regen
-			// Regen_step(&regen_model);
+			TV_step(&torque_model);
+#if REGEN_ENABLE == 1
+			Regen_step(&regen_model);
+#endif
 
 			uint64_t soc_dt_us = get_timestamp_u() - last_soc_step;
 			if (1e6 / SOC_UPDATE_FREQUENCY <= soc_dt_us) {
@@ -153,20 +152,20 @@ void velocity_estimation(can_data_t *can_data) {
 }
 
 void regen_model_set_data(can_data_t *can_data) {
-	Regen_Driver_req = can_data->throttle * can_data->map_pw;
+	Regen_Driver_req = can_data->throttle;
 	Regen_Inp_map_sc = can_data->map_sc;
 	Regen_Inp_omega_inv_rl = can_data->omega_rl;
 	Regen_Inp_omega_inv_rr = can_data->omega_rr;
 	Regen_pressure_f = can_data->brake_f;
 	Regen_pressure_r = can_data->brake_r;
-	Regen_Tm_rl = torque_max(can_data);
-	Regen_Tm_rr = torque_max(can_data);
+	Regen_Tm_rl = torque_max(can_data) * can_data->map_pw;
+	Regen_Tm_rr = torque_max(can_data) * can_data->map_pw;
 }
 
 void slip_model_set_data(can_data_t *can_data) {
-	SLIP_Driver_req = can_data->throttle * can_data->map_pw;
-	SLIP_Tmax_rl = torque_max(can_data);
-	SLIP_Tmax_rr = torque_max(can_data);
+	SLIP_Driver_req = can_data->throttle;
+	SLIP_Tmax_rl = torque_max(can_data) * can_data->map_pw;
+	SLIP_Tmax_rr = torque_max(can_data) * can_data->map_pw;
 	SLIP_map_sc = can_data->map_sc;
 	SLIP_omega_rl = can_data->omega_rl;
 	SLIP_omega_rr = can_data->omega_rr;
@@ -186,7 +185,7 @@ void torque_model_set_data(can_data_t *can_data) {
 	// rtmap_sc_Torque = can_data->map_sc;
 
 	TV_map_tv = can_data->map_tv;
-	TV_Driver_req = can_data->throttle * can_data->map_pw;
+	TV_Driver_req = can_data->throttle;
 	TV_Steeringangle = can_data->steering_angle;
 	TV_yaw_rate = can_data->gyro_z;
 	TV_u_bar = can_data->u;
@@ -200,6 +199,22 @@ void torque_model_set_data(can_data_t *can_data) {
 
 	TV_lambda_rr = SLIP_Out_Tmax_rl_slip;
 	TV_lambda_rr_n = SLIP_Out_Tmax_rr_slip;
+}
+
+bool regen_enable(double brake_front, double throttle) {
+	static bool prev_brake_status = false;
+	static bool prev_throttle_status = false;
+	if (brake_front > (REGEN_BRAKE_FRONT_ON_THRESHOLD - REGEN_BRAKE_HYSTERESIS)) {
+		prev_brake_status = true;
+	} else if (brake_front < (REGEN_BRAKE_FRONT_ON_THRESHOLD + REGEN_BRAKE_HYSTERESIS)) {
+		prev_brake_status = false;
+	}
+	if (throttle < (REGEN_THROTTLE_ON_THRESHOLD - REGEN_THROTTLE_HYSTERESYS)) {
+		prev_throttle_status = true;
+	} else if (throttle > (REGEN_THROTTLE_ON_THRESHOLD + REGEN_THROTTLE_HYSTERESYS)) {
+		prev_throttle_status = false;
+	}
+	return prev_brake_status && prev_throttle_status;
 }
 
 void can_send_data() {
@@ -216,27 +231,21 @@ void can_send_data() {
 	real_T map_sc = SLIP_map_sc;
 	real_T map_tv = TV_map_tv;
 
-	real_T t_rl;
-	real_T t_rr;
+	real_T torque_rl;
+	real_T torque_rr;
 	real_T tmax_rl;
 	real_T tmax_rr;
-
-#if 0		// REGEN
-	t_rl = Regen_Out_Tm_rl;
-	t_rr = Regen_Out_Tm_rr;
-	tmax_rl = Regen_Tm_rl;
-	tmax_rr = Regen_Tm_rr;
-#elif 1 // ONLY SLIP
-	t_rl = SLIP_Out_Tm_rl;
-	t_rr = SLIP_Out_Tm_rr;
-	tmax_rl = SLIP_Out_Tmax_rl_slip;
-	tmax_rr = SLIP_Out_Tmax_rr_slip;
-#else
-	t_rl = TV_Out_Tm_rl;
-	t_rr = TV_Out_Tm_rr;
-	tmax_rl = TV_Tm_rl;
-	tmax_rr = TV_Tm_rr;
-#endif
+	if (REGEN_ENABLE && regen_enable(can_data.brake_f, can_data.throttle)) {
+		torque_rl = Regen_Out_Tm_rl;
+		torque_rr = Regen_Out_Tm_rr;
+		tmax_rl = Regen_Tm_rl;
+		tmax_rr = Regen_Tm_rr;
+	} else {
+		torque_rl = TV_Out_Tm_rl;
+		torque_rr = TV_Out_Tm_rr;
+		tmax_rl = TV_Tm_rl;
+		tmax_rr = TV_Tm_rr;
+	}
 
 	if (timestamp - out_timestamp > 1e4) {
 		out_timestamp = timestamp;
@@ -246,8 +255,8 @@ void can_send_data() {
 		out_src.estimated_velocity = u_bar;
 		out_src.torque_max_l = tmax_rl;
 		out_src.torque_max_r = tmax_rr;
-		out_src.torque_l = t_rl;
-		out_src.torque_r = t_rr;
+		out_src.torque_l = torque_rl;
+		out_src.torque_r = torque_rr;
 		static simulator_control_output_t out_src_raw;
 		simulator_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
 		simulator_control_output_pack(data, &out_src_raw, SIMULATOR_CONTROL_OUTPUT_BYTE_SIZE);
@@ -257,8 +266,8 @@ void can_send_data() {
 		out_src.estimated_velocity = can_data.u;
 		out_src.torque_max_l = tmax_rl;
 		out_src.torque_max_r = tmax_rr;
-		out_src.torque_l = t_rl;
-		out_src.torque_r = t_rr;
+		out_src.torque_l = torque_rl;
+		out_src.torque_r = torque_rr;
 		static primary_control_output_t out_src_raw;
 		primary_control_output_conversion_to_raw_struct(&out_src_raw, &out_src);
 		primary_control_output_pack(data, &out_src_raw, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
@@ -289,17 +298,6 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_STATUS_FRAME_ID, data, PRIMARY_CONTROL_STATUS_BYTE_SIZE);
 #endif
 	}
-	// if (timestamp - debug_timestamp > 1e4) {
-	// 	debug_timestamp = timestamp;
-	// 	static primary_debug_signal_1_converted_t debug_src;
-	// 	debug_src.field_1 = Regen_Out_brake_balance;
-	// 	debug_src.field_2 = Regen_Out_Tm_rl;
-	//
-	// 	static primary_debug_signal_1_t debug_src_raw;
-	// 	primary_debug_signal_1_conversion_to_raw_struct(&debug_src_raw, &debug_src);
-	// 	primary_debug_signal_1_pack(data, &debug_src_raw, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
-	// 	can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
-	// }
 	if (timestamp - hv_soc_state_timestamp > 1e5) {
 		hv_soc_state_timestamp = timestamp;
 		const auto &state = hvSOC.getState();
