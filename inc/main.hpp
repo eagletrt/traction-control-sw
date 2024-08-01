@@ -45,6 +45,7 @@ void velocity_estimation(can_data_t *can_data);
 void torque_model_set_data(can_data_t *can_data);
 void regen_model_set_data(can_data_t *can_data);
 void slip_model_set_data(can_data_t *can_data);
+bool regen_enable(double brake_front, double throttle, double hvSOC);
 
 // CAN thread
 bool kill_can_thread;

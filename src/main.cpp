@@ -201,9 +201,10 @@ void torque_model_set_data(can_data_t *can_data) {
 	TV_lambda_rr_n = SLIP_Out_Tmax_rr_slip;
 }
 
-bool regen_enable(double brake_front, double throttle) {
+bool regen_enable(double brake_front, double throttle, double hvSOC) {
 	static bool prev_brake_status = false;
 	static bool prev_throttle_status = false;
+	static bool prev_soc_status = false;
 	if (brake_front > (REGEN_BRAKE_FRONT_ON_THRESHOLD + REGEN_BRAKE_HYSTERESIS)) {
 		prev_brake_status = true;
 	} else if (brake_front < (REGEN_BRAKE_FRONT_ON_THRESHOLD - REGEN_BRAKE_HYSTERESIS)) {
@@ -214,7 +215,12 @@ bool regen_enable(double brake_front, double throttle) {
 	} else if (throttle > (REGEN_THROTTLE_ON_THRESHOLD + REGEN_THROTTLE_HYSTERESYS)) {
 		prev_throttle_status = false;
 	}
-	return prev_brake_status && prev_throttle_status;
+	if (hvSOC < (REGEN_SOC_ON_THRESOLD - REGEN_SOC_HYSTERESYS)) {
+		prev_soc_status = true;
+	} else if (hvSOC > (REGEN_SOC_ON_THRESOLD + REGEN_SOC_HYSTERESYS)) {
+		prev_soc_status = false;
+	}
+	return prev_brake_status && prev_throttle_status && prev_soc_status;
 }
 
 void can_send_data() {
@@ -235,7 +241,7 @@ void can_send_data() {
 	real_T torque_rr;
 	real_T tmax_rl;
 	real_T tmax_rr;
-	if (REGEN_ENABLE && regen_enable(can_data.brake_f, can_data.throttle)) {
+	if (REGEN_ENABLE && regen_enable(can_data.brake_f, can_data.throttle, hvSOC.getState()(_SOC))) {
 		torque_rl = Regen_Out_Tm_rl;
 		torque_rr = Regen_Out_Tm_rr;
 		tmax_rl = Regen_Tm_rl;

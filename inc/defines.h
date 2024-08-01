@@ -22,8 +22,10 @@
 #define REGEN_ENABLE 1
 #define REGEN_BRAKE_FRONT_ON_THRESHOLD 1.5f // enables regen over this value
 #define REGEN_THROTTLE_ON_THRESHOLD 0.05f		// enables regen under this value
+#define REGEN_SOC_ON_THRESOLD 0.9f					// enables when under this value
 #define REGEN_BRAKE_HYSTERESIS 0.5f
 #define REGEN_THROTTLE_HYSTERESYS 0.02f
+#define REGEN_SOC_HYSTERESYS 0.01f
 static_assert(REGEN_THROTTLE_ON_THRESHOLD > REGEN_THROTTLE_HYSTERESYS);
 static_assert(REGEN_BRAKE_FRONT_ON_THRESHOLD > REGEN_BRAKE_HYSTERESIS);
 
