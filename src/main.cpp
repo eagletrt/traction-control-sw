@@ -236,8 +236,8 @@ void can_send_data() {
 	real_T tmax_rl;
 	real_T tmax_rr;
 	if (REGEN_ENABLE && regen_enable(can_data.brake_f, can_data.throttle)) {
-		torque_rl = Regen_Out_Tm_rl + 100;
-		torque_rr = Regen_Out_Tm_rr + 100;
+		torque_rl = Regen_Out_Tm_rl;
+		torque_rr = Regen_Out_Tm_rr;
 		tmax_rl = Regen_Tm_rl;
 		tmax_rr = Regen_Tm_rr;
 	} else {
