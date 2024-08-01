@@ -165,8 +165,9 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 	secondary_devices_deserialize_from_id(&can_devices, message->frame.can_id, message->frame.data, 0);
 
 	switch (message->frame.can_id) {
-	case SECONDARY_ANGULAR_VELOCITY_FRAME_ID: {
-		secondary_angular_velocity_converted_t *speed = (secondary_angular_velocity_converted_t *)can_devices.message;
+	case SECONDARY_FRONT_ANGULAR_VELOCITY_FRAME_ID: {
+		secondary_front_angular_velocity_converted_t *speed =
+				(secondary_front_angular_velocity_converted_t *)can_devices.message;
 		can_data->omega_fl = speed->fl;
 		can_data->omega_fr = speed->fr;
 		break;
