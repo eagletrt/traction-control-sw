@@ -21,4 +21,4 @@ format:
 	clang-format -i src/*.c inc/*.h -style=file:.clang-format
 
 sync:
-	rsync -r src inc control@control:~/traction-control-sw/ --progress
+	rsync -r src inc exported control@control:~/traction-control-sw/ --progress
