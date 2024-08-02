@@ -27,6 +27,10 @@ bool running;
 can_t can[CAN_SOCKET_COUNT];
 
 can_data_t can_data;
+can_received_bitset_t can_received;
+bool received_controls_data;
+bool received_hv_soc_data;
+bool received_lv_soc_data;
 
 DW_TV torque_rtDW;
 RT_MODEL_TV torque_model;
@@ -46,6 +50,7 @@ void torque_model_set_data(can_data_t *can_data);
 void regen_model_set_data(can_data_t *can_data);
 void slip_model_set_data(can_data_t *can_data);
 bool regen_enable(double brake_front, double throttle, double hvSOC);
+void check_received_messages(can_received_bitset_t *bitset);
 
 // CAN thread
 bool kill_can_thread;

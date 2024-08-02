@@ -1,4 +1,6 @@
 #include "inc/main.hpp"
+#include "inc/data.h"
+#include <pthread.h>
 extern "C" {
 #include "inc/defines.h"
 #include "inc/can_messages.h"
@@ -48,9 +50,18 @@ int main(void) {
 
 	running = true;
 	uint64_t last_soc_step = get_timestamp_u();
+	uint64_t last_can_received_check_times = get_timestamp_u();
 	while (running) {
 		BENCHMARK_TICK();
 		uint64_t t_loop_start = get_timestamp_u();
+
+		if (get_timestamp_u() - last_can_received_check_times >= 1.0f / CHECK_CAN_MESSAGES_FREQUENCY) {
+			last_can_received_check_times = get_timestamp_u();
+			pthread_mutex_lock(&model_mutex);
+			check_received_messages(&can_received);
+			pthread_mutex_unlock(&model_mutex);
+		}
+
 		{
 			BENCHMARK_TICK();
 			pthread_mutex_lock(&model_mutex);
@@ -124,7 +135,7 @@ void *can_thread(void *data) {
 		message.frame = frame;
 
 		pthread_mutex_lock(&model_mutex);
-		can_messages_parse(&message, &can_data);
+		can_messages_parse(&message, &can_data, &can_received);
 		pthread_mutex_unlock(&model_mutex);
 	}
 	return NULL;
@@ -138,6 +149,12 @@ bool init_model(void) {
 	SLIP_initialize(&slip_model);
 
 	return true;
+}
+void check_received_messages(can_received_bitset_t *bitset) {
+	received_controls_data = (*bitset & RECEIVED_CONTROLS_MASK) == RECEIVED_CONTROLS_MASK;
+	received_hv_soc_data = (*bitset & RECEIVED_HV_SOC_MASK) == RECEIVED_HV_SOC_MASK;
+	received_lv_soc_data = (*bitset & RECEIVED_LV_SOC_MASK) == RECEIVED_LV_SOC_MASK;
+	CAN_RECEIVED_CLEAR(*bitset)
 }
 
 double torque_max(can_data_t *can_data) {
@@ -252,7 +269,7 @@ void can_send_data() {
 		tmax_rr = TV_Tm_rr;
 	}
 
-	if (timestamp - out_timestamp > 1e4) {
+	if (received_controls_data && timestamp - out_timestamp > 1e4) {
 		out_timestamp = timestamp;
 
 #if 1 == SIMULATOR
@@ -280,7 +297,7 @@ void can_send_data() {
 #endif
 	}
 
-	if (timestamp - state_timestamp > 1e4) {
+	if (received_controls_data && timestamp - state_timestamp > 1e4) {
 		state_timestamp = timestamp;
 
 #if 1 == SIMULATOR
@@ -303,7 +320,7 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_STATUS_FRAME_ID, data, PRIMARY_CONTROL_STATUS_BYTE_SIZE);
 #endif
 	}
-	if (timestamp - hv_soc_state_timestamp > 1e5) {
+	if (received_hv_soc_data && timestamp - hv_soc_state_timestamp > 1e5) {
 		hv_soc_state_timestamp = timestamp;
 		const auto &state = hvSOC.getState();
 		static secondary_hv_soc_estimation_state_converted_t hv_soc_estimation_state;
@@ -317,7 +334,7 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_HV_SOC_ESTIMATION_STATE_FRAME_ID, data,
 						 SECONDARY_HV_SOC_ESTIMATION_STATE_BYTE_SIZE);
 	}
-	if (timestamp - hv_soc_cov_timestamp > 1e5) {
+	if (received_hv_soc_data && timestamp - hv_soc_cov_timestamp > 1e5) {
 		hv_soc_cov_timestamp = timestamp;
 		const auto &covariance = hvSOC.getCovariance();
 		static secondary_hv_soc_estimation_covariance_converted_t hv_soc_estimation_covariance;
@@ -331,7 +348,7 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_FRAME_ID, data,
 						 SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
 	}
-	if (timestamp - lv_soc_state_timestamp > 1e5) {
+	if (received_lv_soc_data && timestamp - lv_soc_state_timestamp > 1e5) {
 		lv_soc_state_timestamp = timestamp;
 		const auto &state = lvSOC.getState();
 		static secondary_lv_soc_estimation_state_converted_t lv_soc_estimation_state;
@@ -345,7 +362,7 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_LV_SOC_ESTIMATION_STATE_FRAME_ID, data,
 						 SECONDARY_LV_SOC_ESTIMATION_STATE_BYTE_SIZE);
 	}
-	if (timestamp - lv_soc_cov_timestamp > 1e5) {
+	if (received_lv_soc_data && timestamp - lv_soc_cov_timestamp > 1e5) {
 		lv_soc_cov_timestamp = timestamp;
 		const auto &covariance = lvSOC.getCovariance();
 		static secondary_lv_soc_estimation_covariance_converted_t lv_soc_estimation_covariance;
