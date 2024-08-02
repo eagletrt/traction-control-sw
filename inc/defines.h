@@ -40,6 +40,9 @@ static_assert(REGEN_BRAKE_FRONT_ON_THRESHOLD > REGEN_BRAKE_HYSTERESIS);
 #define TV_PID_KP 150.0
 #define TV_PID_KI 300.0
 
+#define HV_SOC_LAST_STATE_FILENAME ".hv_soc_state.txt"
+#define LV_SOC_LAST_STATE_FILENAME ".lv_soc_state.txt"
+
 // MACRO FUNCTIONS
 #define eprintf(m, ...) fprintf(stderr, "\033[1;31m*** ERROR: \033[0m" m, ##__VA_ARGS__)
 

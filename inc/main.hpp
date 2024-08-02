@@ -52,6 +52,9 @@ void slip_model_set_data(can_data_t *can_data);
 bool regen_enable(double brake_front, double throttle, double hvSOC);
 void check_received_messages(can_received_bitset_t *bitset);
 
+bool load_soc_state(const char *path, Eigen::VectorXd &state);
+bool save_soc_state(const char *path, const Eigen::VectorXd &state);
+
 // CAN thread
 bool kill_can_thread;
 pthread_mutex_t model_mutex;

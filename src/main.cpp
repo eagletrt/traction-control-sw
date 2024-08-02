@@ -5,6 +5,7 @@ extern "C" {
 #include "inc/defines.h"
 #include "inc/can_messages.h"
 #include "inc/benchmark.h"
+#include "inc/utils.h"
 }
 #include "external/soc/core/src/soc/soc.hpp"
 
@@ -25,6 +26,18 @@ int main(void) {
 		eprintf("Error initializing model\n");
 		return EXIT_FAILURE;
 	}
+
+	const char *user_home = get_user_home();
+	char hv_soc_state_path[255];
+	char lv_soc_state_path[255];
+	strcpy(hv_soc_state_path, user_home);
+	strcpy(lv_soc_state_path, user_home);
+	strcat(hv_soc_state_path, "/" HV_SOC_LAST_STATE_FILENAME);
+	strcat(lv_soc_state_path, "/" LV_SOC_LAST_STATE_FILENAME);
+	Eigen::VectorXd hvSOCIinitalState(state_enum::STATE_SIZE);
+	Eigen::VectorXd lvSOCIinitalState(state_enum::STATE_SIZE);
+	load_soc_state(hv_soc_state_path, hvSOCIinitalState);
+	load_soc_state(lv_soc_state_path, lvSOCIinitalState);
 
 	can_messages_init();
 	// Start CAN threads
@@ -83,17 +96,22 @@ int main(void) {
 
 			uint64_t soc_dt_us = get_timestamp_u() - last_soc_step;
 			if (1e6 / SOC_UPDATE_FREQUENCY <= soc_dt_us) {
-				// HV
-				hvSOC.setDT(soc_dt_us / 1e6);
-				hvSOC.setTemperature(can_data.hv_mean_temp);
-				hvSOC.predict(can_data.hv_total_current / 4.0);
-				hvSOC.update(can_data.hv_min_cell_voltage);
-				// LV
-				lvSOC.setDT(soc_dt_us / 1e6);
-				lvSOC.setTemperature(can_data.lv_mean_temp);
-				lvSOC.predict(can_data.lv_total_current / 4.0);
-				lvSOC.update(can_data.lv_min_cell_voltage);
-
+				if (received_hv_soc_data) {
+					// HV
+					hvSOC.setDT(soc_dt_us / 1e6);
+					hvSOC.setTemperature(can_data.hv_mean_temp);
+					hvSOC.predict(can_data.hv_total_current / 4.0);
+					hvSOC.update(can_data.hv_min_cell_voltage);
+					save_soc_state(hv_soc_state_path, hvSOC.getState());
+				}
+				if (received_lv_soc_data) {
+					// LV
+					lvSOC.setDT(soc_dt_us / 1e6);
+					lvSOC.setTemperature(can_data.lv_mean_temp);
+					lvSOC.predict(can_data.lv_total_current / 4.0);
+					lvSOC.update(can_data.lv_min_cell_voltage);
+					save_soc_state(lv_soc_state_path, lvSOC.getState());
+				}
 				last_soc_step = get_timestamp_u();
 			}
 
@@ -376,6 +394,33 @@ void can_send_data() {
 		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_LV_SOC_ESTIMATION_COVARIANCE_FRAME_ID, data,
 						 SECONDARY_LV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
 	}
+}
+
+bool load_soc_state(const char *path, Eigen::VectorXd &state) {
+	FILE *ptr = fopen(path, "r");
+	if (!ptr) {
+		state(state_enum::_SOC) = 0;
+		state(state_enum::_RC1) = 0;
+		state(state_enum::_RC2) = 0;
+		return false;
+	}
+
+	int ret = fscanf(ptr, "%lf %lf %lf", &state(state_enum::_SOC), &state(state_enum::_RC1), &state(state_enum::_RC2));
+
+	fclose(ptr);
+	if (ret > 0) {
+		return true;
+	}
+	return false;
+}
+bool save_soc_state(const char *path, const Eigen::VectorXd &state) {
+	FILE *ptr = fopen(path, "w");
+	if (!ptr) {
+		return false;
+	}
+	fprintf(ptr, "%f %f %f", state(state_enum::_SOC), state(state_enum::_RC1), state(state_enum::_RC2));
+	fclose(ptr);
+	return true;
 }
 
 // sig handler
