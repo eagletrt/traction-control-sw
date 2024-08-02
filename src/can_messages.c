@@ -235,7 +235,9 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 		inverters_inv_l_rcv_converted_t *rcv = (inverters_inv_l_rcv_converted_t *)can_devices.message;
 		switch (rcv->rcv_mux) {
 		case INVERTERS_INV_L_RCV_RCV_MUX_ID_A8_N_ACTUAL_FILT_CHOICE:
+#if USE_INVERTERS_SPEED == 1
 			can_data->omega_rl = -inverter_convert_speed(rcv->n_actual_filt);
+#endif
 			break;
 		default:
 			break;
@@ -246,7 +248,9 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 		inverters_inv_r_rcv_converted_t *rcv = (inverters_inv_r_rcv_converted_t *)can_devices.message;
 		switch (rcv->rcv_mux) {
 		case INVERTERS_INV_R_RCV_RCV_MUX_ID_A8_N_ACTUAL_FILT_CHOICE:
+#if USE_INVERTERS_SPEED == 1
 			can_data->omega_rr = inverter_convert_speed(rcv->n_actual_filt);
+#endif
 			break;
 		default:
 			break;

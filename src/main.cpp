@@ -142,7 +142,7 @@ bool init_model(void) {
 
 double torque_max(can_data_t *can_data) {
 	(void)can_data;
-	return 100.0;
+	return 100.0 * can_data->map_pw;
 }
 
 void velocity_estimation(can_data_t *can_data) {
@@ -158,24 +158,23 @@ void regen_model_set_data(can_data_t *can_data) {
 	Regen_Inp_omega_inv_rr = can_data->omega_rr;
 	Regen_pressure_f = can_data->brake_f;
 	Regen_pressure_r = can_data->brake_r;
-	Regen_Tm_rl = torque_max(can_data) * can_data->map_pw;
-	Regen_Tm_rr = torque_max(can_data) * can_data->map_pw;
+	Regen_Tm_rl = torque_max(can_data);
+	Regen_Tm_rr = torque_max(can_data);
 }
 
 void slip_model_set_data(can_data_t *can_data) {
 	SLIP_Driver_req = can_data->throttle;
-	SLIP_Tmax_rl = torque_max(can_data) * can_data->map_pw;
-	SLIP_Tmax_rr = torque_max(can_data) * can_data->map_pw;
+	SLIP_Tmax_rl = torque_max(can_data);
+	SLIP_Tmax_rr = torque_max(can_data);
 	SLIP_map_sc = can_data->map_sc;
 	SLIP_omega_rl = can_data->omega_rl;
 	SLIP_omega_rr = can_data->omega_rr;
-	velocity_estimation(can_data);
 	SLIP_u = can_data->u;
 	SLIP_yaw_rate = can_data->gyro_z;
 
 	SLIP_Inp_Ki = 15000.0;
 	SLIP_Inp_Kp = 0.0;
-	SLIP_Inp_LambdaRef = 0.6;
+	SLIP_Inp_LambdaRef = 0.1;
 	SLIP_Inp_UppSatLim = 70.0;
 	SLIP_Inp_IntegralOffset = 35.0;
 }
@@ -192,13 +191,13 @@ void torque_model_set_data(can_data_t *can_data) {
 
 	TV_Inp_Ki = TV_PID_KI;
 	TV_Inp_Kp = TV_PID_KP;
-	TV_Inp_Kus = TV_KUF;
+	TV_Inp_Kus = TV_KUS;
 
 	TV_Tm_rl = torque_max(can_data);
 	TV_Tm_rr = torque_max(can_data);
 
-	TV_lambda_rr = SLIP_Out_Tmax_rl_slip;
-	TV_lambda_rr_n = SLIP_Out_Tmax_rr_slip;
+	TV_lambda_rr = SLIP_Out_Tmax_rr_slip;
+	TV_lambda_rr_n = SLIP_Out_Tmax_rl_slip;
 }
 
 bool regen_enable(double brake_front, double throttle, double hvSOC) {
