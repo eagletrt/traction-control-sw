@@ -55,7 +55,7 @@ int main(void) {
 		BENCHMARK_TICK();
 		uint64_t t_loop_start = get_timestamp_u();
 
-		if (get_timestamp_u() - last_can_received_check_times >= 1.0f / CHECK_CAN_MESSAGES_FREQUENCY) {
+		if (get_timestamp_u() - last_can_received_check_times >= 1e6 / CHECK_CAN_MESSAGES_FREQUENCY) {
 			last_can_received_check_times = get_timestamp_u();
 			pthread_mutex_lock(&model_mutex);
 			check_received_messages(&can_received);
@@ -154,7 +154,7 @@ void check_received_messages(can_received_bitset_t *bitset) {
 	received_controls_data = (*bitset & RECEIVED_CONTROLS_MASK) == RECEIVED_CONTROLS_MASK;
 	received_hv_soc_data = (*bitset & RECEIVED_HV_SOC_MASK) == RECEIVED_HV_SOC_MASK;
 	received_lv_soc_data = (*bitset & RECEIVED_LV_SOC_MASK) == RECEIVED_LV_SOC_MASK;
-	CAN_RECEIVED_CLEAR(*bitset)
+	*bitset = 0;
 }
 
 double torque_max(can_data_t *can_data) {

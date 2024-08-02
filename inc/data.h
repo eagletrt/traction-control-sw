@@ -48,10 +48,10 @@ typedef enum {
 typedef uint32_t can_received_bitset_t;
 
 #define RECEIVED_CONTROLS_MASK                                                                                         \
-	(CAN_REC_STEER_ANGLE | CAN_REC_THROTTLE | CAN_REC_BRAKE | CAN_REC_ACCEL | CAN_REC_GYRO | CAN_REC_U |                 \
-	 CAN_REC_OMEGA_F | CAN_REC_OMEGA_R | CAN_REC_MAPS)
-#define RECEIVED_HV_SOC_MASK (CAN_REC_HV)
-#define RECEIVED_LV_SOC_MASK (CAN_REC_LV)
+	(1 << CAN_REC_STEER_ANGLE | 1 << CAN_REC_THROTTLE | 1 << CAN_REC_BRAKE | 1 << CAN_REC_ACCEL | 1 << CAN_REC_GYRO |    \
+	 1 << CAN_REC_U | 1 << CAN_REC_OMEGA_F | 1 << CAN_REC_OMEGA_R | 1 << CAN_REC_MAPS)
+#define RECEIVED_HV_SOC_MASK (1 << CAN_REC_HV)
+#define RECEIVED_LV_SOC_MASK (1 << CAN_REC_LV)
 
 #define CAN_RECEIVED_ALL(value) (value & (CAN_REC_COUNT - 1))
 #define CAN_RECEIVED_SET(value, bitset) value = value | (1 << bitset);
