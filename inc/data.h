@@ -49,7 +49,7 @@ typedef uint32_t can_received_bitset_t;
 
 #define RECEIVED_CONTROLS_MASK                                                                                         \
 	(1 << CAN_REC_STEER_ANGLE | 1 << CAN_REC_THROTTLE | 1 << CAN_REC_BRAKE | 1 << CAN_REC_ACCEL | 1 << CAN_REC_GYRO |    \
-	 1 << CAN_REC_U | 1 << CAN_REC_OMEGA_F | 1 << CAN_REC_OMEGA_R | 1 << CAN_REC_MAPS)
+	 1 << CAN_REC_U | 1 << CAN_REC_OMEGA_F | 1 << CAN_REC_OMEGA_R)
 #define RECEIVED_HV_SOC_MASK (1 << CAN_REC_HV)
 #define RECEIVED_LV_SOC_MASK (1 << CAN_REC_LV)
 
