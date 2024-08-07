@@ -36,9 +36,9 @@ static_assert(REGEN_BRAKE_FRONT_ON_THRESHOLD > REGEN_BRAKE_HYSTERESIS);
 #define STEER_CONVERSION_FACTOR 4.588f
 #define WHEEL_RADIUS 0.2035f
 
-#define TV_KUS 0.001
-#define TV_PID_KP 150.0
-#define TV_PID_KI 300.0
+#define TV_KUS (0.000f)
+#define TV_PID_KP (150.0f)
+#define TV_PID_KI (300.0f)
 
 #define HV_SOC_LAST_STATE_FILENAME ".hv_soc_state.txt"
 #define LV_SOC_LAST_STATE_FILENAME ".lv_soc_state.txt"

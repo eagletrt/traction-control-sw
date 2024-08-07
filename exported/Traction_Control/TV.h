@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'TV'.
  *
- * Model version                  : 6.61
+ * Model version                  : 6.197
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Mon Apr  8 10:17:09 2024
+ * C/C++ source code generated on : Sat Aug  3 12:40:27 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -64,16 +64,16 @@ extern real_T TV_Driver_req;           /* '<Root>/Inp_driver_request' */
 extern real_T TV_Inp_Ki;               /* '<Root>/Inp_Ki' */
 extern real_T TV_Inp_Kp;               /* '<Root>/Inp_Kp' */
 extern real_T TV_Inp_Kus;              /* '<Root>/Inp_Kus' */
+extern real_T TV_Inp_Tmax_rl;          /* '<Root>/Inp_Tmax_rl' */
+extern real_T TV_Inp_Tmax_rr;          /* '<Root>/Inp_Tmax_rr' */
 extern real_T TV_Out_Debug_Torque;     /* '<Root>/Out_Debug_Torque' */
 extern real_T TV_Out_Tm_rl;            /* '<Root>/Out_Tm_rl' */
 extern real_T TV_Out_Tm_rr;            /* '<Root>/Out_Tm_rr' */
 extern real_T TV_Steeringangle;        /* '<Root>/Inp_delta' */
-extern real_T TV_Tm_rl;                /* '<Root>/Inp_Tmax_rl' */
-extern real_T TV_Tm_rr;                /* '<Root>/Inp_Tmax_rr' */
 extern real_T TV_lambda_rr;            /* '<Root>/Inp_Tmax_rr_Slip' */
 extern real_T TV_lambda_rr_n;          /* '<Root>/Inp_Tmax_rl_Slip' */
 extern real_T TV_map_tv;               /* '<Root>/Inp_map_TV' */
-extern real_T TV_u_bar;                /* '<Root>/Inp_u_bar' */
+extern real_T TV_u;                    /* '<Root>/Inp_u_bar' */
 extern real_T TV_yaw_rate;             /* '<Root>/Inp_Omega' */
 
 /*-

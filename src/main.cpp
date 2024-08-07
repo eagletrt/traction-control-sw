@@ -188,7 +188,7 @@ void velocity_estimation(can_data_t *can_data) {
 
 void regen_model_set_data(can_data_t *can_data) {
 	Regen_Driver_req = can_data->throttle;
-	Regen_Inp_map_sc = can_data->map_sc;
+	// Regen_Inp_map_sc = 0.5f; // can_data->map_sc;
 	Regen_Inp_omega_inv_rl = can_data->omega_rl;
 	Regen_Inp_omega_inv_rr = can_data->omega_rr;
 	Regen_pressure_f = can_data->brake_f;
@@ -207,11 +207,11 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_u = can_data->u;
 	SLIP_yaw_rate = can_data->gyro_z;
 
-	SLIP_Inp_Ki = 15000.0;
+	SLIP_Inp_Ki = 30000.0;
 	SLIP_Inp_Kp = 0.0;
-	SLIP_Inp_LambdaRef = 0.1;
-	SLIP_Inp_UppSatLim = 70.0;
-	SLIP_Inp_IntegralOffset = 35.0;
+	SLIP_Inp_LambdaRef = 0.2;
+	SLIP_Inp_UppSatLim = 100.0;
+	SLIP_Inp_IntegralOffset = 60.0;
 }
 
 void torque_model_set_data(can_data_t *can_data) {
@@ -220,16 +220,16 @@ void torque_model_set_data(can_data_t *can_data) {
 
 	TV_map_tv = can_data->map_tv;
 	TV_Driver_req = can_data->throttle;
-	TV_Steeringangle = can_data->steering_angle;
+	TV_Steeringangle = (can_data->steering_angle); // / STEER_CONVERSION_FACTOR;
 	TV_yaw_rate = can_data->gyro_z;
-	TV_u_bar = can_data->u;
+	TV_u = can_data->u;
 
 	TV_Inp_Ki = TV_PID_KI;
 	TV_Inp_Kp = TV_PID_KP;
 	TV_Inp_Kus = TV_KUS;
 
-	TV_Tm_rl = torque_max(can_data);
-	TV_Tm_rr = torque_max(can_data);
+	TV_Inp_Tmax_rl = torque_max(can_data);
+	TV_Inp_Tmax_rr = torque_max(can_data);
 
 	TV_lambda_rr = SLIP_Out_Tmax_rr_slip;
 	TV_lambda_rr_n = SLIP_Out_Tmax_rl_slip;
@@ -283,8 +283,8 @@ void can_send_data() {
 	} else {
 		torque_rl = TV_Out_Tm_rl;
 		torque_rr = TV_Out_Tm_rr;
-		tmax_rl = TV_Tm_rl;
-		tmax_rr = TV_Tm_rr;
+		tmax_rl = TV_Inp_Tmax_rl;
+		tmax_rr = TV_Inp_Tmax_rr;
 	}
 
 	if (received_controls_data && timestamp - out_timestamp > 1e4) {

@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'TV'.
  *
- * Model version                  : 6.61
+ * Model version                  : 6.197
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Mon Apr  8 10:17:09 2024
+ * C/C++ source code generated on : Sat Aug  3 12:40:27 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7

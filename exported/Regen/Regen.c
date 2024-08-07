@@ -172,7 +172,7 @@ void Regen_initialize(RT_MODEL_Regen *const Regen_M)
   Regen_Driver_req = 0.0;
   Regen_Tm_rl = 0.0;
   Regen_Tm_rr = 0.0;
-  Regen_Inp_map_sc = 0.0;
+  Regen_Inp_map_sc = 0.5f;
 
   /* Storage classes */
   Regen_Out_Tm_rr = 0.0;
