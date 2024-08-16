@@ -126,7 +126,9 @@ int main(void) {
 		BENCHMARK_TOCK();
 		uint64_t loop_duration = get_timestamp_u() - t_loop_start;
 
-		usleep(1e6 / RUN_FREQUENCY - loop_duration);
+		if (loop_duration < 1e6 / RUN_FREQUENCY) {
+			usleep(1e6 / RUN_FREQUENCY - loop_duration);
+		}
 	}
 
 	BENCHMARK_END();
