@@ -262,6 +262,7 @@ void can_send_data() {
 	uint64_t timestamp = get_timestamp_u();
 	static uint64_t out_timestamp = 0;
 	static uint64_t state_timestamp = 0;
+	static uint64_t debug_state_timestamp = 0;
 	// static uint64_t debug_timestamp = 0;
 	static uint64_t hv_soc_state_timestamp = 0;
 	static uint64_t hv_soc_cov_timestamp = 0;
@@ -275,12 +276,15 @@ void can_send_data() {
 	real_T torque_rr;
 	real_T tmax_rl;
 	real_T tmax_rr;
+	static float renable = 1.0f;
 	if (REGEN_ENABLE && regen_enable(can_data.brake_f, can_data.throttle, hvSOC.getState()(_SOC))) {
+		renable = 1.0f;
 		torque_rl = Regen_Out_Tm_rl;
 		torque_rr = Regen_Out_Tm_rr;
 		tmax_rl = Regen_Tm_rl;
 		tmax_rr = Regen_Tm_rr;
 	} else {
+		renable = 0.0f;
 		torque_rl = TV_Out_Tm_rl;
 		torque_rr = TV_Out_Tm_rr;
 		tmax_rl = TV_Inp_Tmax_rl;
@@ -313,6 +317,17 @@ void can_send_data() {
 		primary_control_output_pack(data, &out_src_raw, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_CONTROL_OUTPUT_FRAME_ID, data, PRIMARY_CONTROL_OUTPUT_BYTE_SIZE);
 #endif
+	}
+
+	if (received_controls_data && timestamp - debug_state_timestamp > 1e4) {
+		debug_state_timestamp = timestamp;
+		static primary_debug_signal_3_converted_t ds1;
+		ds1.device_id = primary_debug_signal_3_device_id_tlm;
+		ds1.field_1 = renable;
+		static primary_debug_signal_3_t ds1_raw;
+		primary_debug_signal_3_conversion_to_raw_struct(&ds1_raw, &ds1);
+		primary_debug_signal_3_pack(data, &ds1_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_3_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
 	}
 
 	if (received_controls_data && timestamp - state_timestamp > 1e4) {
