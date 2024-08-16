@@ -38,6 +38,8 @@ int main(void) {
 	Eigen::VectorXd lvSOCIinitalState(state_enum::STATE_SIZE);
 	load_soc_state(hv_soc_state_path, hvSOCIinitalState);
 	load_soc_state(lv_soc_state_path, lvSOCIinitalState);
+	hvSOC.setState(hvSOCIinitalState);
+	lvSOC.setState(lvSOCIinitalState);
 
 	can_messages_init();
 	// Start CAN threads
