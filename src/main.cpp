@@ -74,17 +74,20 @@ int main(void) {
 			check_received_messages(&can_received);
 			pthread_mutex_unlock(&model_mutex);
 		}
+		can_data_t this_step_can_data;
 
 		{
 			BENCHMARK_TICK();
 			pthread_mutex_lock(&model_mutex);
-			if (USE_TLM_VELOCITY_ESTIMATION == 0) {
-				velocity_estimation(&can_data);
-			}
-			slip_model_set_data(&can_data);
-			torque_model_set_data(&can_data);
-			regen_model_set_data(&can_data);
+			this_step_can_data = gl_can_data;
 			pthread_mutex_unlock(&model_mutex);
+
+			if (USE_TLM_VELOCITY_ESTIMATION == 0) {
+				velocity_estimation(&this_step_can_data);
+			}
+			slip_model_set_data(&this_step_can_data);
+			torque_model_set_data(&this_step_can_data);
+			regen_model_set_data(&this_step_can_data);
 
 			// Slip Control
 			SLIP_step(&slip_model);
@@ -99,17 +102,17 @@ int main(void) {
 				if (received_hv_soc_data) {
 					// HV
 					hvSOC.setDT(soc_dt_us / 1e6);
-					hvSOC.setTemperature(can_data.hv_mean_temp);
-					hvSOC.predict(can_data.hv_total_current / 4.0);
-					hvSOC.update(can_data.hv_min_cell_voltage);
+					hvSOC.setTemperature(this_step_can_data.hv_mean_temp);
+					hvSOC.predict(this_step_can_data.hv_total_current / 4.0);
+					hvSOC.update(this_step_can_data.hv_min_cell_voltage);
 					save_soc_state(hv_soc_state_path, hvSOC.getState());
 				}
 				if (received_lv_soc_data) {
 					// LV
 					lvSOC.setDT(soc_dt_us / 1e6);
-					lvSOC.setTemperature(can_data.lv_mean_temp);
-					lvSOC.predict(can_data.lv_total_current / 4.0);
-					lvSOC.update(can_data.lv_min_cell_voltage);
+					lvSOC.setTemperature(this_step_can_data.lv_mean_temp);
+					lvSOC.predict(this_step_can_data.lv_total_current / 4.0);
+					lvSOC.update(this_step_can_data.lv_min_cell_voltage);
 					save_soc_state(lv_soc_state_path, lvSOC.getState());
 				}
 				last_soc_step = get_timestamp_u();
@@ -118,7 +121,7 @@ int main(void) {
 			BENCHMARK_TOCK();
 		}
 
-		can_send_data();
+		can_send_data(this_step_can_data);
 
 		BENCHMARK_TOCK();
 		uint64_t loop_duration = get_timestamp_u() - t_loop_start;
@@ -153,7 +156,7 @@ void *can_thread(void *data) {
 		message.frame = frame;
 
 		pthread_mutex_lock(&model_mutex);
-		can_messages_parse(&message, &can_data, &can_received);
+		can_messages_parse(&message, &gl_can_data, &can_received);
 		pthread_mutex_unlock(&model_mutex);
 	}
 	return NULL;
@@ -257,7 +260,7 @@ bool regen_enable(double brake_front, double throttle, double hvSOC) {
 	return prev_brake_status && prev_throttle_status && prev_soc_status;
 }
 
-void can_send_data() {
+void can_send_data(can_data_t can_data) {
 	static uint8_t data[8];
 	uint64_t timestamp = get_timestamp_u();
 	static uint64_t out_timestamp = 0;

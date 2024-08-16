@@ -26,7 +26,7 @@ extern "C" {
 bool running;
 can_t can[CAN_SOCKET_COUNT];
 
-can_data_t can_data;
+can_data_t gl_can_data;
 can_received_bitset_t can_received;
 bool received_controls_data;
 bool received_hv_soc_data;
@@ -61,7 +61,7 @@ pthread_mutex_t model_mutex;
 pthread_t can_threads[CAN_SOCKET_COUNT];
 
 void *can_thread(void *);
-void can_send_data();
+void can_send_data(can_data_t can_data);
 void sig_handler(int signo);
 
 #endif // __MAIN_H__

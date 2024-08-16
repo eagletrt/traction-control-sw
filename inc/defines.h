@@ -16,7 +16,7 @@
 #define USE_INVERTERS_SPEED 1
 
 #define BENCHMARK 0
-#define RUN_FREQUENCY 500								// Hz
+#define RUN_FREQUENCY 200								// Hz
 #define SOC_UPDATE_FREQUENCY 20					// Hz
 #define CHECK_CAN_MESSAGES_FREQUENCY 10 // Hz
 
