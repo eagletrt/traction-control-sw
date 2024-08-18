@@ -36,10 +36,12 @@ int main(void) {
 	strcat(lv_soc_state_path, "/" LV_SOC_LAST_STATE_FILENAME);
 	Eigen::VectorXd hvSOCIinitalState(state_enum::STATE_SIZE);
 	Eigen::VectorXd lvSOCIinitalState(state_enum::STATE_SIZE);
-	load_soc_state(hv_soc_state_path, hvSOCIinitalState);
-	load_soc_state(lv_soc_state_path, lvSOCIinitalState);
-	hvSOC.setState(hvSOCIinitalState);
-	lvSOC.setState(lvSOCIinitalState);
+	if (load_soc_state(hv_soc_state_path, hvSOCIinitalState)) {
+		hvSOC.setState(hvSOCIinitalState);
+	}
+	if (load_soc_state(lv_soc_state_path, lvSOCIinitalState)) {
+		lvSOC.setState(lvSOCIinitalState);
+	}
 
 	can_messages_init();
 	// Start CAN threads
