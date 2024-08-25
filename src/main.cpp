@@ -70,6 +70,7 @@ int main(void) {
 	uint64_t last_can_received_check_times = get_timestamp_u();
 	while (running) {
 		BENCHMARK_TICK();
+		BENCHMARK_TICK();
 		uint64_t t_loop_start = get_timestamp_u();
 
 		if (get_timestamp_u() - last_can_received_check_times >= 1e6 / CHECK_CAN_MESSAGES_FREQUENCY) {
@@ -128,13 +129,14 @@ int main(void) {
 		}
 
 		can_send_data(this_step_can_data);
-
-		BENCHMARK_TOCK();
+  
 		uint64_t loop_duration = get_timestamp_u() - t_loop_start;
 
-		if (loop_duration < 1e6 / RUN_FREQUENCY) {
-			usleep(1e6 / RUN_FREQUENCY - loop_duration);
+		BENCHMARK_TOCK();
+		if (loop_duration < LOOP_DURATION) {
+			usleep(LOOP_DURATION - loop_duration);
 		}
+		BENCHMARK_TOCK();
 	}
 
 	BENCHMARK_END();
