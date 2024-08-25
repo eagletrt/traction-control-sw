@@ -102,8 +102,9 @@ int main(void) {
 #endif
 
 			uint64_t soc_dt_us = get_timestamp_u() - last_soc_step;
-			if (1e6 / SOC_UPDATE_FREQUENCY <= soc_dt_us) {
-				if (received_hv_soc_data) {
+			if (1e6 / (SOC_UPDATE_FREQUENCY * 2) <= soc_dt_us) {
+				static int compute_hv_soc = 0;
+				if (compute_hv_soc && received_hv_soc_data) {
 					// HV
 					hvSOC.setDT(soc_dt_us / 1e6);
 					hvSOC.setTemperature(this_step_can_data.hv_mean_temp);
@@ -111,7 +112,7 @@ int main(void) {
 					hvSOC.update(this_step_can_data.hv_min_cell_voltage);
 					save_soc_state(hv_soc_state_path, hvSOC.getState());
 				}
-				if (received_lv_soc_data) {
+				if (!compute_hv_soc && received_lv_soc_data) {
 					// LV
 					lvSOC.setDT(soc_dt_us / 1e6);
 					lvSOC.setTemperature(this_step_can_data.lv_mean_temp);
@@ -120,6 +121,7 @@ int main(void) {
 					save_soc_state(lv_soc_state_path, lvSOC.getState());
 				}
 				last_soc_step = get_timestamp_u();
+				compute_hv_soc = (compute_hv_soc + 1) % 2;
 			}
 
 			BENCHMARK_TOCK();
