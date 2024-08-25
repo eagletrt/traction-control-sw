@@ -50,7 +50,7 @@ static_assert(REGEN_BRAKE_FRONT_ON_THRESHOLD > REGEN_BRAKE_HYSTERESIS);
 
 #define UNUSED(x) (void)(x)
 
-#define INV_MAX_SPEED 6500.f // MOT_RPM_LIMIT_REAL
+#define INV_MAX_SPEED 8000.f // MOT_RPM_LIMIT_REAL
 
 static uint64_t get_timestamp_u() {
 	static struct timeval tv;
