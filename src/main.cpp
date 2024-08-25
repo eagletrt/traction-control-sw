@@ -335,7 +335,7 @@ void can_send_data(can_data_t can_data) {
 		ds1.device_id = primary_debug_signal_3_device_id_tlm;
 		ds1.field_1 = renable;
 		ds1.field_2 = SLIP_Out_lambda_rl;
-		ds1.field_2 = SLIP_Out_lambda_rr;
+		ds1.field_3 = SLIP_Out_lambda_rr;
 		static primary_debug_signal_3_t ds1_raw;
 		primary_debug_signal_3_conversion_to_raw_struct(&ds1_raw, &ds1);
 		primary_debug_signal_3_pack(data, &ds1_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
