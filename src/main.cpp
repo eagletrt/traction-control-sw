@@ -218,10 +218,10 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_u = can_data->u;
 	// SLIP_yaw_rate = can_data->gyro_z;
 
-	SLIP_Inp_Ki = 20000.0;
-	SLIP_Inp_Kp = 0.0;
-	SLIP_Inp_LambdaRef = 0.3;
-	SLIP_Inp_IntegralOffset = 30.0;
+	SLIP_Inp_Ki = 12000.0;
+	SLIP_Inp_Kp = 2.0;
+	SLIP_Inp_LambdaRef = 0.25;
+	SLIP_Inp_IntegralOffset = 40.0;
 }
 
 void torque_model_set_data(can_data_t *can_data) {
