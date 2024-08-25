@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.197
+ * Model version                  : 6.208
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sun Aug 25 11:50:55 2024
+ * C/C++ source code generated on : Sun Aug 25 18:10:44 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -44,8 +44,28 @@ real_T SLIP_omega_rl;                  /* '<Root>/Inp_omega_rl' */
 real_T SLIP_omega_rr;                  /* '<Root>/Inp_omega_rr' */
 real_T SLIP_u;                         /* '<Root>/Inp_u_bar' */
 real_T SLIP_yaw_rate;                  /* '<Root>/Inp_Omega' */
+static void Slip_est1(real_T rtu_omegaR, real_T rtu_u_bar, real_T rtu_Vlow,
+                      real_T *rty_lambda);
 static void map(real_T rtu_Tmax_slip, real_T rtu_Tmax_motor, real_T rtu_map_sc,
                 real_T *rty_T_max);
+
+/*
+ * Output and update for atomic system:
+ *    '<S2>/Slip_est1'
+ *    '<S3>/Slip_est1'
+ */
+static void Slip_est1(real_T rtu_omegaR, real_T rtu_u_bar, real_T rtu_Vlow,
+                      real_T *rty_lambda)
+{
+  real_T Vmax;
+  Vmax = fmax(fabs(rtu_u_bar), fabs(rtu_omegaR));
+  if (Vmax > rtu_Vlow) {
+    *rty_lambda = (rtu_omegaR - rtu_u_bar) / Vmax;
+  } else {
+    *rty_lambda = (rtu_omegaR - rtu_u_bar) * 2.0 / (Vmax * Vmax / rtu_Vlow +
+      rtu_Vlow);
+  }
+}
 
 /*
  * Output and update for atomic system:
@@ -55,67 +75,45 @@ static void map(real_T rtu_Tmax_slip, real_T rtu_Tmax_motor, real_T rtu_map_sc,
 static void map(real_T rtu_Tmax_slip, real_T rtu_Tmax_motor, real_T rtu_map_sc,
                 real_T *rty_T_max)
 {
-  if (rtu_map_sc > 0.05) {
-    *rty_T_max = rtu_Tmax_slip;
-  } else {
-    *rty_T_max = rtu_Tmax_motor;
-  }
+  *rty_T_max = (rtu_Tmax_motor - rtu_Tmax_slip) * (1.0 - rtu_map_sc) +
+    rtu_Tmax_slip;
 }
 
 /* Model step function */
 void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
 {
   DW_SLIP *SLIP_DW = SLIP_M->dwork;
-  real_T Vmax;
-  real_T rtb_Rr;
-  real_T rtb_Rr_tmp;
+  real_T DiscreteTimeIntegrator1;
+  real_T DiscreteTimeIntegrator1_j;
+  real_T rtb_Product1;
   real_T rtb_Sum2;
   real_T rtb_error;
-  real_T rtb_vms;
-  real_T rtb_vms_o;
   boolean_T rtb_Compare;
   boolean_T rtb_Compare_f;
 
-  /* Gain: '<S3>/Rr' incorporates:
-   *  Inport: '<Root>/Inp_omega_rr'
-   */
-  rtb_Rr = 0.203 * SLIP_omega_rr;
-
-  /* Sum: '<S3>/Add2' incorporates:
-   *  Gain: '<S3>/Wr//2'
-   *  Inport: '<Root>/Inp_Omega'
-   *  Inport: '<Root>/Inp_u_bar'
-   */
-  rtb_vms = 0.605 * SLIP_yaw_rate + SLIP_u;
-
   /* MATLAB Function: '<S3>/Slip_est1' incorporates:
    *  Constant: '<S3>/Constant'
+   *  Gain: '<S3>/Rr'
+   *  Gain: '<S3>/Wr//2'
+   *  Inport: '<Root>/Inp_Omega'
+   *  Inport: '<Root>/Inp_omega_rr'
+   *  Inport: '<Root>/Inp_u_bar'
+   *  Outport: '<Root>/Out_lambda_rr'
+   *  Sum: '<S3>/Add2'
    */
-  Vmax = fmax(fabs(rtb_vms), fabs(rtb_Rr));
-  if (Vmax > 1.0) {
-    Vmax = fabs((rtb_vms - rtb_Rr) / Vmax);
-  } else {
-    Vmax = fabs((rtb_vms - rtb_Rr) * 2.0 / (Vmax * Vmax + 1.0));
-  }
-
-  /* End of MATLAB Function: '<S3>/Slip_est1' */
+  Slip_est1(0.203 * SLIP_omega_rr, SLIP_u + 0.605 * SLIP_yaw_rate, 1.0,
+            &SLIP_Out_lambda_rr);
 
   /* Sum: '<S3>/Add1' incorporates:
    *  Inport: '<Root>/Inp_LambdaRef'
+   *  Outport: '<Root>/Out_lambda_rr'
    */
-  rtb_error = SLIP_Inp_LambdaRef - Vmax;
-
-  /* Product: '<S3>/Product1' incorporates:
-   *  Inport: '<Root>/Inp_Ki'
-   *  Inport: '<Root>/Inp_map_sc'
-   *  Product: '<S2>/Product1'
-   */
-  rtb_Rr_tmp = SLIP_map_sc * SLIP_Inp_Ki;
+  rtb_error = SLIP_Inp_LambdaRef - SLIP_Out_lambda_rr;
 
   /* Product: '<S18>/Product1' incorporates:
-   *  Product: '<S3>/Product1'
+   *  Inport: '<Root>/Inp_Ki'
    */
-  rtb_Rr = rtb_Rr_tmp * rtb_error;
+  rtb_Product1 = rtb_error * SLIP_Inp_Ki;
 
   /* RelationalOperator: '<S12>/Compare' incorporates:
    *  Constant: '<S12>/Constant'
@@ -129,12 +127,13 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   }
 
   /* DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
-  rtb_vms = 5.0E-5 * rtb_Rr + SLIP_DW->DiscreteTimeIntegrator1_DSTATE;
+  DiscreteTimeIntegrator1 = 5.0E-5 * rtb_Product1 +
+    SLIP_DW->DiscreteTimeIntegrator1_DSTATE;
 
   /* DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
-  if (rtb_vms < 0.0) {
+  if (DiscreteTimeIntegrator1 < 0.0) {
     /* DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
-    rtb_vms = 0.0;
+    DiscreteTimeIntegrator1 = 0.0;
   }
 
   /* Sum: '<S13>/Sum2' incorporates:
@@ -143,7 +142,8 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Product: '<S19>/Product'
    *  Sum: '<S18>/Add'
    */
-  rtb_Sum2 = rtb_error * SLIP_Inp_Kp + (rtb_vms + SLIP_Inp_IntegralOffset);
+  rtb_Sum2 = rtb_error * SLIP_Inp_Kp + (DiscreteTimeIntegrator1 +
+    SLIP_Inp_IntegralOffset);
 
   /* Switch: '<S15>/Switch2' incorporates:
    *  Constant: '<S3>/Constant3'
@@ -201,46 +201,35 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
 
   /* End of Switch: '<S14>/Switch2' */
 
-  /* Outport: '<Root>/Out_lambda_rr' */
-  SLIP_Out_lambda_rr = Vmax;
-
   /* RelationalOperator: '<S4>/Compare' incorporates:
    *  Constant: '<S4>/Constant'
    *  Inport: '<Root>/Inp_driver_request'
    */
   rtb_Compare_f = (SLIP_Driver_req >= 0.03);
 
-  /* Gain: '<S2>/Rr' incorporates:
-   *  Inport: '<Root>/Inp_omega_rl'
-   */
-  rtb_Sum2 = 0.203 * SLIP_omega_rl;
-
-  /* Sum: '<S2>/Add2' incorporates:
-   *  Gain: '<S2>/Wr//2'
-   *  Inport: '<Root>/Inp_Omega'
-   *  Inport: '<Root>/Inp_u_bar'
-   */
-  rtb_vms_o = SLIP_u - 0.605 * SLIP_yaw_rate;
-
   /* MATLAB Function: '<S2>/Slip_est1' incorporates:
    *  Constant: '<S2>/Constant'
+   *  Gain: '<S2>/Rr'
+   *  Gain: '<S2>/Wr//2'
+   *  Inport: '<Root>/Inp_Omega'
+   *  Inport: '<Root>/Inp_omega_rl'
+   *  Inport: '<Root>/Inp_u_bar'
+   *  Outport: '<Root>/Out_lambda_rl'
+   *  Sum: '<S2>/Add2'
    */
-  Vmax = fmax(fabs(rtb_vms_o), fabs(rtb_Sum2));
-  if (Vmax > 1.0) {
-    Vmax = fabs((rtb_vms_o - rtb_Sum2) / Vmax);
-  } else {
-    Vmax = fabs((rtb_vms_o - rtb_Sum2) * 2.0 / (Vmax * Vmax + 1.0));
-  }
-
-  /* End of MATLAB Function: '<S2>/Slip_est1' */
+  Slip_est1(0.203 * SLIP_omega_rl, SLIP_u - 0.605 * SLIP_yaw_rate, 1.0,
+            &SLIP_Out_lambda_rl);
 
   /* Sum: '<S2>/Add1' incorporates:
    *  Inport: '<Root>/Inp_LambdaRef'
+   *  Outport: '<Root>/Out_lambda_rl'
    */
-  rtb_error = SLIP_Inp_LambdaRef - Vmax;
+  rtb_error = SLIP_Inp_LambdaRef - SLIP_Out_lambda_rl;
 
-  /* Product: '<S10>/Product1' */
-  rtb_Sum2 = rtb_Rr_tmp * rtb_error;
+  /* Product: '<S10>/Product1' incorporates:
+   *  Inport: '<Root>/Inp_Ki'
+   */
+  rtb_Sum2 = rtb_error * SLIP_Inp_Ki;
 
   /* DiscreteIntegrator: '<S10>/Discrete-Time Integrator1' */
   if (rtb_Compare_f && (SLIP_DW->DiscreteTimeIntegrator1_PrevR_h <= 0)) {
@@ -248,12 +237,13 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   }
 
   /* DiscreteIntegrator: '<S10>/Discrete-Time Integrator1' */
-  rtb_vms_o = 5.0E-5 * rtb_Sum2 + SLIP_DW->DiscreteTimeIntegrator1_DSTAT_j;
+  DiscreteTimeIntegrator1_j = 5.0E-5 * rtb_Sum2 +
+    SLIP_DW->DiscreteTimeIntegrator1_DSTAT_j;
 
   /* DiscreteIntegrator: '<S10>/Discrete-Time Integrator1' */
-  if (rtb_vms_o < 0.0) {
+  if (DiscreteTimeIntegrator1_j < 0.0) {
     /* DiscreteIntegrator: '<S10>/Discrete-Time Integrator1' */
-    rtb_vms_o = 0.0;
+    DiscreteTimeIntegrator1_j = 0.0;
   }
 
   /* Sum: '<S5>/Sum2' incorporates:
@@ -262,7 +252,8 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Product: '<S11>/Product'
    *  Sum: '<S10>/Add'
    */
-  rtb_error = rtb_error * SLIP_Inp_Kp + (rtb_vms_o + SLIP_Inp_IntegralOffset);
+  rtb_error = rtb_error * SLIP_Inp_Kp + (DiscreteTimeIntegrator1_j +
+    SLIP_Inp_IntegralOffset);
 
   /* Switch: '<S7>/Switch2' incorporates:
    *  Constant: '<S2>/Constant3'
@@ -320,11 +311,9 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
 
   /* End of Switch: '<S6>/Switch2' */
 
-  /* Outport: '<Root>/Out_lambda_rl' */
-  SLIP_Out_lambda_rl = Vmax;
-
   /* Update for DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
-  SLIP_DW->DiscreteTimeIntegrator1_DSTATE = 5.0E-5 * rtb_Rr + rtb_vms;
+  SLIP_DW->DiscreteTimeIntegrator1_DSTATE = 5.0E-5 * rtb_Product1 +
+    DiscreteTimeIntegrator1;
   if (SLIP_DW->DiscreteTimeIntegrator1_DSTATE < 0.0) {
     SLIP_DW->DiscreteTimeIntegrator1_DSTATE = 0.0;
   }
@@ -334,7 +323,8 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   /* End of Update for DiscreteIntegrator: '<S18>/Discrete-Time Integrator1' */
 
   /* Update for DiscreteIntegrator: '<S10>/Discrete-Time Integrator1' */
-  SLIP_DW->DiscreteTimeIntegrator1_DSTAT_j = 5.0E-5 * rtb_Sum2 + rtb_vms_o;
+  SLIP_DW->DiscreteTimeIntegrator1_DSTAT_j = 5.0E-5 * rtb_Sum2 +
+    DiscreteTimeIntegrator1_j;
   if (SLIP_DW->DiscreteTimeIntegrator1_DSTAT_j < 0.0) {
     SLIP_DW->DiscreteTimeIntegrator1_DSTAT_j = 0.0;
   }
@@ -352,6 +342,14 @@ void SLIP_initialize(RT_MODEL_SLIP *const SLIP_M)
   /* Registration code */
 
   /* Storage classes */
+  SLIP_Out_Tm_rr = 0.0;
+  SLIP_Out_Tm_rl = 0.0;
+  SLIP_Out_lambda_rr = 0.0;
+  SLIP_Out_lambda_rl = 0.0;
+  SLIP_Out_Tmax_rr_slip = 0.0;
+  SLIP_Out_Tmax_rl_slip = 0.0;
+
+  /* Storage classes */
   SLIP_Driver_req = 0.0;
   SLIP_u = 0.0;
   SLIP_omega_rr = 0.0;
@@ -364,14 +362,6 @@ void SLIP_initialize(RT_MODEL_SLIP *const SLIP_M)
   SLIP_Inp_Kp = 0.0;
   SLIP_Inp_Ki = 0.0;
   SLIP_Inp_IntegralOffset = 0.0;
-
-  /* Storage classes */
-  SLIP_Out_Tm_rr = 0.0;
-  SLIP_Out_Tm_rl = 0.0;
-  SLIP_Out_lambda_rr = 0.0;
-  SLIP_Out_lambda_rl = 0.0;
-  SLIP_Out_Tmax_rr_slip = 0.0;
-  SLIP_Out_Tmax_rl_slip = 0.0;
 
   /* states (dwork) */
   (void) memset((void *)SLIP_DW, 0,
