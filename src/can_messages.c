@@ -1,4 +1,5 @@
 #include "inc/data.h"
+#include <stdint.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include "inc/can_messages.h"
@@ -290,7 +291,7 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 #endif
 
 static inline double inverter_convert_speed(double val) {
-	return (val * 10.0 / 4.5 * (2 * M_PI / 60.0) * (INV_MAX_SPEED / 32767.f));
+	return (val * 10.0 / 4.5 * (M_PI / 30.0) * (INV_MAX_SPEED / INT16_MAX));
 }
 static inline double convert_gyro(double val) { return -val * M_PI / 180.0; };
 static inline double convert_accel(double val) { return -val * 9.81; };
