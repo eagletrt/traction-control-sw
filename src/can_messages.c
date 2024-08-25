@@ -44,13 +44,13 @@ void can_messages_init() {
 void can_messages_parse(can_message_t *message, can_data_t *can_data, can_received_bitset_t *can_received) {
 	assert(message && can_data);
 
-#if SIMULATOR == 1
-	if (message->socket == CAN_SOCKET_PRIMARY) {
-		if (simulator_id_is_message(message->frame.can_id)) {
-			can_messages_parse_simulator(message, can_data, can_received);
-		}
-	}
-#else
+// #if SIMULATOR == 1
+// 	if (message->socket == CAN_SOCKET_PRIMARY) {
+// 		if (simulator_id_is_message(message->frame.can_id)) {
+// 			can_messages_parse_simulator(message, can_data, can_received);
+// 		}
+// 	}
+// #else
 	if (message->socket == CAN_SOCKET_PRIMARY) {
 		if (inverters_id_is_message(message->frame.can_id)) {
 			can_messages_parse_inverters(message, can_data, can_received);
@@ -62,7 +62,7 @@ void can_messages_parse(can_message_t *message, can_data_t *can_data, can_receiv
 			can_messages_parse_secondary(message, can_data, can_received);
 		}
 	}
-#endif // SIMULATOR
+// #endif // SIMULATOR
 }
 
 #if SIMULATOR == 1
@@ -189,16 +189,16 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 		CAN_RECEIVED_SET(*can_received, CAN_REC_OMEGA_F)
 		break;
 	}
-	case SECONDARY_REAR_ANGULAR_VELOCITY_FRAME_ID: {
-#if USE_INVERTERS_SPEED == 0
-		secondary_rear_angular_velocity_converted_t *speed =
-				(secondary_rear_angular_velocity_converted_t *)can_devices.message;
-		can_data->omega_rl = speed->rl;
-		can_data->omega_rr = speed->rr;
-		CAN_RECEIVED_SET(*can_received, CAN_REC_OMEGA_R)
-#endif
-		break;
-	}
+// 	case SECONDARY_REAR_ANGULAR_VELOCITY_FRAME_ID: {
+// #if USE_INVERTERS_SPEED == 0
+// 		secondary_rear_angular_velocity_converted_t *speed =
+// 				(secondary_rear_angular_velocity_converted_t *)can_devices.message;
+// 		can_data->omega_rl = speed->rl;
+// 		can_data->omega_rr = speed->rr;
+// 		CAN_RECEIVED_SET(*can_received, CAN_REC_OMEGA_R)
+// #endif
+// 		break;
+// 	}
 	case SECONDARY_PEDAL_THROTTLE_FRAME_ID: {
 		secondary_pedal_throttle_converted_t *pedals_output = (secondary_pedal_throttle_converted_t *)can_devices.message;
 		can_data->throttle = convert_throttle(pedals_output->throttle);
@@ -239,9 +239,9 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 	}
 	case SECONDARY_VEHICLE_SPEED_FRAME_ID: {
 		secondary_vehicle_speed_converted_t *speed = (secondary_vehicle_speed_converted_t *)can_devices.message;
-		if (USE_TLM_VELOCITY_ESTIMATION == 1) {
+		// if (USE_TLM_VELOCITY_ESTIMATION == 1) {
 			can_data->u = speed->u;
-		}
+		// }
 		CAN_RECEIVED_SET(*can_received, CAN_REC_U)
 		break;
 	}
@@ -260,10 +260,10 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 		inverters_inv_l_rcv_converted_t *rcv = (inverters_inv_l_rcv_converted_t *)can_devices.message;
 		switch (rcv->rcv_mux) {
 		case INVERTERS_INV_L_RCV_RCV_MUX_ID_A8_N_ACTUAL_FILT_CHOICE:
-#if USE_INVERTERS_SPEED == 1
+// #if USE_INVERTERS_SPEED == 1
 			can_data->omega_rl = -inverter_convert_speed(rcv->n_actual_filt);
 			CAN_RECEIVED_SET(*can_received, CAN_REC_OMEGA_R)
-#endif
+// #endif
 			break;
 		default:
 			break;
@@ -274,10 +274,10 @@ static inline void can_messages_parse_inverters(can_message_t *message, can_data
 		inverters_inv_r_rcv_converted_t *rcv = (inverters_inv_r_rcv_converted_t *)can_devices.message;
 		switch (rcv->rcv_mux) {
 		case INVERTERS_INV_R_RCV_RCV_MUX_ID_A8_N_ACTUAL_FILT_CHOICE:
-#if USE_INVERTERS_SPEED == 1
+// #if USE_INVERTERS_SPEED == 1
 			can_data->omega_rr = inverter_convert_speed(rcv->n_actual_filt);
 			CAN_RECEIVED_SET(*can_received, CAN_REC_OMEGA_R)
-#endif
+// #endif
 			break;
 		default:
 			break;
