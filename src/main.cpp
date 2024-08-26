@@ -222,7 +222,7 @@ void slip_model_set_data(can_data_t *can_data) {
 
 	SLIP_Inp_Ki = 12000.0;
 	SLIP_Inp_Kp = 2.0;
-	SLIP_Inp_LambdaRef = 0.11;
+	SLIP_Inp_LambdaRef = 0.10;
 	SLIP_Inp_IntegralOffset = 60.0;
 }
 
