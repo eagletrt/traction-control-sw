@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.210
+ * Model version                  : 6.214
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sun Aug 25 20:16:31 2024
+ * C/C++ source code generated on : Mon Aug 26 11:22:56 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -117,7 +117,7 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   if (rtb_Switch_e > 0.0) {
     DiscreteTimeIntegrator1_j = SLIP_Inp_Ki;
   } else {
-    DiscreteTimeIntegrator1_j = 0.5 * SLIP_Inp_Ki;
+    DiscreteTimeIntegrator1_j = 0.16666666666666666 * SLIP_Inp_Ki;
   }
 
   /* Product: '<S18>/Product1' incorporates:
@@ -243,7 +243,7 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   if (rtb_error > 0.0) {
     DiscreteTimeIntegrator1_j = SLIP_Inp_Ki;
   } else {
-    DiscreteTimeIntegrator1_j = 0.5 * SLIP_Inp_Ki;
+    DiscreteTimeIntegrator1_j = 0.16666666666666666 * SLIP_Inp_Ki;
   }
 
   /* Product: '<S10>/Product1' incorporates:
