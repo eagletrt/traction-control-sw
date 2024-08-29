@@ -190,7 +190,7 @@ void check_received_messages(can_received_bitset_t *bitset) {
 
 double torque_max(can_data_t *can_data) {
 	(void)can_data;
-	return 100.0 * can_data->map_pw;
+	return 100.0 * can_data->map_power;
 }
 
 void velocity_estimation(can_data_t *can_data) {
@@ -214,7 +214,6 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_Driver_req = can_data->throttle;
 	SLIP_Tmax_rl = torque_max(can_data);
 	SLIP_Tmax_rr = torque_max(can_data);
-	SLIP_map_sc = can_data->map_sc;
 	SLIP_omega_rl = can_data->omega_rl;
 	SLIP_omega_rr = can_data->omega_rr;
 	SLIP_u = can_data->u;
@@ -227,7 +226,6 @@ void slip_model_set_data(can_data_t *can_data) {
 }
 
 void torque_model_set_data(can_data_t *can_data) {
-	TV_map_tv = can_data->map_tv;
 	TV_Driver_req = can_data->throttle;
 	TV_Steeringangle = (can_data->steering_angle); // / STEER_CONVERSION_FACTOR;
 	TV_yaw_rate = can_data->gyro_z;
@@ -277,9 +275,6 @@ void can_send_data(can_data_t can_data) {
 	static uint64_t hv_soc_cov_timestamp = 0;
 	static uint64_t lv_soc_state_timestamp = 0;
 	static uint64_t lv_soc_cov_timestamp = 0;
-
-	real_T map_sc = SLIP_map_sc;
-	real_T map_tv = TV_map_tv;
 
 	real_T torque_rl;
 	real_T torque_rr;
@@ -355,9 +350,10 @@ void can_send_data(can_data_t can_data) {
 		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_STATE_FRAME_ID, data, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
 #else
 		static primary_control_status_converted_t state_src;
-		state_src.map_pw = can_data.map_pw;
-		state_src.map_sc = map_sc;
-		state_src.map_tv = map_tv;
+		state_src.map_power = can_data.map_power;
+		state_src.sc_state = (primary_control_status_sc_state)can_data.sc_state;
+		state_src.tv_state = (primary_control_status_tv_state)can_data.tv_state;
+		state_src.reg_state = (primary_control_status_reg_state)can_data.reg_state;
 		static primary_control_status_t state_src_raw;
 		primary_control_status_conversion_to_raw_struct(&state_src_raw, &state_src);
 		primary_control_status_pack(data, &state_src_raw, PRIMARY_CONTROL_STATUS_BYTE_SIZE);

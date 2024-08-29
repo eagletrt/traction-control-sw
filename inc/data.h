@@ -1,6 +1,7 @@
 #ifndef __DATA_H__
 #define __DATA_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef struct {
@@ -19,9 +20,10 @@ typedef struct {
 	double omega_fr;
 	double omega_rl;
 	double omega_rr;
-	double map_pw;
-	double map_sc;
-	double map_tv;
+	double map_power;
+	bool sc_state;
+	bool tv_state;
+	bool reg_state;
 	double hv_min_cell_voltage;
 	double hv_total_current;
 	double hv_mean_temp;
