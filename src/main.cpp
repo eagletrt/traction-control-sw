@@ -129,7 +129,7 @@ int main(void) {
 		}
 
 		can_send_data(this_step_can_data);
-  
+
 		uint64_t loop_duration = get_timestamp_u() - t_loop_start;
 
 		BENCHMARK_TOCK();
@@ -396,7 +396,10 @@ void can_send_data(can_data_t can_data) {
 		lv_soc_state_timestamp = timestamp;
 		const auto &state = lvSOC.getState();
 		static secondary_lv_soc_estimation_state_converted_t lv_soc_estimation_state;
-		lv_soc_estimation_state.soc = state(_SOC);
+
+		constexpr float realMinSoc = 0.1;
+		float soc = (state(_SOC) - realMinSoc) / (1.0 - realMinSoc);
+		lv_soc_estimation_state.soc = soc;
 		lv_soc_estimation_state.rc1 = state(_RC1);
 		lv_soc_estimation_state.rc2 = state(_RC2);
 
