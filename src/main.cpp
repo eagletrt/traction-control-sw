@@ -1,4 +1,5 @@
 #include "inc/main.hpp"
+#include "exported/Regen/Regen.h"
 #include "inc/data.h"
 #include <pthread.h>
 extern "C" {
@@ -178,6 +179,8 @@ bool init_model(void) {
 	slip_model.dwork = &slip_rtDW;
 	SLIP_initialize(&slip_model);
 
+	Regen_initialize(&regen_model);
+
 	return true;
 }
 void check_received_messages(can_received_bitset_t *bitset) {
@@ -211,17 +214,23 @@ void regen_model_set_data(can_data_t *can_data) {
 
 void slip_model_set_data(can_data_t *can_data) {
 	SLIP_Driver_req = can_data->throttle;
-	SLIP_Tmax_rl = torque_max(can_data);
-	SLIP_Tmax_rr = torque_max(can_data);
-	SLIP_omega_rl = can_data->omega_rl;
-	SLIP_omega_rr = can_data->omega_rr;
+	SLIP_T_max = torque_max(can_data);
+	SLIP_in_omega_rl = can_data->omega_rl;
+	SLIP_in_omega_rr = can_data->omega_rr;
 	SLIP_u = can_data->u;
 	SLIP_yaw_rate = can_data->gyro_z;
 
-	SLIP_Inp_Ki = 12000.0;
-	SLIP_Inp_Kp = 2.0;
-	SLIP_Inp_LambdaRef = 0.10;
-	SLIP_Inp_IntegralOffset = 45.0;
+	SLIP_in_Kp = 500.0;
+	SLIP_in_Ki = 10000.0;
+	SLIP_in_Kd = 100.0;
+
+	SLIP_in_lambda_reference = 0.06;
+	SLIP_in_minimum_torque = 10.0;
+
+	SLIP_in_iteration_step_seconds = 1.0 / RUN_FREQUENCY;
+	SLIP_in_window_size_seconds = 0.1;
+	in_shallow_window_size_seconds = 0.05;
+	in_differentiation_step_seconds = 0.3;
 }
 
 void torque_model_set_data(can_data_t *can_data) {
@@ -237,8 +246,8 @@ void torque_model_set_data(can_data_t *can_data) {
 	TV_Inp_Tmax_rl = torque_max(can_data);
 	TV_Inp_Tmax_rr = torque_max(can_data);
 
-	TV_lambda_rr = SLIP_Out_Tmax_rr_slip;
-	TV_lambda_rr_n = SLIP_Out_Tmax_rl_slip;
+	TV_lambda_rr = SLIP_out_T_max_rr_slip;
+	TV_lambda_rr_n = SLIP_out_T_max_rl_slip;
 }
 
 bool regen_enable(double brake_front, double throttle, double hvSOC) {
@@ -294,10 +303,10 @@ void can_send_data(can_data_t can_data) {
 			tmax_rl = TV_Inp_Tmax_rl;
 			tmax_rr = TV_Inp_Tmax_rr;
 		} else if (can_data.sc_state) {
-			torque_rl = SLIP_Out_Tm_rr;
-			torque_rr = SLIP_Out_Tm_rr;
-			tmax_rl = SLIP_Out_Tmax_rl_slip;
-			tmax_rr = SLIP_Out_Tmax_rr_slip;
+			torque_rl = SLIP_out_T_motor_rl;
+			torque_rr = SLIP_out_T_motor_rr;
+			tmax_rl = SLIP_out_T_max_rl_slip;
+			tmax_rr = SLIP_out_T_max_rr_slip;
 		} else {
 			torque_rl = torque_max(&can_data) * can_data.throttle;
 			torque_rr = torque_max(&can_data) * can_data.throttle;
@@ -339,8 +348,8 @@ void can_send_data(can_data_t can_data) {
 		static primary_debug_signal_3_converted_t ds1;
 		ds1.device_id = primary_debug_signal_3_device_id_tlm;
 		ds1.field_1 = renable;
-		ds1.field_2 = SLIP_Out_lambda_rl;
-		ds1.field_3 = SLIP_Out_lambda_rr;
+		ds1.field_2 = SLIP_out_lambda_rl;
+		ds1.field_3 = SLIP_out_lambda_rr;
 		static primary_debug_signal_3_t ds1_raw;
 		primary_debug_signal_3_conversion_to_raw_struct(&ds1_raw, &ds1);
 		primary_debug_signal_3_pack(data, &ds1_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
