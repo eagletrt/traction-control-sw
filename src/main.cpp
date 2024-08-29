@@ -98,9 +98,8 @@ int main(void) {
 			SLIP_step(&slip_model);
 			// Torque Vectoring
 			TV_step(&torque_model);
-#if REGEN_ENABLE == 1
+			// Regen
 			Regen_step(&regen_model);
-#endif
 
 			uint64_t soc_dt_us = get_timestamp_u() - last_soc_step;
 			if (1e6 / (SOC_UPDATE_FREQUENCY * 2) <= soc_dt_us) {
@@ -190,7 +189,7 @@ void check_received_messages(can_received_bitset_t *bitset) {
 
 double torque_max(can_data_t *can_data) {
 	(void)can_data;
-	return 100.0 * can_data->map_power;
+	return MAX_TORQUE * can_data->map_power;
 }
 
 void velocity_estimation(can_data_t *can_data) {
@@ -281,7 +280,7 @@ void can_send_data(can_data_t can_data) {
 	real_T tmax_rl;
 	real_T tmax_rr;
 	static float renable = 1.0f;
-	if (REGEN_ENABLE && regen_enable(can_data.brake_f, can_data.throttle, hvSOC.getState()(_SOC))) {
+	if (can_data.reg_state && regen_enable(can_data.brake_f, can_data.throttle, hvSOC.getState()(_SOC))) {
 		renable = 1.0f;
 		torque_rl = Regen_Out_Tm_rl;
 		torque_rr = Regen_Out_Tm_rr;
@@ -289,10 +288,22 @@ void can_send_data(can_data_t can_data) {
 		tmax_rr = Regen_Tm_rr;
 	} else {
 		renable = 0.0f;
-		torque_rl = TV_Out_Tm_rl;
-		torque_rr = TV_Out_Tm_rr;
-		tmax_rl = TV_Inp_Tmax_rl;
-		tmax_rr = TV_Inp_Tmax_rr;
+		if (can_data.tv_state) {
+			torque_rl = TV_Out_Tm_rl;
+			torque_rr = TV_Out_Tm_rr;
+			tmax_rl = TV_Inp_Tmax_rl;
+			tmax_rr = TV_Inp_Tmax_rr;
+		} else if (can_data.sc_state) {
+			torque_rl = SLIP_Out_Tm_rr;
+			torque_rr = SLIP_Out_Tm_rr;
+			tmax_rl = SLIP_Out_Tmax_rl_slip;
+			tmax_rr = SLIP_Out_Tmax_rr_slip;
+		} else {
+			torque_rl = torque_max(&can_data) * can_data.throttle;
+			torque_rr = torque_max(&can_data) * can_data.throttle;
+			tmax_rl = torque_max(&can_data);
+			tmax_rr = torque_max(&can_data);
+		}
 	}
 
 	if (received_controls_data && timestamp - out_timestamp > 1e4) {

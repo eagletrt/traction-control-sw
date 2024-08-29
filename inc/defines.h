@@ -16,12 +16,13 @@
 #define USE_INVERTERS_SPEED 1
 
 #define BENCHMARK 0
-#define RUN_FREQUENCY 200								// Hz
-#define LOOP_DURATION 1000000 / RUN_FREQUENCY								// us
-#define SOC_UPDATE_FREQUENCY 50					// Hz
-#define CHECK_CAN_MESSAGES_FREQUENCY 10 // Hz
+#define RUN_FREQUENCY 200											// Hz
+#define LOOP_DURATION 1000000 / RUN_FREQUENCY // us
+#define SOC_UPDATE_FREQUENCY 50								// Hz
+#define CHECK_CAN_MESSAGES_FREQUENCY 10				// Hz
 
-#define REGEN_ENABLE 1
+#define MAX_TORQUE (100.0)
+
 #define REGEN_BRAKE_FRONT_ON_THRESHOLD 1.5f // enables regen over this value
 #define REGEN_THROTTLE_ON_THRESHOLD 0.05f		// enables regen under this value
 #define REGEN_SOC_ON_THRESOLD 0.95f					// enables when under this value
