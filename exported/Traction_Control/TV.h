@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'TV'.
  *
- * Model version                  : 6.197
+ * Model version                  : 6.289
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Aug  3 12:40:27 2024
+ * C/C++ source code generated on : Fri Aug 30 10:31:09 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -60,21 +60,20 @@ extern void TV_step(RT_MODEL_TV *const TV_M);
 /* Exported data declaration */
 
 /* Data with Exported storage */
-extern real_T TV_Driver_req;           /* '<Root>/Inp_driver_request' */
-extern real_T TV_Inp_Ki;               /* '<Root>/Inp_Ki' */
-extern real_T TV_Inp_Kp;               /* '<Root>/Inp_Kp' */
-extern real_T TV_Inp_Kus;              /* '<Root>/Inp_Kus' */
-extern real_T TV_Inp_Tmax_rl;          /* '<Root>/Inp_Tmax_rl' */
-extern real_T TV_Inp_Tmax_rr;          /* '<Root>/Inp_Tmax_rr' */
-extern real_T TV_Out_Debug_Torque;     /* '<Root>/Out_Debug_Torque' */
-extern real_T TV_Out_Tm_rl;            /* '<Root>/Out_Tm_rl' */
-extern real_T TV_Out_Tm_rr;            /* '<Root>/Out_Tm_rr' */
-extern real_T TV_Steeringangle;        /* '<Root>/Inp_delta' */
-extern real_T TV_lambda_rr;            /* '<Root>/Inp_Tmax_rr_Slip' */
-extern real_T TV_lambda_rr_n;          /* '<Root>/Inp_Tmax_rl_Slip' */
-extern real_T TV_map_tv;               /* '<Root>/Inp_map_TV' */
-extern real_T TV_u;                    /* '<Root>/Inp_u_bar' */
-extern real_T TV_yaw_rate;             /* '<Root>/Inp_Omega' */
+extern real_T TV_Driver_req;           /* '<Root>/throttle' */
+extern real_T TV_Steeringangle;        /* '<Root>/delta' */
+extern real_T TV_in_KUS;               /* '<Root>/in_KUS' */
+extern real_T TV_in_Ki;                /* '<Root>/in_Ki' */
+extern real_T TV_in_Kp;                /* '<Root>/in_Kp' */
+extern real_T TV_in_T_max_rl;          /* '<Root>/in_T_max_rl' */
+extern real_T TV_in_T_max_rl_slip;     /* '<Root>/in_T_max_rl_slip' */
+extern real_T TV_in_T_max_rr;          /* '<Root>/in_T_max_rr' */
+extern real_T TV_in_T_max_rr_slip;     /* '<Root>/in_T_max_rr_slip' */
+extern real_T TV_out_T_motor_rl;       /* '<Root>/out_T_motor_rl' */
+extern real_T TV_out_T_motor_rr;       /* '<Root>/out_T_motor_rr' */
+extern real_T TV_out_debug_torque;     /* '<Root>/out_debug_torque' */
+extern real_T TV_u;                    /* '<Root>/u_bar' */
+extern real_T TV_yaw_rate;             /* '<Root>/yaw_rate' */
 
 /*-
  * These blocks were eliminated from the model due to optimizations:

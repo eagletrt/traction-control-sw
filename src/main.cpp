@@ -239,15 +239,15 @@ void torque_model_set_data(can_data_t *can_data) {
 	TV_yaw_rate = can_data->gyro_z;
 	TV_u = can_data->u;
 
-	TV_Inp_Ki = TV_PID_KI;
-	TV_Inp_Kp = TV_PID_KP;
-	TV_Inp_Kus = TV_KUS;
+	TV_in_Ki = TV_PID_KI;
+	TV_in_Kp = TV_PID_KP;
+	TV_in_KUS = TV_KUS;
 
-	TV_Inp_Tmax_rl = torque_max(can_data);
-	TV_Inp_Tmax_rr = torque_max(can_data);
+	TV_in_T_max_rl = torque_max(can_data);
+	TV_in_T_max_rr = torque_max(can_data);
 
-	TV_lambda_rr = SLIP_out_T_max_rr_slip;
-	TV_lambda_rr_n = SLIP_out_T_max_rl_slip;
+	TV_in_T_max_rl_slip = SLIP_out_T_max_rl_slip;
+	TV_in_T_max_rr_slip = SLIP_out_T_max_rr_slip;
 }
 
 bool regen_enable(double brake_front, double throttle, double hvSOC) {
@@ -298,10 +298,10 @@ void can_send_data(can_data_t can_data) {
 	} else {
 		renable = 0.0f;
 		if (can_data.tv_state) {
-			torque_rl = TV_Out_Tm_rl;
-			torque_rr = TV_Out_Tm_rr;
-			tmax_rl = TV_Inp_Tmax_rl;
-			tmax_rr = TV_Inp_Tmax_rr;
+			torque_rl = TV_out_T_motor_rl;
+			torque_rr = TV_out_T_motor_rr;
+			tmax_rl = TV_in_T_max_rl_slip;
+			tmax_rr = TV_in_T_max_rr_slip;
 		} else if (can_data.sc_state) {
 			torque_rl = SLIP_out_T_motor_rl;
 			torque_rr = SLIP_out_T_motor_rr;
