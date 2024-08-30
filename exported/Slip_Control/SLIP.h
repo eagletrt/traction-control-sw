@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.281
+ * Model version                  : 6.300
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Thu Aug 29 18:46:57 2024
+ * C/C++ source code generated on : Fri Aug 30 19:02:51 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -42,20 +42,34 @@
 /* Forward declaration for rtModel */
 typedef struct tag_RTM_SLIP RT_MODEL_SLIP;
 
+#ifndef DEFINED_TYPEDEF_FOR_debug_bus_
+#define DEFINED_TYPEDEF_FOR_debug_bus_
+
+typedef struct {
+  real_T lambda;
+  real_T filtered_lambda_error;
+  real_T shallow_filtered_lambda_error;
+  real_T proportional;
+  real_T integral;
+  real_T derivative;
+} debug_bus;
+
+#endif
+
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
-  real_T Delay_DSTATE[100];            /* '<S5>/Delay' */
-  real_T Delay_DSTATE_j[100];          /* '<S15>/Delay' */
-  real_T DelayOneStep2_DSTATE;         /* '<S5>/Delay One Step2' */
-  real_T DelayOneStep_DSTATE;          /* '<S9>/Delay One Step' */
-  real_T DelayOneStep1_DSTATE;         /* '<S5>/Delay One Step1' */
-  real_T DelayOneStep_DSTATE_j;        /* '<S19>/Delay One Step' */
-  real_T DelayOneStep2_DSTATE_d;       /* '<S15>/Delay One Step2' */
-  real_T DelayOneStep1_DSTATE_n;       /* '<S15>/Delay One Step1' */
-  boolean_T IC2_FirstOutputTime;       /* '<S5>/IC2' */
-  boolean_T IC1_FirstOutputTime;       /* '<S5>/IC1' */
-  boolean_T IC2_FirstOutputTime_d;     /* '<S15>/IC2' */
-  boolean_T IC1_FirstOutputTime_b;     /* '<S15>/IC1' */
+  real_T Delay_DSTATE[100];            /* '<S15>/Delay' */
+  real_T Delay_DSTATE_j[100];          /* '<S5>/Delay' */
+  real_T DelayOneStep2_DSTATE;         /* '<S15>/Delay One Step2' */
+  real_T DelayOneStep_DSTATE;          /* '<S19>/Delay One Step' */
+  real_T DelayOneStep1_DSTATE;         /* '<S15>/Delay One Step1' */
+  real_T DelayOneStep2_DSTATE_f;       /* '<S5>/Delay One Step2' */
+  real_T DelayOneStep_DSTATE_h;        /* '<S9>/Delay One Step' */
+  real_T DelayOneStep1_DSTATE_c;       /* '<S5>/Delay One Step1' */
+  boolean_T IC2_FirstOutputTime;       /* '<S15>/IC2' */
+  boolean_T IC1_FirstOutputTime;       /* '<S15>/IC1' */
+  boolean_T IC2_FirstOutputTime_g;     /* '<S5>/IC2' */
+  boolean_T IC1_FirstOutputTime_n;     /* '<S5>/IC1' */
 } DW_SLIP;
 
 /* Real-time Model Data Structure */
@@ -64,6 +78,9 @@ struct tag_RTM_SLIP {
   DW_SLIP *dwork;
 };
 
+/* External data declarations for dependent source files */
+extern const debug_bus SLIP_rtZdebug_bus;/* debug_bus ground */
+
 /* Model entry point functions */
 extern void SLIP_initialize(RT_MODEL_SLIP *const SLIP_M);
 extern void SLIP_step(RT_MODEL_SLIP *const SLIP_M);
@@ -71,7 +88,6 @@ extern void SLIP_step(RT_MODEL_SLIP *const SLIP_M);
 /* Exported data declaration */
 
 /* Data with Exported storage */
-extern real_T SLIP_Driver_req;         /* '<Root>/throttle' */
 extern real_T SLIP_T_max;              /* '<Root>/in_T_max' */
 extern real_T SLIP_in_Kd;              /* '<Root>/in_Kd' */
 extern real_T SLIP_in_Ki;              /* '<Root>/in_Ki' */
@@ -86,8 +102,9 @@ extern real_T SLIP_out_T_max_rl_slip;  /* '<Root>/out_T_max_rl_slip' */
 extern real_T SLIP_out_T_max_rr_slip;  /* '<Root>/out_T_max_rr_slip' */
 extern real_T SLIP_out_T_motor_rl;     /* '<Root>/out_T_motor_rl' */
 extern real_T SLIP_out_T_motor_rr;     /* '<Root>/out_T_motor_rr' */
-extern real_T SLIP_out_lambda_rl;      /* '<Root>/out_lambda_rl' */
-extern real_T SLIP_out_lambda_rr;      /* '<Root>/out_lambda_rr' */
+extern debug_bus SLIP_out_debug_bus_rl;/* '<Root>/out_debug_bus_rl' */
+extern debug_bus SLIP_out_debug_bus_rr;/* '<Root>/out_debug_bus_rr' */
+extern real_T SLIP_throttle;           /* '<Root>/throttle' */
 extern real_T SLIP_u;                  /* '<Root>/in_u_bar' */
 extern real_T SLIP_yaw_rate;           /* '<Root>/in_yaw_rate' */
 extern real_T in_differentiation_step_seconds;

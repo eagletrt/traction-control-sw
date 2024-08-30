@@ -1,5 +1,6 @@
 #include "inc/main.hpp"
 #include "exported/Regen/Regen.h"
+#include "exported/Slip_Control/SLIP.h"
 #include "inc/data.h"
 #include <pthread.h>
 extern "C" {
@@ -213,7 +214,7 @@ void regen_model_set_data(can_data_t *can_data) {
 }
 
 void slip_model_set_data(can_data_t *can_data) {
-	SLIP_Driver_req = can_data->throttle;
+	SLIP_throttle = can_data->throttle;
 	SLIP_T_max = torque_max(can_data);
 	SLIP_in_omega_rl = can_data->omega_rl;
 	SLIP_in_omega_rr = can_data->omega_rr;
@@ -288,15 +289,12 @@ void can_send_data(can_data_t can_data) {
 	real_T torque_rr;
 	real_T tmax_rl;
 	real_T tmax_rr;
-	static float renable = 1.0f;
 	if (can_data.reg_state && regen_enable(can_data.brake_f, can_data.throttle, hvSOC.getState()(_SOC))) {
-		renable = 1.0f;
 		torque_rl = Regen_Out_Tm_rl;
 		torque_rr = Regen_Out_Tm_rr;
 		tmax_rl = Regen_Tm_rl;
 		tmax_rr = Regen_Tm_rr;
 	} else {
-		renable = 0.0f;
 		if (can_data.tv_state) {
 			torque_rl = TV_out_T_motor_rl;
 			torque_rr = TV_out_T_motor_rr;
@@ -345,14 +343,23 @@ void can_send_data(can_data_t can_data) {
 
 	if (received_controls_data && timestamp - debug_state_timestamp > 1e4) {
 		debug_state_timestamp = timestamp;
-		static primary_debug_signal_3_converted_t ds1;
-		ds1.device_id = primary_debug_signal_3_device_id_tlm;
-		ds1.field_1 = renable;
-		ds1.field_2 = SLIP_out_lambda_rl;
-		ds1.field_3 = SLIP_out_lambda_rr;
-		static primary_debug_signal_3_t ds1_raw;
-		primary_debug_signal_3_conversion_to_raw_struct(&ds1_raw, &ds1);
-		primary_debug_signal_3_pack(data, &ds1_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
+		static primary_debug_signal_1_converted_t ds1;
+		ds1.device_id = primary_debug_signal_1_device_id_tlm;
+		ds1.field_1 = SLIP_out_debug_bus_rl.lambda;
+		ds1.field_2 = SLIP_out_debug_bus_rl.filtered_lambda_error;
+		ds1.field_3 = SLIP_out_debug_bus_rl.shallow_filtered_lambda_error;
+		static primary_debug_signal_1_t ds1_raw;
+		primary_debug_signal_1_conversion_to_raw_struct(&ds1_raw, &ds1);
+		primary_debug_signal_1_pack(data, &ds1_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
+		static primary_debug_signal_3_converted_t ds3;
+		ds3.device_id = primary_debug_signal_3_device_id_tlm;
+		ds3.field_1 = SLIP_out_debug_bus_rl.lambda;
+		ds3.field_2 = SLIP_out_debug_bus_rl.filtered_lambda_error;
+		ds3.field_3 = SLIP_out_debug_bus_rl.shallow_filtered_lambda_error;
+		static primary_debug_signal_3_t ds3_raw;
+		primary_debug_signal_3_conversion_to_raw_struct(&ds3_raw, &ds3);
+		primary_debug_signal_3_pack(data, &ds3_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_3_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
 	}
 
