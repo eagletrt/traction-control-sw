@@ -354,9 +354,9 @@ void can_send_data(can_data_t can_data) {
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
 		static primary_debug_signal_3_converted_t ds3;
 		ds3.device_id = primary_debug_signal_3_device_id_tlm;
-		ds3.field_1 = SLIP_out_debug_bus_rl.lambda;
-		ds3.field_2 = SLIP_out_debug_bus_rl.filtered_lambda_error;
-		ds3.field_3 = SLIP_out_debug_bus_rl.shallow_filtered_lambda_error;
+		ds3.field_1 = SLIP_out_debug_bus_rl.proportional;
+		ds3.field_2 = SLIP_out_debug_bus_rl.integral;
+		ds3.field_3 = SLIP_out_debug_bus_rl.derivative;
 		static primary_debug_signal_3_t ds3_raw;
 		primary_debug_signal_3_conversion_to_raw_struct(&ds3_raw, &ds3);
 		primary_debug_signal_3_pack(data, &ds3_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
