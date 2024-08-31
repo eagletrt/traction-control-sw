@@ -187,7 +187,7 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   if (rtb_error > 0.0) {
     rtb_derivative = SLIP_in_Ki;
   } else {
-    rtb_derivative = 0.1 * SLIP_in_Ki;
+    rtb_derivative = 0.01 * SLIP_in_Ki;
   }
 
   /* MATLAB Function: '<S21>/MATLAB Function' incorporates:
@@ -342,7 +342,7 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   if (rtb_Switch2_j > 0.0) {
     rtb_derivative = SLIP_in_Ki;
   } else {
-    rtb_derivative = 0.1 * SLIP_in_Ki;
+    rtb_derivative = 0.01 * SLIP_in_Ki;
   }
 
   /* MATLAB Function: '<S9>/MATLAB Function' incorporates:
