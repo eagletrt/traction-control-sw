@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.365
+ * Model version                  : 6.368
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Aug 31 11:36:47 2024
+ * C/C++ source code generated on : Sat Aug 31 11:52:27 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -61,9 +61,9 @@ real_T in_differentiation_step_seconds;
 static void MATLABFunction(real_T rtu_new_sample, boolean_T rtu_external_reset,
   real_T rtu_lower_bound, real_T rtu_upper_bound, real_T rtu_sample_time, real_T
   *rty_integral);
-static void MATLABFunction_i_Init(DW_MATLABFunction_l_SLIP *localDW);
-static void MATLABFunction_e(real_T rtu_u, real_T rtu_window_length, real_T
-  *rty_y, DW_MATLABFunction_l_SLIP *localDW);
+static void MATLABFunction_j_Init(DW_MATLABFunction_c_SLIP *localDW);
+static void MATLABFunction_d(real_T rtu_u, real_T rtu_window_length, real_T
+  *rty_y, DW_MATLABFunction_c_SLIP *localDW);
 static void Slip_estimation(real_T rtu_omegaR, real_T rtu_u_bar, real_T rtu_Vlow,
   real_T *rty_lambda);
 
@@ -73,12 +73,12 @@ static void merge(int32_T idx_data[], real_T x_data[], int32_T offset, int32_T
 static void merge_block(int32_T idx_data[], real_T x_data[], int32_T offset,
   int32_T n, int32_T preSortLevel, int32_T iwork_data[], real_T xwork_data[]);
 static void sort(real_T x_data[], const int32_T *x_size,
-                 DW_MATLABFunction_l_SLIP *localDW);
+                 DW_MATLABFunction_c_SLIP *localDW);
 
 /*
  * Output and update for atomic system:
  *    '<S9>/MATLAB Function'
- *    '<S19>/MATLAB Function'
+ *    '<S21>/MATLAB Function'
  */
 static void MATLABFunction(real_T rtu_new_sample, boolean_T rtu_external_reset,
   real_T rtu_lower_bound, real_T rtu_upper_bound, real_T rtu_sample_time, real_T
@@ -92,7 +92,7 @@ static void MATLABFunction(real_T rtu_new_sample, boolean_T rtu_external_reset,
   *rty_integral = fmax(fmin(*rty_integral, rtu_upper_bound), rtu_lower_bound);
 }
 
-/* Function for MATLAB Function: '<S5>/MATLAB Function' */
+/* Function for MATLAB Function: '<S10>/MATLAB Function' */
 static void merge(int32_T idx_data[], real_T x_data[], int32_T offset, int32_T
                   np, int32_T nq, int32_T iwork_data[], real_T xwork_data[])
 {
@@ -143,7 +143,7 @@ static void merge(int32_T idx_data[], real_T x_data[], int32_T offset, int32_T
   }
 }
 
-/* Function for MATLAB Function: '<S5>/MATLAB Function' */
+/* Function for MATLAB Function: '<S10>/MATLAB Function' */
 static void merge_block(int32_T idx_data[], real_T x_data[], int32_T offset,
   int32_T n, int32_T preSortLevel, int32_T iwork_data[], real_T xwork_data[])
 {
@@ -181,9 +181,9 @@ static void merge_block(int32_T idx_data[], real_T x_data[], int32_T offset,
   }
 }
 
-/* Function for MATLAB Function: '<S5>/MATLAB Function' */
+/* Function for MATLAB Function: '<S10>/MATLAB Function' */
 static void sort(real_T x_data[], const int32_T *x_size,
-                 DW_MATLABFunction_l_SLIP *localDW)
+                 DW_MATLABFunction_c_SLIP *localDW)
 {
   real_T b_xwork[256];
   real_T x4[4];
@@ -467,25 +467,26 @@ static void sort(real_T x_data[], const int32_T *x_size,
 
 /*
  * System initialize for atomic system:
- *    '<S5>/MATLAB Function'
- *    '<S5>/MATLAB Function1'
- *    '<S15>/MATLAB Function'
- *    '<S15>/MATLAB Function1'
+ *    '<S10>/MATLAB Function'
+ *    '<S11>/MATLAB Function'
+ *    '<S22>/MATLAB Function'
+ *    '<S23>/MATLAB Function'
  */
-static void MATLABFunction_i_Init(DW_MATLABFunction_l_SLIP *localDW)
+static void MATLABFunction_j_Init(DW_MATLABFunction_c_SLIP *localDW)
 {
   memset(&localDW->buffer[0], 0, 1000U * sizeof(real_T));
+  localDW->avg = 0.0;
 }
 
 /*
  * Output and update for atomic system:
- *    '<S5>/MATLAB Function'
- *    '<S5>/MATLAB Function1'
- *    '<S15>/MATLAB Function'
- *    '<S15>/MATLAB Function1'
+ *    '<S10>/MATLAB Function'
+ *    '<S11>/MATLAB Function'
+ *    '<S22>/MATLAB Function'
+ *    '<S23>/MATLAB Function'
  */
-static void MATLABFunction_e(real_T rtu_u, real_T rtu_window_length, real_T
-  *rty_y, DW_MATLABFunction_l_SLIP *localDW)
+static void MATLABFunction_d(real_T rtu_u, real_T rtu_window_length, real_T
+  *rty_y, DW_MATLABFunction_c_SLIP *localDW)
 {
   int32_T loop_ub;
   int32_T sorted_size;
@@ -505,7 +506,9 @@ static void MATLABFunction_e(real_T rtu_u, real_T rtu_window_length, real_T
   }
 
   sort(localDW->sorted_data, &sorted_size, localDW);
-  *rty_y = localDW->sorted_data[(int32_T)((real_T)(loop_ub + 1) / 2.0) - 1];
+  localDW->avg = localDW->sorted_data[(int32_T)((real_T)(loop_ub + 1) / 2.0) - 1]
+    * 0.1 + localDW->avg * 0.9;
+  *rty_y = localDW->avg;
 }
 
 /*
@@ -541,8 +544,8 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   real_T rtb_integral;
   real_T rtb_lambda;
   real_T rtb_y;
-  real_T rtb_y_f;
-  real_T rtb_y_k;
+  real_T rtb_y_e;
+  real_T rtb_y_l;
   int32_T idxDelay;
 
   /* Product: '<S3>/Product' incorporates:
@@ -563,32 +566,32 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Sum: '<S3>/Add2'
    */
   Slip_estimation(0.2286 * SLIP_in_omega_rl, SLIP_u + SLIP_yaw_rate * 0.605, 1.0,
-                  &rtb_y_k);
+                  &rtb_y_l);
 
   /* Sum: '<S3>/Add1' incorporates:
    *  Inport: '<Root>/in_lambda_reference'
    */
-  rtb_error = SLIP_in_lambda_reference - rtb_y_k;
+  rtb_error = SLIP_in_lambda_reference - rtb_y_l;
 
-  /* MATLAB Function: '<S15>/MATLAB Function1' incorporates:
+  /* MATLAB Function: '<S23>/MATLAB Function' incorporates:
    *  Inport: '<Root>/in_iteration_step_seconds'
    *  Inport: '<Root>/in_shallow_window_seconds'
-   *  Product: '<S15>/Divide3'
+   *  Product: '<S17>/Divide3'
    */
-  MATLABFunction_e(rtb_error, SLIP_in_shallow_window_seconds /
+  MATLABFunction_d(rtb_error, SLIP_in_shallow_window_seconds /
                    SLIP_in_iteration_step_seconds, &rtb_lambda,
-                   &SLIP_DW->sf_MATLABFunction1_e);
+                   &SLIP_DW->sf_MATLABFunction_hz);
 
-  /* Product: '<S22>/Product' incorporates:
+  /* Product: '<S24>/Product' incorporates:
    *  Inport: '<Root>/in_Kp'
    */
-  rtb_y_f = rtb_lambda * SLIP_in_Kp;
+  rtb_y_e = rtb_lambda * SLIP_in_Kp;
 
-  /* Delay: '<S19>/Delay One Step' */
+  /* Delay: '<S21>/Delay One Step' */
   rtb_integral = SLIP_DW->DelayOneStep_DSTATE;
 
-  /* Switch: '<S19>/Switch' incorporates:
-   *  Gain: '<S19>/Gain'
+  /* Switch: '<S21>/Switch' incorporates:
+   *  Gain: '<S21>/Gain'
    *  Inport: '<Root>/in_Ki'
    */
   if (rtb_error > 0.0) {
@@ -597,30 +600,30 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
     rtb_derivative = 0.16666666666666666 * SLIP_in_Ki;
   }
 
-  /* MATLAB Function: '<S19>/MATLAB Function' incorporates:
-   *  Constant: '<S14>/Constant'
-   *  Constant: '<S15>/Constant'
+  /* MATLAB Function: '<S21>/MATLAB Function' incorporates:
+   *  Constant: '<S16>/Constant'
+   *  Constant: '<S17>/Constant'
    *  Inport: '<Root>/in_iteration_step_seconds'
    *  Inport: '<Root>/in_minimum_torque'
    *  Inport: '<Root>/throttle'
-   *  Product: '<S19>/Product1'
-   *  RelationalOperator: '<S14>/Compare'
-   *  Switch: '<S19>/Switch'
+   *  Product: '<S21>/Product1'
+   *  RelationalOperator: '<S16>/Compare'
+   *  Switch: '<S21>/Switch'
    */
   MATLABFunction(rtb_error * rtb_derivative, (SLIP_throttle < 0.03),
                  SLIP_in_minimum_torque, 100.0, SLIP_in_iteration_step_seconds,
                  &rtb_integral);
 
-  /* MATLAB Function: '<S15>/MATLAB Function' incorporates:
+  /* MATLAB Function: '<S22>/MATLAB Function' incorporates:
    *  Inport: '<Root>/in_iteration_step_seconds'
    *  Inport: '<Root>/in_window_seconds'
-   *  Product: '<S15>/Divide2'
+   *  Product: '<S17>/Divide2'
    */
-  MATLABFunction_e(rtb_error, SLIP_in_window_seconds /
+  MATLABFunction_d(rtb_error, SLIP_in_window_seconds /
                    SLIP_in_iteration_step_seconds, &rtb_y,
-                   &SLIP_DW->sf_MATLABFunction_f);
+                   &SLIP_DW->sf_MATLABFunction_k);
 
-  /* Product: '<S15>/Divide1' incorporates:
+  /* Product: '<S17>/Divide1' incorporates:
    *  Inport: '<Root>/in_differentiation_step_seconds'
    *  Inport: '<Root>/in_iteration_step_seconds'
    *  Product: '<S5>/Divide1'
@@ -628,9 +631,9 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   rtb_derivative_tmp = in_differentiation_step_seconds /
     SLIP_in_iteration_step_seconds;
 
-  /* Delay: '<S15>/Delay' incorporates:
-   *  DataTypeConversion: '<S15>/Cast To Single'
-   *  Product: '<S15>/Divide1'
+  /* Delay: '<S17>/Delay' incorporates:
+   *  DataTypeConversion: '<S17>/Cast To Single'
+   *  Product: '<S17>/Divide1'
    */
   if ((real32_T)rtb_derivative_tmp < 1.0F) {
     rtb_derivative = rtb_y;
@@ -645,54 +648,54 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
     rtb_derivative = SLIP_DW->Delay_DSTATE[100U - (uint32_T)idxDelay];
   }
 
-  /* End of Delay: '<S15>/Delay' */
+  /* End of Delay: '<S17>/Delay' */
 
-  /* Product: '<S15>/Product' incorporates:
+  /* Product: '<S17>/Product' incorporates:
    *  Inport: '<Root>/in_Kd'
    *  Inport: '<Root>/in_differentiation_step_seconds'
-   *  Product: '<S15>/Divide'
-   *  Sum: '<S15>/Sum'
+   *  Product: '<S17>/Divide'
+   *  Sum: '<S17>/Sum'
    */
   rtb_derivative = (rtb_y - rtb_derivative) / in_differentiation_step_seconds *
     SLIP_in_Kd;
 
-  /* MinMax: '<S15>/Max' incorporates:
+  /* MinMax: '<S17>/Max' incorporates:
    *  Inport: '<Root>/in_minimum_torque'
-   *  Sum: '<S15>/Sum2'
+   *  Sum: '<S17>/Sum2'
    */
-  rtb_error = fmax((rtb_y_f + rtb_integral) + rtb_derivative,
+  rtb_error = fmax((rtb_y_e + rtb_integral) + rtb_derivative,
                    SLIP_in_minimum_torque);
 
-  /* Switch: '<S17>/Switch2' incorporates:
+  /* Switch: '<S19>/Switch2' incorporates:
    *  Constant: '<S3>/Constant3'
    *  Product: '<S3>/Product'
-   *  RelationalOperator: '<S17>/LowerRelop1'
-   *  RelationalOperator: '<S17>/UpperRelop'
-   *  Switch: '<S17>/Switch'
+   *  RelationalOperator: '<S19>/LowerRelop1'
+   *  RelationalOperator: '<S19>/UpperRelop'
+   *  Switch: '<S19>/Switch'
    */
   if (rtb_error > rtb_Product_tmp) {
     rtb_error = rtb_Product_tmp;
   } else if (rtb_error < 0.0) {
-    /* Switch: '<S17>/Switch' incorporates:
+    /* Switch: '<S19>/Switch' incorporates:
      *  Constant: '<S3>/Constant3'
      */
     rtb_error = 0.0;
   }
 
-  /* End of Switch: '<S17>/Switch2' */
+  /* End of Switch: '<S19>/Switch2' */
 
-  /* Switch: '<S16>/Switch2' incorporates:
+  /* Switch: '<S18>/Switch2' incorporates:
    *  Constant: '<S3>/Constant2'
    *  Product: '<S3>/Product'
-   *  RelationalOperator: '<S16>/LowerRelop1'
-   *  RelationalOperator: '<S16>/UpperRelop'
-   *  Switch: '<S16>/Switch'
+   *  RelationalOperator: '<S18>/LowerRelop1'
+   *  RelationalOperator: '<S18>/UpperRelop'
+   *  Switch: '<S18>/Switch'
    */
   if (rtb_Product_tmp > rtb_error) {
     /* Outport: '<Root>/out_T_motor_rl' */
     SLIP_out_T_motor_rl = rtb_error;
   } else if (rtb_Product_tmp < 0.0) {
-    /* Switch: '<S16>/Switch' incorporates:
+    /* Switch: '<S18>/Switch' incorporates:
      *  Constant: '<S3>/Constant2'
      *  Outport: '<Root>/out_T_motor_rl'
      */
@@ -702,7 +705,7 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
     SLIP_out_T_motor_rl = rtb_Product_tmp;
   }
 
-  /* End of Switch: '<S16>/Switch2' */
+  /* End of Switch: '<S18>/Switch2' */
 
   /* Outport: '<Root>/out_T_max_rl_slip' */
   SLIP_out_T_max_rl_slip = rtb_error;
@@ -710,10 +713,10 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   /* BusCreator: '<S3>/Bus Creator' incorporates:
    *  Outport: '<Root>/out_debug_bus_rl'
    */
-  SLIP_out_debug_bus_rl.lambda = rtb_y_k;
+  SLIP_out_debug_bus_rl.lambda = rtb_y_l;
   SLIP_out_debug_bus_rl.filtered_lambda_error = rtb_y;
   SLIP_out_debug_bus_rl.shallow_filtered_lambda_error = rtb_lambda;
-  SLIP_out_debug_bus_rl.proportional = rtb_y_f;
+  SLIP_out_debug_bus_rl.proportional = rtb_y_e;
   SLIP_out_debug_bus_rl.integral = rtb_integral;
   SLIP_out_debug_bus_rl.derivative = rtb_derivative;
 
@@ -735,19 +738,19 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    */
   rtb_error_h = SLIP_in_lambda_reference - rtb_lambda;
 
-  /* MATLAB Function: '<S5>/MATLAB Function1' incorporates:
+  /* MATLAB Function: '<S11>/MATLAB Function' incorporates:
    *  Inport: '<Root>/in_iteration_step_seconds'
    *  Inport: '<Root>/in_shallow_window_seconds'
    *  Product: '<S5>/Divide3'
    */
-  MATLABFunction_e(rtb_error_h, SLIP_in_shallow_window_seconds /
-                   SLIP_in_iteration_step_seconds, &rtb_y_k,
-                   &SLIP_DW->sf_MATLABFunction1);
+  MATLABFunction_d(rtb_error_h, SLIP_in_shallow_window_seconds /
+                   SLIP_in_iteration_step_seconds, &rtb_y_l,
+                   &SLIP_DW->sf_MATLABFunction_o);
 
   /* Product: '<S12>/Product' incorporates:
    *  Inport: '<Root>/in_Kp'
    */
-  rtb_error = rtb_y_k * SLIP_in_Kp;
+  rtb_error = rtb_y_l * SLIP_in_Kp;
 
   /* Delay: '<S9>/Delay One Step' */
   rtb_Product = SLIP_DW->DelayOneStep_DSTATE_h;
@@ -776,20 +779,20 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
                  SLIP_in_minimum_torque, 100.0, SLIP_in_iteration_step_seconds,
                  &rtb_Product);
 
-  /* MATLAB Function: '<S5>/MATLAB Function' incorporates:
+  /* MATLAB Function: '<S10>/MATLAB Function' incorporates:
    *  Inport: '<Root>/in_iteration_step_seconds'
    *  Inport: '<Root>/in_window_seconds'
    *  Product: '<S5>/Divide2'
    */
-  MATLABFunction_e(rtb_error_h, SLIP_in_window_seconds /
-                   SLIP_in_iteration_step_seconds, &rtb_y_f,
-                   &SLIP_DW->sf_MATLABFunction_e);
+  MATLABFunction_d(rtb_error_h, SLIP_in_window_seconds /
+                   SLIP_in_iteration_step_seconds, &rtb_y_e,
+                   &SLIP_DW->sf_MATLABFunction_d);
 
   /* Delay: '<S5>/Delay' incorporates:
    *  DataTypeConversion: '<S5>/Cast To Single'
    */
   if ((real32_T)rtb_derivative_tmp < 1.0F) {
-    rtb_derivative = rtb_y_f;
+    rtb_derivative = rtb_y_e;
   } else {
     if ((real32_T)rtb_derivative_tmp > 100.0F) {
       idxDelay = 100;
@@ -809,15 +812,15 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Product: '<S5>/Divide'
    *  Sum: '<S5>/Sum'
    */
-  rtb_derivative = (rtb_y_f - rtb_derivative) / in_differentiation_step_seconds *
+  rtb_derivative = (rtb_y_e - rtb_derivative) / in_differentiation_step_seconds *
     SLIP_in_Kd;
 
   /* BusCreator: '<S2>/Bus Creator' incorporates:
    *  Outport: '<Root>/out_debug_bus_rr'
    */
   SLIP_out_debug_bus_rr.lambda = rtb_lambda;
-  SLIP_out_debug_bus_rr.filtered_lambda_error = rtb_y_f;
-  SLIP_out_debug_bus_rr.shallow_filtered_lambda_error = rtb_y_k;
+  SLIP_out_debug_bus_rr.filtered_lambda_error = rtb_y_e;
+  SLIP_out_debug_bus_rr.shallow_filtered_lambda_error = rtb_y_l;
   SLIP_out_debug_bus_rr.proportional = rtb_error;
   SLIP_out_debug_bus_rr.integral = rtb_Product;
   SLIP_out_debug_bus_rr.derivative = rtb_derivative;
@@ -873,24 +876,24 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
 
   /* End of Switch: '<S6>/Switch2' */
 
-  /* Update for Delay: '<S19>/Delay One Step' */
+  /* Update for Delay: '<S21>/Delay One Step' */
   SLIP_DW->DelayOneStep_DSTATE = rtb_integral;
 
   /* Update for Delay: '<S9>/Delay One Step' */
   SLIP_DW->DelayOneStep_DSTATE_h = rtb_Product;
   for (idxDelay = 0; idxDelay < 99; idxDelay++) {
-    /* Update for Delay: '<S15>/Delay' */
+    /* Update for Delay: '<S17>/Delay' */
     SLIP_DW->Delay_DSTATE[idxDelay] = SLIP_DW->Delay_DSTATE[idxDelay + 1];
 
     /* Update for Delay: '<S5>/Delay' */
     SLIP_DW->Delay_DSTATE_d[idxDelay] = SLIP_DW->Delay_DSTATE_d[idxDelay + 1];
   }
 
-  /* Update for Delay: '<S15>/Delay' */
+  /* Update for Delay: '<S17>/Delay' */
   SLIP_DW->Delay_DSTATE[99] = rtb_y;
 
   /* Update for Delay: '<S5>/Delay' */
-  SLIP_DW->Delay_DSTATE_d[99] = rtb_y_f;
+  SLIP_DW->Delay_DSTATE_d[99] = rtb_y_e;
 }
 
 /* Model initialize function */
@@ -929,17 +932,17 @@ void SLIP_initialize(RT_MODEL_SLIP *const SLIP_M)
   (void) memset((void *)SLIP_DW, 0,
                 sizeof(DW_SLIP));
 
-  /* SystemInitialize for MATLAB Function: '<S15>/MATLAB Function1' */
-  MATLABFunction_i_Init(&SLIP_DW->sf_MATLABFunction1_e);
+  /* SystemInitialize for MATLAB Function: '<S23>/MATLAB Function' */
+  MATLABFunction_j_Init(&SLIP_DW->sf_MATLABFunction_hz);
 
-  /* SystemInitialize for MATLAB Function: '<S15>/MATLAB Function' */
-  MATLABFunction_i_Init(&SLIP_DW->sf_MATLABFunction_f);
+  /* SystemInitialize for MATLAB Function: '<S22>/MATLAB Function' */
+  MATLABFunction_j_Init(&SLIP_DW->sf_MATLABFunction_k);
 
-  /* SystemInitialize for MATLAB Function: '<S5>/MATLAB Function1' */
-  MATLABFunction_i_Init(&SLIP_DW->sf_MATLABFunction1);
+  /* SystemInitialize for MATLAB Function: '<S11>/MATLAB Function' */
+  MATLABFunction_j_Init(&SLIP_DW->sf_MATLABFunction_o);
 
-  /* SystemInitialize for MATLAB Function: '<S5>/MATLAB Function' */
-  MATLABFunction_i_Init(&SLIP_DW->sf_MATLABFunction_e);
+  /* SystemInitialize for MATLAB Function: '<S10>/MATLAB Function' */
+  MATLABFunction_j_Init(&SLIP_DW->sf_MATLABFunction_d);
 }
 
 /*

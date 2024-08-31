@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.365
+ * Model version                  : 6.368
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Aug 31 11:36:47 2024
+ * C/C++ source code generated on : Sat Aug 31 11:52:27 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -56,24 +56,25 @@ typedef struct {
 
 #endif
 
-/* Block signals and states (default storage) for system '<S5>/MATLAB Function' */
+/* Block signals and states (default storage) for system '<S10>/MATLAB Function' */
 typedef struct {
-  real_T buffer[1000];                 /* '<S5>/MATLAB Function' */
+  real_T buffer[1000];                 /* '<S10>/MATLAB Function' */
   real_T sorted_data[999];
   real_T rtu_u[1000];
   real_T vwork_data[999];
   real_T b_x_data[999];
-} DW_MATLABFunction_l_SLIP;
+  real_T avg;                          /* '<S10>/MATLAB Function' */
+} DW_MATLABFunction_c_SLIP;
 
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
-  DW_MATLABFunction_l_SLIP sf_MATLABFunction1_e;/* '<S15>/MATLAB Function1' */
-  DW_MATLABFunction_l_SLIP sf_MATLABFunction_f;/* '<S15>/MATLAB Function' */
-  DW_MATLABFunction_l_SLIP sf_MATLABFunction1;/* '<S5>/MATLAB Function1' */
-  DW_MATLABFunction_l_SLIP sf_MATLABFunction_e;/* '<S5>/MATLAB Function' */
-  real_T Delay_DSTATE[100];            /* '<S15>/Delay' */
+  DW_MATLABFunction_c_SLIP sf_MATLABFunction_hz;/* '<S23>/MATLAB Function' */
+  DW_MATLABFunction_c_SLIP sf_MATLABFunction_k;/* '<S22>/MATLAB Function' */
+  DW_MATLABFunction_c_SLIP sf_MATLABFunction_o;/* '<S11>/MATLAB Function' */
+  DW_MATLABFunction_c_SLIP sf_MATLABFunction_d;/* '<S10>/MATLAB Function' */
+  real_T Delay_DSTATE[100];            /* '<S17>/Delay' */
   real_T Delay_DSTATE_d[100];          /* '<S5>/Delay' */
-  real_T DelayOneStep_DSTATE;          /* '<S19>/Delay One Step' */
+  real_T DelayOneStep_DSTATE;          /* '<S21>/Delay One Step' */
   real_T DelayOneStep_DSTATE_h;        /* '<S9>/Delay One Step' */
 } DW_SLIP;
 
@@ -133,14 +134,14 @@ extern real_T in_differentiation_step_seconds;
  * Block '<S2>/Scope4' : Unused code path elimination
  * Block '<S2>/Scope5' : Unused code path elimination
  * Block '<S2>/Scope6' : Unused code path elimination
- * Block '<S15>/Scope' : Unused code path elimination
- * Block '<S15>/Scope1' : Unused code path elimination
- * Block '<S15>/Scope2' : Unused code path elimination
- * Block '<S15>/Scope3' : Unused code path elimination
- * Block '<S16>/Data Type Duplicate' : Unused code path elimination
- * Block '<S16>/Data Type Propagation' : Unused code path elimination
- * Block '<S17>/Data Type Duplicate' : Unused code path elimination
- * Block '<S17>/Data Type Propagation' : Unused code path elimination
+ * Block '<S17>/Scope' : Unused code path elimination
+ * Block '<S17>/Scope1' : Unused code path elimination
+ * Block '<S17>/Scope2' : Unused code path elimination
+ * Block '<S17>/Scope3' : Unused code path elimination
+ * Block '<S18>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S18>/Data Type Propagation' : Unused code path elimination
+ * Block '<S19>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S19>/Data Type Propagation' : Unused code path elimination
  * Block '<S3>/Scope1' : Unused code path elimination
  * Block '<S3>/Scope2' : Unused code path elimination
  * Block '<S3>/Scope3' : Unused code path elimination
@@ -176,20 +177,24 @@ extern real_T in_differentiation_step_seconds;
  * '<S7>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Saturation Dynamic2'
  * '<S8>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Slip_estimation'
  * '<S9>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/Integral Part'
- * '<S10>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MATLAB Function'
- * '<S11>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MATLAB Function1'
+ * '<S10>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MedianAndMeanFilter'
+ * '<S11>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MedianAndMeanFilter1'
  * '<S12>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/Proportional Part'
  * '<S13>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/Integral Part/MATLAB Function'
- * '<S14>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Compare To Constant'
- * '<S15>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID'
- * '<S16>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Saturation Dynamic1'
- * '<S17>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Saturation Dynamic2'
- * '<S18>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Slip_estimation'
- * '<S19>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/Integral Part'
- * '<S20>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MATLAB Function'
- * '<S21>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MATLAB Function1'
- * '<S22>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/Proportional Part'
- * '<S23>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/Integral Part/MATLAB Function'
+ * '<S14>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MedianAndMeanFilter/MATLAB Function'
+ * '<S15>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MedianAndMeanFilter1/MATLAB Function'
+ * '<S16>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Compare To Constant'
+ * '<S17>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID'
+ * '<S18>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Saturation Dynamic1'
+ * '<S19>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Saturation Dynamic2'
+ * '<S20>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Slip_estimation'
+ * '<S21>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/Integral Part'
+ * '<S22>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MedianAndMeanFilter'
+ * '<S23>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MedianAndMeanFilter1'
+ * '<S24>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/Proportional Part'
+ * '<S25>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/Integral Part/MATLAB Function'
+ * '<S26>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MedianAndMeanFilter/MATLAB Function'
+ * '<S27>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MedianAndMeanFilter1/MATLAB Function'
  */
 #endif                                 /* RTW_HEADER_SLIP_h_ */
 
