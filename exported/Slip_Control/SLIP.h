@@ -9,7 +9,7 @@
  *
  * Model version                  : 6.372
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Aug 31 14:31:43 2024
+ * C/C++ source code generated on : Sat Aug 31 14:47:29 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -59,12 +59,12 @@ typedef struct {
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
   real_T Delay_DSTATE[100];            /* '<S17>/Delay' */
-  real_T Delay_DSTATE_d[100];          /* '<S5>/Delay' */
+  real_T Delay_DSTATE_m[100];          /* '<S5>/Delay' */
   real_T DelayOneStep_DSTATE;          /* '<S23>/Delay One Step' */
-  real_T DelayOneStep_DSTATE_b;        /* '<S21>/Delay One Step' */
-  real_T DelayOneStep_DSTATE_o;        /* '<S22>/Delay One Step' */
-  real_T DelayOneStep_DSTATE_n;        /* '<S11>/Delay One Step' */
-  real_T DelayOneStep_DSTATE_h;        /* '<S9>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_g;        /* '<S21>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_m;        /* '<S22>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_l;        /* '<S9>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_l5;       /* '<S11>/Delay One Step' */
   real_T DelayOneStep_DSTATE_j;        /* '<S10>/Delay One Step' */
 } DW_SLIP;
 
