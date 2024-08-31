@@ -226,7 +226,7 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_in_Kd = 100.0;
 
 	SLIP_in_lambda_reference = 0.06;
-	SLIP_in_minimum_torque = 10.0;
+	SLIP_in_minimum_torque = 1.0;
 
 	SLIP_in_iteration_step_seconds = 1.0 / RUN_FREQUENCY;
 	SLIP_in_window_seconds = 0.1;
@@ -354,9 +354,9 @@ void can_send_data(can_data_t can_data) {
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
 		static primary_debug_signal_3_converted_t ds3;
 		ds3.device_id = primary_debug_signal_3_device_id_tlm;
-		ds3.field_1 = SLIP_out_debug_bus_rl.proportional;
-		ds3.field_2 = SLIP_out_debug_bus_rl.integral;
-		ds3.field_3 = SLIP_out_debug_bus_rl.derivative;
+		ds3.field_1 = SLIP_out_debug_bus_rl.proportional / 100.0;
+		ds3.field_2 = SLIP_out_debug_bus_rl.integral / 100.0;
+		ds3.field_3 = SLIP_out_debug_bus_rl.derivative / 100.0;
 		static primary_debug_signal_3_t ds3_raw;
 		primary_debug_signal_3_conversion_to_raw_struct(&ds3_raw, &ds3);
 		primary_debug_signal_3_pack(data, &ds3_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
