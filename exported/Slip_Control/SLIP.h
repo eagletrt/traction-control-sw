@@ -9,7 +9,7 @@
  *
  * Model version                  : 6.372
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Aug 31 14:47:29 2024
+ * C/C++ source code generated on : Sat Aug 31 18:11:06 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -61,11 +61,11 @@ typedef struct {
   real_T Delay_DSTATE[100];            /* '<S17>/Delay' */
   real_T Delay_DSTATE_m[100];          /* '<S5>/Delay' */
   real_T DelayOneStep_DSTATE;          /* '<S23>/Delay One Step' */
-  real_T DelayOneStep_DSTATE_g;        /* '<S21>/Delay One Step' */
-  real_T DelayOneStep_DSTATE_m;        /* '<S22>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_e;        /* '<S21>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_g;        /* '<S22>/Delay One Step' */
   real_T DelayOneStep_DSTATE_l;        /* '<S9>/Delay One Step' */
-  real_T DelayOneStep_DSTATE_l5;       /* '<S11>/Delay One Step' */
-  real_T DelayOneStep_DSTATE_j;        /* '<S10>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_h;        /* '<S11>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_p;        /* '<S10>/Delay One Step' */
 } DW_SLIP;
 
 /* Real-time Model Data Structure */
@@ -118,7 +118,6 @@ extern real_T in_differentiation_step_seconds;
  * Block '<S6>/Data Type Propagation' : Unused code path elimination
  * Block '<S7>/Data Type Duplicate' : Unused code path elimination
  * Block '<S7>/Data Type Propagation' : Unused code path elimination
- * Block '<S2>/Scope1' : Unused code path elimination
  * Block '<S2>/Scope2' : Unused code path elimination
  * Block '<S2>/Scope3' : Unused code path elimination
  * Block '<S2>/Scope4' : Unused code path elimination
@@ -132,7 +131,6 @@ extern real_T in_differentiation_step_seconds;
  * Block '<S18>/Data Type Propagation' : Unused code path elimination
  * Block '<S19>/Data Type Duplicate' : Unused code path elimination
  * Block '<S19>/Data Type Propagation' : Unused code path elimination
- * Block '<S3>/Scope1' : Unused code path elimination
  * Block '<S3>/Scope2' : Unused code path elimination
  * Block '<S3>/Scope3' : Unused code path elimination
  * Block '<S3>/Scope4' : Unused code path elimination
