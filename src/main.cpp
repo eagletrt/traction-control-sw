@@ -28,22 +28,22 @@ int main(void) {
 		eprintf("Error initializing model\n");
 		return EXIT_FAILURE;
 	}
-
-	const char *user_home = get_user_home();
-	char hv_soc_state_path[255];
-	char lv_soc_state_path[255];
-	strcpy(hv_soc_state_path, user_home);
-	strcpy(lv_soc_state_path, user_home);
-	strcat(hv_soc_state_path, "/" HV_SOC_LAST_STATE_FILENAME);
-	strcat(lv_soc_state_path, "/" LV_SOC_LAST_STATE_FILENAME);
-	Eigen::VectorXd hvSOCIinitalState(state_enum::STATE_SIZE);
-	Eigen::VectorXd lvSOCIinitalState(state_enum::STATE_SIZE);
-	if (load_soc_state(hv_soc_state_path, hvSOCIinitalState)) {
-		hvSOC.setState(hvSOCIinitalState);
-	}
-	if (load_soc_state(lv_soc_state_path, lvSOCIinitalState)) {
-		lvSOC.setState(lvSOCIinitalState);
-	}
+	//
+	// const char *user_home = get_user_home();
+	// char hv_soc_state_path[255];
+	// char lv_soc_state_path[255];
+	// strcpy(hv_soc_state_path, user_home);
+	// strcpy(lv_soc_state_path, user_home);
+	// strcat(hv_soc_state_path, "/" HV_SOC_LAST_STATE_FILENAME);
+	// strcat(lv_soc_state_path, "/" LV_SOC_LAST_STATE_FILENAME);
+	// Eigen::VectorXd hvSOCIinitalState(state_enum::STATE_SIZE);
+	// Eigen::VectorXd lvSOCIinitalState(state_enum::STATE_SIZE);
+	// if (load_soc_state(hv_soc_state_path, hvSOCIinitalState)) {
+	// 	hvSOC.setState(hvSOCIinitalState);
+	// }
+	// if (load_soc_state(lv_soc_state_path, lvSOCIinitalState)) {
+	// 	lvSOC.setState(lvSOCIinitalState);
+	// }
 
 	can_messages_init();
 	// Start CAN threads
@@ -112,7 +112,7 @@ int main(void) {
 					hvSOC.setTemperature(this_step_can_data.hv_mean_temp);
 					hvSOC.predict(this_step_can_data.hv_total_current / 4.0);
 					hvSOC.update(this_step_can_data.hv_min_cell_voltage);
-					save_soc_state(hv_soc_state_path, hvSOC.getState());
+					// save_soc_state(hv_soc_state_path, hvSOC.getState());
 				}
 				if (!compute_hv_soc && received_lv_soc_data) {
 					// LV
@@ -120,7 +120,7 @@ int main(void) {
 					lvSOC.setTemperature(this_step_can_data.lv_mean_temp);
 					lvSOC.predict(this_step_can_data.lv_total_current / 4.0);
 					lvSOC.update(this_step_can_data.lv_min_cell_voltage);
-					save_soc_state(lv_soc_state_path, lvSOC.getState());
+					// save_soc_state(lv_soc_state_path, lvSOC.getState());
 				}
 				last_soc_step = get_timestamp_u();
 				compute_hv_soc = (compute_hv_soc + 1) % 2;
@@ -216,10 +216,10 @@ void regen_model_set_data(can_data_t *can_data) {
 void slip_model_set_data(can_data_t *can_data) {
 	SLIP_throttle = can_data->throttle;
 	SLIP_T_max = torque_max(can_data);
-  static double w_rl = 0.0;
-  static double w_rr = 0.0;
-  w_rl = w_rl * 0.8 + can_data->omega_rl * 0.2;
-  w_rr = w_rr * 0.8 + can_data->omega_rr * 0.2;
+	static double w_rl = 0.0;
+	static double w_rr = 0.0;
+	w_rl = w_rl * 0.8 + can_data->omega_rl * 0.2;
+	w_rr = w_rr * 0.8 + can_data->omega_rr * 0.2;
 	SLIP_in_omega_rl = w_rl;
 	SLIP_in_omega_rr = w_rr;
 	SLIP_u = can_data->u;
