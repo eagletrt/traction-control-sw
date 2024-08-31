@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.300
+ * Model version                  : 6.365
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Fri Aug 30 19:02:51 2024
+ * C/C++ source code generated on : Sat Aug 31 11:36:47 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -56,20 +56,25 @@ typedef struct {
 
 #endif
 
+/* Block signals and states (default storage) for system '<S5>/MATLAB Function' */
+typedef struct {
+  real_T buffer[1000];                 /* '<S5>/MATLAB Function' */
+  real_T sorted_data[999];
+  real_T rtu_u[1000];
+  real_T vwork_data[999];
+  real_T b_x_data[999];
+} DW_MATLABFunction_l_SLIP;
+
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
+  DW_MATLABFunction_l_SLIP sf_MATLABFunction1_e;/* '<S15>/MATLAB Function1' */
+  DW_MATLABFunction_l_SLIP sf_MATLABFunction_f;/* '<S15>/MATLAB Function' */
+  DW_MATLABFunction_l_SLIP sf_MATLABFunction1;/* '<S5>/MATLAB Function1' */
+  DW_MATLABFunction_l_SLIP sf_MATLABFunction_e;/* '<S5>/MATLAB Function' */
   real_T Delay_DSTATE[100];            /* '<S15>/Delay' */
-  real_T Delay_DSTATE_j[100];          /* '<S5>/Delay' */
-  real_T DelayOneStep2_DSTATE;         /* '<S15>/Delay One Step2' */
+  real_T Delay_DSTATE_d[100];          /* '<S5>/Delay' */
   real_T DelayOneStep_DSTATE;          /* '<S19>/Delay One Step' */
-  real_T DelayOneStep1_DSTATE;         /* '<S15>/Delay One Step1' */
-  real_T DelayOneStep2_DSTATE_f;       /* '<S5>/Delay One Step2' */
   real_T DelayOneStep_DSTATE_h;        /* '<S9>/Delay One Step' */
-  real_T DelayOneStep1_DSTATE_c;       /* '<S5>/Delay One Step1' */
-  boolean_T IC2_FirstOutputTime;       /* '<S15>/IC2' */
-  boolean_T IC1_FirstOutputTime;       /* '<S15>/IC1' */
-  boolean_T IC2_FirstOutputTime_g;     /* '<S5>/IC2' */
-  boolean_T IC1_FirstOutputTime_n;     /* '<S5>/IC1' */
 } DW_SLIP;
 
 /* Real-time Model Data Structure */
@@ -97,7 +102,8 @@ extern real_T SLIP_in_lambda_reference;/* '<Root>/in_lambda_reference' */
 extern real_T SLIP_in_minimum_torque;  /* '<Root>/in_minimum_torque' */
 extern real_T SLIP_in_omega_rl;        /* '<Root>/in_omega_rl' */
 extern real_T SLIP_in_omega_rr;        /* '<Root>/in_omega_rr' */
-extern real_T SLIP_in_window_size_seconds;/* '<Root>/in_window_size_seconds' */
+extern real_T SLIP_in_shallow_window_seconds;/* '<Root>/in_shallow_window_seconds' */
+extern real_T SLIP_in_window_seconds;  /* '<Root>/in_window_seconds' */
 extern real_T SLIP_out_T_max_rl_slip;  /* '<Root>/out_T_max_rl_slip' */
 extern real_T SLIP_out_T_max_rr_slip;  /* '<Root>/out_T_max_rr_slip' */
 extern real_T SLIP_out_T_motor_rl;     /* '<Root>/out_T_motor_rl' */
@@ -109,8 +115,6 @@ extern real_T SLIP_u;                  /* '<Root>/in_u_bar' */
 extern real_T SLIP_yaw_rate;           /* '<Root>/in_yaw_rate' */
 extern real_T in_differentiation_step_seconds;
                                   /* '<Root>/in_differentiation_step_seconds' */
-extern real_T in_shallow_window_size_seconds;
-                                   /* '<Root>/in_shallow_window_size_seconds' */
 
 /*-
  * These blocks were eliminated from the model due to optimizations:
@@ -172,8 +176,8 @@ extern real_T in_shallow_window_size_seconds;
  * '<S7>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Saturation Dynamic2'
  * '<S8>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Slip_estimation'
  * '<S9>'   : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/Integral Part'
- * '<S10>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MATLAB Function1'
- * '<S11>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MATLAB Function2'
+ * '<S10>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MATLAB Function'
+ * '<S11>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/MATLAB Function1'
  * '<S12>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/Proportional Part'
  * '<S13>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference/Low Level PID/Integral Part/MATLAB Function'
  * '<S14>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Compare To Constant'
@@ -182,8 +186,8 @@ extern real_T in_shallow_window_size_seconds;
  * '<S17>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Saturation Dynamic2'
  * '<S18>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Slip_estimation'
  * '<S19>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/Integral Part'
- * '<S20>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MATLAB Function1'
- * '<S21>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MATLAB Function2'
+ * '<S20>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MATLAB Function'
+ * '<S21>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/MATLAB Function1'
  * '<S22>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/Proportional Part'
  * '<S23>'  : 'Fenice_Vehicle_Model/Vehicle Controller/SLIP/Subsystem Reference1/Low Level PID/Integral Part/MATLAB Function'
  */

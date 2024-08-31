@@ -229,8 +229,8 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_in_minimum_torque = 10.0;
 
 	SLIP_in_iteration_step_seconds = 1.0 / RUN_FREQUENCY;
-	SLIP_in_window_size_seconds = 0.1;
-	in_shallow_window_size_seconds = 0.05;
+	SLIP_in_window_seconds = 0.1;
+	SLIP_in_shallow_window_seconds = 0.05;
 	in_differentiation_step_seconds = 0.3;
 }
 
