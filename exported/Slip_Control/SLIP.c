@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.368
+ * Model version                  : 6.372
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Aug 31 11:52:27 2024
+ * C/C++ source code generated on : Sat Aug 31 14:31:43 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -22,7 +22,6 @@
 #include "SLIP.h"
 #include "rtwtypes.h"
 #include <math.h>
-#include <string.h>
 
 const debug_bus SLIP_rtZdebug_bus = {
   0.0,                                 /* lambda */
@@ -61,19 +60,10 @@ real_T in_differentiation_step_seconds;
 static void MATLABFunction(real_T rtu_new_sample, boolean_T rtu_external_reset,
   real_T rtu_lower_bound, real_T rtu_upper_bound, real_T rtu_sample_time, real_T
   *rty_integral);
-static void MATLABFunction_j_Init(DW_MATLABFunction_c_SLIP *localDW);
-static void MATLABFunction_d(real_T rtu_u, real_T rtu_window_length, real_T
-  *rty_y, DW_MATLABFunction_c_SLIP *localDW);
+static void MATLABFunction_d(real_T rtu_newSample, real_T rtu_window_length,
+  real_T *rty_mem);
 static void Slip_estimation(real_T rtu_omegaR, real_T rtu_u_bar, real_T rtu_Vlow,
   real_T *rty_lambda);
-
-/* Forward declaration for local functions */
-static void merge(int32_T idx_data[], real_T x_data[], int32_T offset, int32_T
-                  np, int32_T nq, int32_T iwork_data[], real_T xwork_data[]);
-static void merge_block(int32_T idx_data[], real_T x_data[], int32_T offset,
-  int32_T n, int32_T preSortLevel, int32_T iwork_data[], real_T xwork_data[]);
-static void sort(real_T x_data[], const int32_T *x_size,
-                 DW_MATLABFunction_c_SLIP *localDW);
 
 /*
  * Output and update for atomic system:
@@ -92,392 +82,6 @@ static void MATLABFunction(real_T rtu_new_sample, boolean_T rtu_external_reset,
   *rty_integral = fmax(fmin(*rty_integral, rtu_upper_bound), rtu_lower_bound);
 }
 
-/* Function for MATLAB Function: '<S10>/MATLAB Function' */
-static void merge(int32_T idx_data[], real_T x_data[], int32_T offset, int32_T
-                  np, int32_T nq, int32_T iwork_data[], real_T xwork_data[])
-{
-  int32_T q;
-  if (nq != 0) {
-    int32_T iout;
-    int32_T n;
-    int32_T qend;
-    qend = np + nq;
-    for (q = 0; q < qend; q++) {
-      iout = offset + q;
-      iwork_data[q] = idx_data[iout];
-      xwork_data[q] = x_data[iout];
-    }
-
-    n = 0;
-    q = np;
-    iout = offset - 1;
-    int32_T exitg1;
-    do {
-      exitg1 = 0;
-      iout++;
-      if (xwork_data[n] <= xwork_data[q]) {
-        idx_data[iout] = iwork_data[n];
-        x_data[iout] = xwork_data[n];
-        if (n + 1 < np) {
-          n++;
-        } else {
-          exitg1 = 1;
-        }
-      } else {
-        idx_data[iout] = iwork_data[q];
-        x_data[iout] = xwork_data[q];
-        if (q + 1 < qend) {
-          q++;
-        } else {
-          qend = iout - n;
-          for (q = n + 1; q <= np; q++) {
-            iout = qend + q;
-            idx_data[iout] = iwork_data[q - 1];
-            x_data[iout] = xwork_data[q - 1];
-          }
-
-          exitg1 = 1;
-        }
-      }
-    } while (exitg1 == 0);
-  }
-}
-
-/* Function for MATLAB Function: '<S10>/MATLAB Function' */
-static void merge_block(int32_T idx_data[], real_T x_data[], int32_T offset,
-  int32_T n, int32_T preSortLevel, int32_T iwork_data[], real_T xwork_data[])
-{
-  int32_T b;
-  int32_T bLen;
-  int32_T nPairs;
-  int32_T nTail;
-  int32_T tailOffset;
-  nPairs = n >> preSortLevel;
-  bLen = 1 << preSortLevel;
-  while (nPairs > 1) {
-    if (((uint32_T)nPairs & 1U) != 0U) {
-      nPairs--;
-      tailOffset = bLen * nPairs;
-      nTail = n - tailOffset;
-      if (nTail > bLen) {
-        merge(idx_data, x_data, offset + tailOffset, bLen, nTail - bLen,
-              iwork_data, xwork_data);
-      }
-    }
-
-    nTail = bLen << 1;
-    nPairs >>= 1;
-    b = (uint8_T)nPairs;
-    for (tailOffset = 0; tailOffset < b; tailOffset++) {
-      merge(idx_data, x_data, offset + tailOffset * nTail, bLen, bLen,
-            iwork_data, xwork_data);
-    }
-
-    bLen = nTail;
-  }
-
-  if (n > bLen) {
-    merge(idx_data, x_data, offset, bLen, n - bLen, iwork_data, xwork_data);
-  }
-}
-
-/* Function for MATLAB Function: '<S10>/MATLAB Function' */
-static void sort(real_T x_data[], const int32_T *x_size,
-                 DW_MATLABFunction_c_SLIP *localDW)
-{
-  real_T b_xwork[256];
-  real_T x4[4];
-  real_T b_x;
-  real_T tmp;
-  int32_T idx_data[999];
-  int32_T iwork_data[999];
-  int32_T perm[4];
-  int32_T b;
-  int32_T bLen2;
-  int32_T blockOffset;
-  int32_T dim;
-  int32_T e;
-  int32_T exitg1;
-  int32_T i2;
-  int32_T i3;
-  int32_T i4;
-  int32_T ib;
-  int32_T m;
-  int32_T n;
-  int32_T nLastBlock;
-  int32_T p;
-  int32_T q;
-  int32_T vstride;
-  int32_T vwork;
-  int32_T vwork_size_idx_0;
-  int16_T b_iwork[256];
-  int16_T idx4[4];
-  e = 0;
-  if (*x_size != 1) {
-    e = -1;
-    nLastBlock = *x_size;
-  } else {
-    nLastBlock = 1;
-  }
-
-  b = nLastBlock - 1;
-  vwork_size_idx_0 = nLastBlock;
-  vstride = 1;
-  for (dim = 0; dim <= e; dim++) {
-    vstride *= *x_size;
-  }
-
-  for (dim = 0; dim < 1; dim++) {
-    for (e = 0; e < vstride; e++) {
-      for (n = 0; n <= b; n++) {
-        localDW->vwork_data[n] = x_data[n * vstride + e];
-      }
-
-      if (vwork_size_idx_0 != 0) {
-        x4[0] = 0.0;
-        idx4[0] = 0;
-        x4[1] = 0.0;
-        idx4[1] = 0;
-        x4[2] = 0.0;
-        idx4[2] = 0;
-        x4[3] = 0.0;
-        idx4[3] = 0;
-        ib = 0;
-        for (nLastBlock = 0; nLastBlock < vwork_size_idx_0; nLastBlock++) {
-          idx_data[nLastBlock] = 0;
-          b_x = localDW->vwork_data[nLastBlock];
-          localDW->b_x_data[nLastBlock] = b_x;
-          ib++;
-          idx4[ib - 1] = (int16_T)(nLastBlock + 1);
-          x4[ib - 1] = b_x;
-          if (ib == 4) {
-            if (x4[0] <= x4[1]) {
-              ib = 1;
-              i2 = 2;
-            } else {
-              ib = 2;
-              i2 = 1;
-            }
-
-            if (x4[2] <= x4[3]) {
-              i3 = 3;
-              i4 = 4;
-            } else {
-              i3 = 4;
-              i4 = 3;
-            }
-
-            b_x = x4[i3 - 1];
-            tmp = x4[ib - 1];
-            if (tmp <= b_x) {
-              tmp = x4[i2 - 1];
-              if (tmp <= b_x) {
-                blockOffset = ib;
-                p = i2;
-                ib = i3;
-                i2 = i4;
-              } else if (tmp <= x4[i4 - 1]) {
-                blockOffset = ib;
-                p = i3;
-                ib = i2;
-                i2 = i4;
-              } else {
-                blockOffset = ib;
-                p = i3;
-                ib = i4;
-              }
-            } else {
-              b_x = x4[i4 - 1];
-              if (tmp <= b_x) {
-                if (x4[i2 - 1] <= b_x) {
-                  blockOffset = i3;
-                  p = ib;
-                  ib = i2;
-                  i2 = i4;
-                } else {
-                  blockOffset = i3;
-                  p = ib;
-                  ib = i4;
-                }
-              } else {
-                blockOffset = i3;
-                p = i4;
-              }
-            }
-
-            idx_data[nLastBlock - 3] = idx4[blockOffset - 1];
-            idx_data[nLastBlock - 2] = idx4[p - 1];
-            idx_data[nLastBlock - 1] = idx4[ib - 1];
-            idx_data[nLastBlock] = idx4[i2 - 1];
-            localDW->b_x_data[nLastBlock - 3] = x4[blockOffset - 1];
-            localDW->b_x_data[nLastBlock - 2] = x4[p - 1];
-            localDW->b_x_data[nLastBlock - 1] = x4[ib - 1];
-            localDW->b_x_data[nLastBlock] = x4[i2 - 1];
-            ib = 0;
-          }
-        }
-
-        if (ib > 0) {
-          perm[1] = 0;
-          perm[2] = 0;
-          perm[3] = 0;
-          switch (ib) {
-           case 1:
-            perm[0] = 1;
-            break;
-
-           case 2:
-            if (x4[0] <= x4[1]) {
-              perm[0] = 1;
-              perm[1] = 2;
-            } else {
-              perm[0] = 2;
-              perm[1] = 1;
-            }
-            break;
-
-           default:
-            if (x4[0] <= x4[1]) {
-              if (x4[1] <= x4[2]) {
-                perm[0] = 1;
-                perm[1] = 2;
-                perm[2] = 3;
-              } else if (x4[0] <= x4[2]) {
-                perm[0] = 1;
-                perm[1] = 3;
-                perm[2] = 2;
-              } else {
-                perm[0] = 3;
-                perm[1] = 1;
-                perm[2] = 2;
-              }
-            } else if (x4[0] <= x4[2]) {
-              perm[0] = 2;
-              perm[1] = 1;
-              perm[2] = 3;
-            } else if (x4[1] <= x4[2]) {
-              perm[0] = 2;
-              perm[1] = 3;
-              perm[2] = 1;
-            } else {
-              perm[0] = 3;
-              perm[1] = 2;
-              perm[2] = 1;
-            }
-            break;
-          }
-
-          vwork = (uint8_T)ib;
-          for (nLastBlock = 0; nLastBlock < vwork; nLastBlock++) {
-            blockOffset = perm[nLastBlock];
-            i2 = (vwork_size_idx_0 - ib) + nLastBlock;
-            idx_data[i2] = idx4[blockOffset - 1];
-            localDW->b_x_data[i2] = x4[blockOffset - 1];
-          }
-        }
-
-        if (vwork_size_idx_0 - 1 >= 0) {
-          memset(&iwork_data[0], 0, (uint32_T)vwork_size_idx_0 * sizeof(int32_T));
-        }
-
-        if (vwork_size_idx_0 - 1 >= 0) {
-          memset(&localDW->vwork_data[0], 0, (uint32_T)vwork_size_idx_0 * sizeof
-                 (real_T));
-        }
-
-        n = 2;
-        if (vwork_size_idx_0 > 1) {
-          if (vwork_size_idx_0 >= 256) {
-            ib = vwork_size_idx_0 >> 8;
-            for (n = 0; n < ib; n++) {
-              i3 = (n << 8) - 1;
-              for (nLastBlock = 0; nLastBlock < 6; nLastBlock++) {
-                i4 = 1 << (nLastBlock + 2);
-                bLen2 = i4 << 1;
-                m = 256 >> (nLastBlock + 3);
-                for (vwork = 0; vwork < m; vwork++) {
-                  blockOffset = vwork * bLen2 + i3;
-                  for (p = 0; p < bLen2; p++) {
-                    i2 = (blockOffset + p) + 1;
-                    b_iwork[p] = (int16_T)idx_data[i2];
-                    b_xwork[p] = localDW->b_x_data[i2];
-                  }
-
-                  p = 0;
-                  q = i4;
-                  do {
-                    exitg1 = 0;
-                    blockOffset++;
-                    if (b_xwork[p] <= b_xwork[q]) {
-                      idx_data[blockOffset] = b_iwork[p];
-                      localDW->b_x_data[blockOffset] = b_xwork[p];
-                      if (p + 1 < i4) {
-                        p++;
-                      } else {
-                        exitg1 = 1;
-                      }
-                    } else {
-                      idx_data[blockOffset] = b_iwork[q];
-                      localDW->b_x_data[blockOffset] = b_xwork[q];
-                      if (q + 1 < bLen2) {
-                        q++;
-                      } else {
-                        q = blockOffset - p;
-                        for (blockOffset = p + 1; blockOffset <= i4; blockOffset
-                             ++) {
-                          i2 = q + blockOffset;
-                          idx_data[i2] = b_iwork[blockOffset - 1];
-                          localDW->b_x_data[i2] = b_xwork[blockOffset - 1];
-                        }
-
-                        exitg1 = 1;
-                      }
-                    }
-                  } while (exitg1 == 0);
-                }
-              }
-            }
-
-            n = ib << 8;
-            nLastBlock = vwork_size_idx_0 - n;
-            if (nLastBlock > 0) {
-              merge_block(idx_data, localDW->b_x_data, n, nLastBlock, 2,
-                          iwork_data, localDW->vwork_data);
-            }
-
-            n = 8;
-          }
-
-          merge_block(idx_data, localDW->b_x_data, 0, vwork_size_idx_0, n,
-                      iwork_data, localDW->vwork_data);
-        }
-
-        if (vwork_size_idx_0 - 1 >= 0) {
-          memcpy(&localDW->vwork_data[0], &localDW->b_x_data[0], (uint32_T)
-                 vwork_size_idx_0 * sizeof(real_T));
-        }
-      }
-
-      for (n = 0; n <= b; n++) {
-        x_data[e + n * vstride] = localDW->vwork_data[n];
-      }
-    }
-  }
-}
-
-/*
- * System initialize for atomic system:
- *    '<S10>/MATLAB Function'
- *    '<S11>/MATLAB Function'
- *    '<S22>/MATLAB Function'
- *    '<S23>/MATLAB Function'
- */
-static void MATLABFunction_j_Init(DW_MATLABFunction_c_SLIP *localDW)
-{
-  memset(&localDW->buffer[0], 0, 1000U * sizeof(real_T));
-  localDW->avg = 0.0;
-}
-
 /*
  * Output and update for atomic system:
  *    '<S10>/MATLAB Function'
@@ -485,30 +89,11 @@ static void MATLABFunction_j_Init(DW_MATLABFunction_c_SLIP *localDW)
  *    '<S22>/MATLAB Function'
  *    '<S23>/MATLAB Function'
  */
-static void MATLABFunction_d(real_T rtu_u, real_T rtu_window_length, real_T
-  *rty_y, DW_MATLABFunction_c_SLIP *localDW)
+static void MATLABFunction_d(real_T rtu_newSample, real_T rtu_window_length,
+  real_T *rty_mem)
 {
-  int32_T loop_ub;
-  int32_T sorted_size;
-  localDW->rtu_u[0] = rtu_u;
-  memcpy(&localDW->rtu_u[1], &localDW->buffer[0], 999U * sizeof(real_T));
-  memcpy(&localDW->buffer[0], &localDW->rtu_u[0], 1000U * sizeof(real_T));
-  if (rtu_window_length < 1.0) {
-    loop_ub = -1;
-  } else {
-    loop_ub = (int32_T)rtu_window_length - 1;
-  }
-
-  sorted_size = loop_ub + 1;
-  if (loop_ub >= 0) {
-    memcpy(&localDW->sorted_data[0], &localDW->buffer[0], (uint32_T)(loop_ub + 1)
-           * sizeof(real_T));
-  }
-
-  sort(localDW->sorted_data, &sorted_size, localDW);
-  localDW->avg = localDW->sorted_data[(int32_T)((real_T)(loop_ub + 1) / 2.0) - 1]
-    * 0.1 + localDW->avg * 0.9;
-  *rty_y = localDW->avg;
+  *rty_mem = (1.0 - 1.0 / rtu_window_length) * *rty_mem + 1.0 /
+    rtu_window_length * rtu_newSample;
 }
 
 /*
@@ -536,16 +121,16 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
 {
   DW_SLIP *SLIP_DW = SLIP_M->dwork;
   real_T rtb_Product;
+  real_T rtb_Product_b;
   real_T rtb_Product_tmp;
   real_T rtb_derivative;
   real_T rtb_derivative_tmp;
   real_T rtb_error;
-  real_T rtb_error_h;
   real_T rtb_integral;
   real_T rtb_lambda;
-  real_T rtb_y;
-  real_T rtb_y_e;
-  real_T rtb_y_l;
+  real_T rtb_mem;
+  real_T rtb_mem_d;
+  real_T rtb_mem_o;
   int32_T idxDelay;
 
   /* Product: '<S3>/Product' incorporates:
@@ -566,12 +151,15 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Sum: '<S3>/Add2'
    */
   Slip_estimation(0.2286 * SLIP_in_omega_rl, SLIP_u + SLIP_yaw_rate * 0.605, 1.0,
-                  &rtb_y_l);
+                  &rtb_lambda);
 
   /* Sum: '<S3>/Add1' incorporates:
    *  Inport: '<Root>/in_lambda_reference'
    */
-  rtb_error = SLIP_in_lambda_reference - rtb_y_l;
+  rtb_error = SLIP_in_lambda_reference - rtb_lambda;
+
+  /* Delay: '<S23>/Delay One Step' */
+  rtb_mem = SLIP_DW->DelayOneStep_DSTATE;
 
   /* MATLAB Function: '<S23>/MATLAB Function' incorporates:
    *  Inport: '<Root>/in_iteration_step_seconds'
@@ -579,25 +167,24 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Product: '<S17>/Divide3'
    */
   MATLABFunction_d(rtb_error, SLIP_in_shallow_window_seconds /
-                   SLIP_in_iteration_step_seconds, &rtb_lambda,
-                   &SLIP_DW->sf_MATLABFunction_hz);
+                   SLIP_in_iteration_step_seconds, &rtb_mem);
 
   /* Product: '<S24>/Product' incorporates:
    *  Inport: '<Root>/in_Kp'
    */
-  rtb_y_e = rtb_lambda * SLIP_in_Kp;
+  rtb_Product_b = rtb_mem * SLIP_in_Kp;
 
   /* Delay: '<S21>/Delay One Step' */
-  rtb_integral = SLIP_DW->DelayOneStep_DSTATE;
+  rtb_integral = SLIP_DW->DelayOneStep_DSTATE_b;
 
   /* Switch: '<S21>/Switch' incorporates:
    *  Gain: '<S21>/Gain'
    *  Inport: '<Root>/in_Ki'
    */
   if (rtb_error > 0.0) {
-    rtb_derivative = SLIP_in_Ki;
+    rtb_mem_o = SLIP_in_Ki;
   } else {
-    rtb_derivative = 0.16666666666666666 * SLIP_in_Ki;
+    rtb_mem_o = 0.16666666666666666 * SLIP_in_Ki;
   }
 
   /* MATLAB Function: '<S21>/MATLAB Function' incorporates:
@@ -610,9 +197,12 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  RelationalOperator: '<S16>/Compare'
    *  Switch: '<S21>/Switch'
    */
-  MATLABFunction(rtb_error * rtb_derivative, (SLIP_throttle < 0.03),
+  MATLABFunction(rtb_error * rtb_mem_o, (SLIP_throttle < 0.03),
                  SLIP_in_minimum_torque, 100.0, SLIP_in_iteration_step_seconds,
                  &rtb_integral);
+
+  /* Delay: '<S22>/Delay One Step' */
+  rtb_mem_d = SLIP_DW->DelayOneStep_DSTATE_o;
 
   /* MATLAB Function: '<S22>/MATLAB Function' incorporates:
    *  Inport: '<Root>/in_iteration_step_seconds'
@@ -620,8 +210,7 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Product: '<S17>/Divide2'
    */
   MATLABFunction_d(rtb_error, SLIP_in_window_seconds /
-                   SLIP_in_iteration_step_seconds, &rtb_y,
-                   &SLIP_DW->sf_MATLABFunction_k);
+                   SLIP_in_iteration_step_seconds, &rtb_mem_d);
 
   /* Product: '<S17>/Divide1' incorporates:
    *  Inport: '<Root>/in_differentiation_step_seconds'
@@ -636,7 +225,7 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Product: '<S17>/Divide1'
    */
   if ((real32_T)rtb_derivative_tmp < 1.0F) {
-    rtb_derivative = rtb_y;
+    rtb_derivative = rtb_mem_d;
   } else {
     if ((real32_T)rtb_derivative_tmp > 100.0F) {
       idxDelay = 100;
@@ -656,14 +245,14 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Product: '<S17>/Divide'
    *  Sum: '<S17>/Sum'
    */
-  rtb_derivative = (rtb_y - rtb_derivative) / in_differentiation_step_seconds *
-    SLIP_in_Kd;
+  rtb_derivative = (rtb_mem_d - rtb_derivative) /
+    in_differentiation_step_seconds * SLIP_in_Kd;
 
   /* MinMax: '<S17>/Max' incorporates:
    *  Inport: '<Root>/in_minimum_torque'
    *  Sum: '<S17>/Sum2'
    */
-  rtb_error = fmax((rtb_y_e + rtb_integral) + rtb_derivative,
+  rtb_error = fmax((rtb_Product_b + rtb_integral) + rtb_derivative,
                    SLIP_in_minimum_torque);
 
   /* Switch: '<S19>/Switch2' incorporates:
@@ -713,10 +302,10 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   /* BusCreator: '<S3>/Bus Creator' incorporates:
    *  Outport: '<Root>/out_debug_bus_rl'
    */
-  SLIP_out_debug_bus_rl.lambda = rtb_y_l;
-  SLIP_out_debug_bus_rl.filtered_lambda_error = rtb_y;
-  SLIP_out_debug_bus_rl.shallow_filtered_lambda_error = rtb_lambda;
-  SLIP_out_debug_bus_rl.proportional = rtb_y_e;
+  SLIP_out_debug_bus_rl.lambda = rtb_lambda;
+  SLIP_out_debug_bus_rl.filtered_lambda_error = rtb_mem_d;
+  SLIP_out_debug_bus_rl.shallow_filtered_lambda_error = rtb_mem;
+  SLIP_out_debug_bus_rl.proportional = rtb_Product_b;
   SLIP_out_debug_bus_rl.integral = rtb_integral;
   SLIP_out_debug_bus_rl.derivative = rtb_derivative;
 
@@ -736,33 +325,35 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   /* Sum: '<S2>/Add1' incorporates:
    *  Inport: '<Root>/in_lambda_reference'
    */
-  rtb_error_h = SLIP_in_lambda_reference - rtb_lambda;
+  rtb_derivative = SLIP_in_lambda_reference - rtb_lambda;
+
+  /* Delay: '<S11>/Delay One Step' */
+  rtb_Product = SLIP_DW->DelayOneStep_DSTATE_n;
 
   /* MATLAB Function: '<S11>/MATLAB Function' incorporates:
    *  Inport: '<Root>/in_iteration_step_seconds'
    *  Inport: '<Root>/in_shallow_window_seconds'
    *  Product: '<S5>/Divide3'
    */
-  MATLABFunction_d(rtb_error_h, SLIP_in_shallow_window_seconds /
-                   SLIP_in_iteration_step_seconds, &rtb_y_l,
-                   &SLIP_DW->sf_MATLABFunction_o);
+  MATLABFunction_d(rtb_derivative, SLIP_in_shallow_window_seconds /
+                   SLIP_in_iteration_step_seconds, &rtb_Product);
 
   /* Product: '<S12>/Product' incorporates:
    *  Inport: '<Root>/in_Kp'
    */
-  rtb_error = rtb_y_l * SLIP_in_Kp;
+  rtb_error = rtb_Product * SLIP_in_Kp;
 
   /* Delay: '<S9>/Delay One Step' */
-  rtb_Product = SLIP_DW->DelayOneStep_DSTATE_h;
+  rtb_Product_b = SLIP_DW->DelayOneStep_DSTATE_h;
 
   /* Switch: '<S9>/Switch' incorporates:
    *  Gain: '<S9>/Gain'
    *  Inport: '<Root>/in_Ki'
    */
-  if (rtb_error_h > 0.0) {
-    rtb_derivative = SLIP_in_Ki;
+  if (rtb_derivative > 0.0) {
+    rtb_mem_o = SLIP_in_Ki;
   } else {
-    rtb_derivative = 0.16666666666666666 * SLIP_in_Ki;
+    rtb_mem_o = 0.16666666666666666 * SLIP_in_Ki;
   }
 
   /* MATLAB Function: '<S9>/MATLAB Function' incorporates:
@@ -775,24 +366,26 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  RelationalOperator: '<S4>/Compare'
    *  Switch: '<S9>/Switch'
    */
-  MATLABFunction(rtb_error_h * rtb_derivative, (SLIP_throttle < 0.03),
+  MATLABFunction(rtb_derivative * rtb_mem_o, (SLIP_throttle < 0.03),
                  SLIP_in_minimum_torque, 100.0, SLIP_in_iteration_step_seconds,
-                 &rtb_Product);
+                 &rtb_Product_b);
+
+  /* Delay: '<S10>/Delay One Step' */
+  rtb_mem_o = SLIP_DW->DelayOneStep_DSTATE_j;
 
   /* MATLAB Function: '<S10>/MATLAB Function' incorporates:
    *  Inport: '<Root>/in_iteration_step_seconds'
    *  Inport: '<Root>/in_window_seconds'
    *  Product: '<S5>/Divide2'
    */
-  MATLABFunction_d(rtb_error_h, SLIP_in_window_seconds /
-                   SLIP_in_iteration_step_seconds, &rtb_y_e,
-                   &SLIP_DW->sf_MATLABFunction_d);
+  MATLABFunction_d(rtb_derivative, SLIP_in_window_seconds /
+                   SLIP_in_iteration_step_seconds, &rtb_mem_o);
 
   /* Delay: '<S5>/Delay' incorporates:
    *  DataTypeConversion: '<S5>/Cast To Single'
    */
   if ((real32_T)rtb_derivative_tmp < 1.0F) {
-    rtb_derivative = rtb_y_e;
+    rtb_derivative = rtb_mem_o;
   } else {
     if ((real32_T)rtb_derivative_tmp > 100.0F) {
       idxDelay = 100;
@@ -812,25 +405,25 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  Product: '<S5>/Divide'
    *  Sum: '<S5>/Sum'
    */
-  rtb_derivative = (rtb_y_e - rtb_derivative) / in_differentiation_step_seconds *
-    SLIP_in_Kd;
+  rtb_derivative = (rtb_mem_o - rtb_derivative) /
+    in_differentiation_step_seconds * SLIP_in_Kd;
 
   /* BusCreator: '<S2>/Bus Creator' incorporates:
    *  Outport: '<Root>/out_debug_bus_rr'
    */
   SLIP_out_debug_bus_rr.lambda = rtb_lambda;
-  SLIP_out_debug_bus_rr.filtered_lambda_error = rtb_y_e;
-  SLIP_out_debug_bus_rr.shallow_filtered_lambda_error = rtb_y_l;
+  SLIP_out_debug_bus_rr.filtered_lambda_error = rtb_mem_o;
+  SLIP_out_debug_bus_rr.shallow_filtered_lambda_error = rtb_Product;
   SLIP_out_debug_bus_rr.proportional = rtb_error;
-  SLIP_out_debug_bus_rr.integral = rtb_Product;
+  SLIP_out_debug_bus_rr.integral = rtb_Product_b;
   SLIP_out_debug_bus_rr.derivative = rtb_derivative;
 
   /* MinMax: '<S5>/Max' incorporates:
    *  Inport: '<Root>/in_minimum_torque'
    *  Sum: '<S5>/Sum2'
    */
-  rtb_lambda = fmax((rtb_error + rtb_Product) + rtb_derivative,
-                    SLIP_in_minimum_torque);
+  rtb_derivative = fmax((rtb_error + rtb_Product_b) + rtb_derivative,
+                        SLIP_in_minimum_torque);
 
   /* Switch: '<S7>/Switch2' incorporates:
    *  Constant: '<S2>/Constant3'
@@ -838,15 +431,15 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
    *  RelationalOperator: '<S7>/UpperRelop'
    *  Switch: '<S7>/Switch'
    */
-  if (rtb_lambda > rtb_Product_tmp) {
+  if (rtb_derivative > rtb_Product_tmp) {
     rtb_error = rtb_Product_tmp;
-  } else if (rtb_lambda < 0.0) {
+  } else if (rtb_derivative < 0.0) {
     /* Switch: '<S7>/Switch' incorporates:
      *  Constant: '<S2>/Constant3'
      */
     rtb_error = 0.0;
   } else {
-    rtb_error = rtb_lambda;
+    rtb_error = rtb_derivative;
   }
 
   /* End of Switch: '<S7>/Switch2' */
@@ -876,11 +469,23 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
 
   /* End of Switch: '<S6>/Switch2' */
 
+  /* Update for Delay: '<S23>/Delay One Step' */
+  SLIP_DW->DelayOneStep_DSTATE = rtb_mem;
+
   /* Update for Delay: '<S21>/Delay One Step' */
-  SLIP_DW->DelayOneStep_DSTATE = rtb_integral;
+  SLIP_DW->DelayOneStep_DSTATE_b = rtb_integral;
+
+  /* Update for Delay: '<S22>/Delay One Step' */
+  SLIP_DW->DelayOneStep_DSTATE_o = rtb_mem_d;
+
+  /* Update for Delay: '<S11>/Delay One Step' */
+  SLIP_DW->DelayOneStep_DSTATE_n = rtb_Product;
 
   /* Update for Delay: '<S9>/Delay One Step' */
-  SLIP_DW->DelayOneStep_DSTATE_h = rtb_Product;
+  SLIP_DW->DelayOneStep_DSTATE_h = rtb_Product_b;
+
+  /* Update for Delay: '<S10>/Delay One Step' */
+  SLIP_DW->DelayOneStep_DSTATE_j = rtb_mem_o;
   for (idxDelay = 0; idxDelay < 99; idxDelay++) {
     /* Update for Delay: '<S17>/Delay' */
     SLIP_DW->Delay_DSTATE[idxDelay] = SLIP_DW->Delay_DSTATE[idxDelay + 1];
@@ -890,10 +495,10 @@ void SLIP_step(RT_MODEL_SLIP *const SLIP_M)
   }
 
   /* Update for Delay: '<S17>/Delay' */
-  SLIP_DW->Delay_DSTATE[99] = rtb_y;
+  SLIP_DW->Delay_DSTATE[99] = rtb_mem_d;
 
   /* Update for Delay: '<S5>/Delay' */
-  SLIP_DW->Delay_DSTATE_d[99] = rtb_y_e;
+  SLIP_DW->Delay_DSTATE_d[99] = rtb_mem_o;
 }
 
 /* Model initialize function */
@@ -931,18 +536,6 @@ void SLIP_initialize(RT_MODEL_SLIP *const SLIP_M)
   /* states (dwork) */
   (void) memset((void *)SLIP_DW, 0,
                 sizeof(DW_SLIP));
-
-  /* SystemInitialize for MATLAB Function: '<S23>/MATLAB Function' */
-  MATLABFunction_j_Init(&SLIP_DW->sf_MATLABFunction_hz);
-
-  /* SystemInitialize for MATLAB Function: '<S22>/MATLAB Function' */
-  MATLABFunction_j_Init(&SLIP_DW->sf_MATLABFunction_k);
-
-  /* SystemInitialize for MATLAB Function: '<S11>/MATLAB Function' */
-  MATLABFunction_j_Init(&SLIP_DW->sf_MATLABFunction_o);
-
-  /* SystemInitialize for MATLAB Function: '<S10>/MATLAB Function' */
-  MATLABFunction_j_Init(&SLIP_DW->sf_MATLABFunction_d);
 }
 
 /*

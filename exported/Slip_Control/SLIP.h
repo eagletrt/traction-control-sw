@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SLIP'.
  *
- * Model version                  : 6.368
+ * Model version                  : 6.372
  * Simulink Coder version         : 23.2 (R2023b) 01-Aug-2023
- * C/C++ source code generated on : Sat Aug 31 11:52:27 2024
+ * C/C++ source code generated on : Sat Aug 31 14:31:43 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM 7
@@ -56,26 +56,16 @@ typedef struct {
 
 #endif
 
-/* Block signals and states (default storage) for system '<S10>/MATLAB Function' */
-typedef struct {
-  real_T buffer[1000];                 /* '<S10>/MATLAB Function' */
-  real_T sorted_data[999];
-  real_T rtu_u[1000];
-  real_T vwork_data[999];
-  real_T b_x_data[999];
-  real_T avg;                          /* '<S10>/MATLAB Function' */
-} DW_MATLABFunction_c_SLIP;
-
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
-  DW_MATLABFunction_c_SLIP sf_MATLABFunction_hz;/* '<S23>/MATLAB Function' */
-  DW_MATLABFunction_c_SLIP sf_MATLABFunction_k;/* '<S22>/MATLAB Function' */
-  DW_MATLABFunction_c_SLIP sf_MATLABFunction_o;/* '<S11>/MATLAB Function' */
-  DW_MATLABFunction_c_SLIP sf_MATLABFunction_d;/* '<S10>/MATLAB Function' */
   real_T Delay_DSTATE[100];            /* '<S17>/Delay' */
   real_T Delay_DSTATE_d[100];          /* '<S5>/Delay' */
-  real_T DelayOneStep_DSTATE;          /* '<S21>/Delay One Step' */
+  real_T DelayOneStep_DSTATE;          /* '<S23>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_b;        /* '<S21>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_o;        /* '<S22>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_n;        /* '<S11>/Delay One Step' */
   real_T DelayOneStep_DSTATE_h;        /* '<S9>/Delay One Step' */
+  real_T DelayOneStep_DSTATE_j;        /* '<S10>/Delay One Step' */
 } DW_SLIP;
 
 /* Real-time Model Data Structure */

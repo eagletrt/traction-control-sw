@@ -221,11 +221,11 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_u = can_data->u;
 	SLIP_yaw_rate = can_data->gyro_z;
 
-	SLIP_in_Kp = 500.0;
-	SLIP_in_Ki = 10000.0;
-	SLIP_in_Kd = 100.0;
+	SLIP_in_Kp = 5.0;
+	SLIP_in_Ki = 0.0;
+	SLIP_in_Kd = 0.0;
 
-	SLIP_in_lambda_reference = 0.06;
+	SLIP_in_lambda_reference = 0.16;
 	SLIP_in_minimum_torque = 1.0;
 
 	SLIP_in_iteration_step_seconds = 1.0 / RUN_FREQUENCY;
