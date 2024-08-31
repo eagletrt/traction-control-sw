@@ -216,16 +216,20 @@ void regen_model_set_data(can_data_t *can_data) {
 void slip_model_set_data(can_data_t *can_data) {
 	SLIP_throttle = can_data->throttle;
 	SLIP_T_max = torque_max(can_data);
-	SLIP_in_omega_rl = can_data->omega_rl;
-	SLIP_in_omega_rr = can_data->omega_rr;
+  static double w_rl = 0.0;
+  static double w_rr = 0.0;
+  w_rl = w_rl * 0.8 + can_data->omega_rl * 0.2;
+  w_rr = w_rr * 0.8 + can_data->omega_rr * 0.2;
+	SLIP_in_omega_rl = w_rl;
+	SLIP_in_omega_rr = w_rr;
 	SLIP_u = can_data->u;
 	SLIP_yaw_rate = can_data->gyro_z;
 
 	SLIP_in_Kp = 80.0;
 	SLIP_in_Ki = 2000.0;
-	SLIP_in_Kd = 50.0 * std::clamp((SLIP_u - 2.0) / 5.0, 0.0, 1.0);
+	SLIP_in_Kd = 50.0 * std::clamp((SLIP_u - 3.0) / 7.0, 0.0, 1.0);
 
-	SLIP_in_lambda_reference = 0.2;
+	SLIP_in_lambda_reference = 0.10;
 	SLIP_in_minimum_torque = 20.0;
 
 	SLIP_in_iteration_step_seconds = 1.0 / RUN_FREQUENCY;
