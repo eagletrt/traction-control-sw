@@ -221,17 +221,17 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_u = can_data->u;
 	SLIP_yaw_rate = can_data->gyro_z;
 
-	SLIP_in_Kp = 5.0;
-	SLIP_in_Ki = 0.0;
-	SLIP_in_Kd = 0.0;
+	SLIP_in_Kp = 80.0;
+	SLIP_in_Ki = 2000.0;
+	SLIP_in_Kd = 50.0 * std::clamp((SLIP_u - 2.0) / 5.0, 0.0, 1.0);
 
-	SLIP_in_lambda_reference = 0.16;
-	SLIP_in_minimum_torque = 1.0;
+	SLIP_in_lambda_reference = 0.2;
+	SLIP_in_minimum_torque = 20.0;
 
 	SLIP_in_iteration_step_seconds = 1.0 / RUN_FREQUENCY;
-	SLIP_in_window_seconds = 0.1;
-	SLIP_in_shallow_window_seconds = 0.05;
-	in_differentiation_step_seconds = 0.3;
+	SLIP_in_window_seconds = 0.10;
+	SLIP_in_shallow_window_seconds = 0.2;
+	in_differentiation_step_seconds = 0.35;
 }
 
 void torque_model_set_data(can_data_t *can_data) {
