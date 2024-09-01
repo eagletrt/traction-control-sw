@@ -225,8 +225,8 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_u = can_data->u;
 	SLIP_yaw_rate = can_data->gyro_z;
 
-	SLIP_in_Kp = 150.0;
-	SLIP_in_Ki = 1200.0;
+	SLIP_in_Kp = 90.0;
+	SLIP_in_Ki = 1500.0;
 	SLIP_in_Kd = 15.0 * std::clamp((SLIP_u - 2.0) / 5.0, 0.0, 1.0);
 
 	SLIP_in_lambda_reference = 0.10;
@@ -250,9 +250,15 @@ void torque_model_set_data(can_data_t *can_data) {
 
 	TV_in_T_max_rl = torque_max(can_data);
 	TV_in_T_max_rr = torque_max(can_data);
-
+  
+  if (can_data->sc_state) {
 	TV_in_T_max_rl_slip = SLIP_out_T_max_rl_slip;
 	TV_in_T_max_rr_slip = SLIP_out_T_max_rr_slip;
+  } else {
+
+	TV_in_T_max_rl_slip = torque_max(can_data);
+	TV_in_T_max_rr_slip = torque_max(can_data);
+  }
 }
 
 bool regen_enable(double brake_front, double throttle, double hvSOC) {
