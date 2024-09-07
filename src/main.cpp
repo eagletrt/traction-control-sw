@@ -191,10 +191,17 @@ void check_received_messages(can_received_bitset_t *bitset) {
 	*bitset = 0;
 }
 
-double torque_max(can_data_t *can_data) {
-	(void)can_data;
-	return MAX_TORQUE * can_data->map_power;
+void limit_torque_by_power(can_data_t *can_data, double *torque_l, double *torque_r) {
+	double p_mech = (*torque_l * can_data->omega_rl + *torque_r * can_data->omega_rr) * 4.5;
+	double p_max = 40000;
+	if (p_mech > p_max && p_mech > 0) {
+		double reduction_ratio = std::min(std::max(p_max / p_mech, 0.0), 1.0);
+		*torque_l *= reduction_ratio;
+		*torque_r *= reduction_ratio;
+	}
 }
+
+double torque_max(can_data_t *can_data) { return MAX_TORQUE * can_data->map_power; }
 
 void velocity_estimation(can_data_t *can_data) {
 	double delta = can_data->steering_angle / STEER_CONVERSION_FACTOR;
@@ -322,6 +329,7 @@ void can_send_data(can_data_t can_data) {
 			tmax_rr = torque_max(&can_data);
 		}
 	}
+	limit_torque_by_power(&can_data, &torque_rl, &torque_rr);
 
 	if (received_controls_data && timestamp - out_timestamp > 1e4) {
 		out_timestamp = timestamp;
