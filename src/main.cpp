@@ -15,6 +15,8 @@ extern "C" {
 #include <unistd.h>
 #include <signal.h>
 
+double power_mech = 0.0;
+
 int main(void) {
 	BENCHMARK_START();
 
@@ -193,6 +195,7 @@ void check_received_messages(can_received_bitset_t *bitset) {
 
 void limit_torque_by_power(can_data_t *can_data, double *torque_l, double *torque_r) {
 	double p_mech = (*torque_l * can_data->omega_rl + *torque_r * can_data->omega_rr) * 4.5;
+	power_mech = p_mech;
 	double p_max = 40000;
 	if (p_mech > p_max && p_mech > 0) {
 		double reduction_ratio = std::min(std::max(p_max / p_mech, 0.0), 1.0);
@@ -236,7 +239,7 @@ void slip_model_set_data(can_data_t *can_data) {
 	SLIP_in_Ki = 2000.0;
 	SLIP_in_Kd = 15.0 * std::clamp((SLIP_u - 2.0) / 5.0, 0.0, 1.0);
 
-SLIP_in_lambda_reference = 0.11;
+	SLIP_in_lambda_reference = 0.11;
 	SLIP_in_minimum_torque = 40.0;
 
 	SLIP_in_iteration_step_seconds = 1.0 / RUN_FREQUENCY;
@@ -257,15 +260,14 @@ void torque_model_set_data(can_data_t *can_data) {
 
 	TV_in_T_max_rl = torque_max(can_data);
 	TV_in_T_max_rr = torque_max(can_data);
-  
-  if (can_data->sc_state) {
-	TV_in_T_max_rl_slip = SLIP_out_T_max_rl_slip;
-	TV_in_T_max_rr_slip = SLIP_out_T_max_rr_slip;
-  } else {
 
-	TV_in_T_max_rl_slip = torque_max(can_data);
-	TV_in_T_max_rr_slip = torque_max(can_data);
-  }
+	if (can_data->sc_state) {
+		TV_in_T_max_rl_slip = SLIP_out_T_max_rl_slip;
+		TV_in_T_max_rr_slip = SLIP_out_T_max_rr_slip;
+	} else {
+		TV_in_T_max_rl_slip = torque_max(can_data);
+		TV_in_T_max_rr_slip = torque_max(can_data);
+	}
 }
 
 bool regen_enable(double brake_front, double throttle, double hvSOC) {
@@ -363,22 +365,11 @@ void can_send_data(can_data_t can_data) {
 		debug_state_timestamp = timestamp;
 		static primary_debug_signal_1_converted_t ds1;
 		ds1.device_id = primary_debug_signal_1_device_id_tlm;
-		ds1.field_1 = SLIP_out_debug_bus_rl.lambda;
-		ds1.field_2 = SLIP_out_debug_bus_rl.filtered_lambda_error;
-		ds1.field_3 = SLIP_out_debug_bus_rl.shallow_filtered_lambda_error;
+		ds1.field_1 = power_mech;
 		static primary_debug_signal_1_t ds1_raw;
 		primary_debug_signal_1_conversion_to_raw_struct(&ds1_raw, &ds1);
 		primary_debug_signal_1_pack(data, &ds1_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
-		static primary_debug_signal_3_converted_t ds3;
-		ds3.device_id = primary_debug_signal_3_device_id_tlm;
-		ds3.field_1 = SLIP_out_debug_bus_rl.proportional / 100.0;
-		ds3.field_2 = SLIP_out_debug_bus_rl.integral / 100.0;
-		ds3.field_3 = SLIP_out_debug_bus_rl.derivative / 100.0;
-		static primary_debug_signal_3_t ds3_raw;
-		primary_debug_signal_3_conversion_to_raw_struct(&ds3_raw, &ds3);
-		primary_debug_signal_3_pack(data, &ds3_raw, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
-		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_3_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_3_BYTE_SIZE);
 	}
 
 	if (received_controls_data && timestamp - state_timestamp > 1e4) {
