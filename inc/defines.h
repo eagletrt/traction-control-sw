@@ -22,6 +22,8 @@
 #define CHECK_CAN_MESSAGES_FREQUENCY 10				// Hz
 
 #define MAX_TORQUE (100.0)
+#define MAX_BRAKE_BAR (10.0)
+#define IDEAL_BRAKE_BALANCE (0.8) // 0.8 front
 
 #define REGEN_BRAKE_FRONT_ON_THRESHOLD (1.5f) // enables regen over this value
 #define REGEN_THROTTLE_ON_THRESHOLD (0.05f)		// enables regen under this value

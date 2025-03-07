@@ -1,4 +1,5 @@
 #include "inc/data.h"
+#include "inc/defines.h"
 #include <stdint.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -171,6 +172,28 @@ static inline void can_messages_parse_primary(can_message_t *message, can_data_t
 		CAN_RECEIVED_SET(*can_received, CAN_REC_LV)
 		break;
 	}
+  case PRIMARY_AS_COMMANDS_SET_STATUS_FRAME_ID: {
+      primary_as_commands_set_status_converted_t *as_commands_set_status = (primary_as_commands_set_status_converted_t *)can_devices.message;
+      can_data->steer_enabled = as_commands_set_status->steerstatus;
+      can_data->throttle_enabled = as_commands_set_status->throttlestatus;
+      can_data->brake_enabled = as_commands_set_status->brakestatus;
+      break;
+    }
+  case PRIMARY_AS_COMMANDS_SET_VALUE_FRAME_ID: {
+      primary_as_commands_set_value_converted_t *as_commands_set_value = (primary_as_commands_set_value_converted_t *)can_devices.message;
+      can_data->map_power = 1.0f; 
+      if(can_data->throttle_enabled){
+        can_data->throttle = convert_throttle(as_commands_set_value->throttle);
+        CAN_RECEIVED_SET(*can_received, CAN_REC_THROTTLE);
+      }
+      if(can_data->brake_enabled){
+        float total_brake = convert_brake(as_commands_set_value->brake) * MAX_BRAKE_BAR;
+        can_data->brake_f = total_brake * IDEAL_BRAKE_BALANCE;
+        can_data->brake_r = total_brake * (1.0 - IDEAL_BRAKE_BALANCE);
+        CAN_RECEIVED_SET(*can_received, CAN_REC_BRAKE);
+      }
+      break;
+    }
 	default:
 		break;
 	}
@@ -201,17 +224,21 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 		// 		break;
 		// 	}
 	case SECONDARY_PEDAL_THROTTLE_FRAME_ID: {
-		secondary_pedal_throttle_converted_t *pedals_output = (secondary_pedal_throttle_converted_t *)can_devices.message;
-		can_data->throttle = convert_throttle(pedals_output->throttle);
-		CAN_RECEIVED_SET(*can_received, CAN_REC_THROTTLE)
+      if(!can_data->throttle_enabled) {
+        secondary_pedal_throttle_converted_t *pedals_output = (secondary_pedal_throttle_converted_t *)can_devices.message;
+        can_data->throttle = convert_throttle(pedals_output->throttle);
+        CAN_RECEIVED_SET(*can_received, CAN_REC_THROTTLE)
+      }
 		break;
 	}
 	case SECONDARY_PEDAL_BRAKES_PRESSURE_FRAME_ID: {
-		secondary_pedal_brakes_pressure_converted_t *pedals_output =
-				(secondary_pedal_brakes_pressure_converted_t *)can_devices.message;
-		can_data->brake_f = convert_brake(pedals_output->front);
-		can_data->brake_r = convert_brake(pedals_output->rear);
-		CAN_RECEIVED_SET(*can_received, CAN_REC_BRAKE)
+      if(!can_data->brake_enabled){
+        secondary_pedal_brakes_pressure_converted_t *pedals_output =
+            (secondary_pedal_brakes_pressure_converted_t *)can_devices.message;
+        can_data->brake_f = convert_brake(pedals_output->front);
+        can_data->brake_r = convert_brake(pedals_output->rear);
+        CAN_RECEIVED_SET(*can_received, CAN_REC_BRAKE)
+      }
 		break;
 	}
 	case SECONDARY_IMU_ACCELERATION_FRAME_ID: {
@@ -233,9 +260,9 @@ static inline void can_messages_parse_secondary(can_message_t *message, can_data
 		break;
 	}
 	case SECONDARY_STEER_ANGLE_FRAME_ID: {
-		secondary_steer_angle_converted_t *steer_angle = (secondary_steer_angle_converted_t *)can_devices.message;
-		can_data->steering_angle = convert_steering_angle(steer_angle->angle);
-		CAN_RECEIVED_SET(*can_received, CAN_REC_STEER_ANGLE)
+    secondary_steer_angle_converted_t *steer_angle = (secondary_steer_angle_converted_t *)can_devices.message;
+    can_data->steering_angle = convert_steering_angle(steer_angle->angle);
+    CAN_RECEIVED_SET(*can_received, CAN_REC_STEER_ANGLE);
 		break;
 	}
 	case SECONDARY_VEHICLE_SPEED_FRAME_ID: {

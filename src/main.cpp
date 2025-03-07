@@ -304,32 +304,41 @@ void can_send_data(can_data_t can_data) {
 	static uint64_t lv_soc_state_timestamp = 0;
 	static uint64_t lv_soc_cov_timestamp = 0;
 
-	real_T torque_rl;
-	real_T torque_rr;
-	real_T tmax_rl;
-	real_T tmax_rr;
+	real_T torque_rl = 0;
+	real_T torque_rr = 0;
+	real_T tmax_rl = 0;
+	real_T tmax_rr = 0;
 	if (can_data.reg_state && regen_enable(can_data.brake_f, can_data.throttle, hvSOC.getState()(_SOC))) {
-		torque_rl = Regen_Out_Tm_rl;
-		torque_rr = Regen_Out_Tm_rr;
-		tmax_rl = Regen_Tm_rl;
-		tmax_rr = Regen_Tm_rr;
+    if(can_data.brake_enabled) {
+      torque_rl = can_data.brake_r * -1;
+      torque_rr = can_data.brake_r * -1;
+      tmax_rl = MAX_BRAKE_BAR;
+      tmax_rr = MAX_BRAKE_BAR;
+    } else {
+      torque_rl = Regen_Out_Tm_rl;
+      torque_rr = Regen_Out_Tm_rr;
+      tmax_rl = Regen_Tm_rl;
+      tmax_rr = Regen_Tm_rr;
+    }
 	} else {
-		if (can_data.tv_state) {
-			torque_rl = TV_out_T_motor_rl;
-			torque_rr = TV_out_T_motor_rr;
-			tmax_rl = TV_in_T_max_rl_slip;
-			tmax_rr = TV_in_T_max_rr_slip;
-		} else if (can_data.sc_state) {
-			torque_rl = SLIP_out_T_motor_rl;
-			torque_rr = SLIP_out_T_motor_rr;
-			tmax_rl = SLIP_out_T_max_rl_slip;
-			tmax_rr = SLIP_out_T_max_rr_slip;
-		} else {
-			torque_rl = torque_max(&can_data) * can_data.throttle;
-			torque_rr = torque_max(&can_data) * can_data.throttle;
-			tmax_rl = torque_max(&can_data);
-			tmax_rr = torque_max(&can_data);
-		}
+    torque_rl = torque_max(&can_data) * can_data.throttle;
+    torque_rr = torque_max(&can_data) * can_data.throttle;
+    tmax_rl = torque_max(&can_data);
+    tmax_rr = torque_max(&can_data);
+
+    if(!can_data.throttle_enabled) {
+      if (can_data.tv_state) {
+        torque_rl = TV_out_T_motor_rl;
+        torque_rr = TV_out_T_motor_rr;
+        tmax_rl = TV_in_T_max_rl_slip;
+        tmax_rr = TV_in_T_max_rr_slip;
+      } else if (can_data.sc_state) {
+        torque_rl = SLIP_out_T_motor_rl;
+        torque_rr = SLIP_out_T_motor_rr;
+        tmax_rl = SLIP_out_T_max_rl_slip;
+        tmax_rr = SLIP_out_T_max_rr_slip;
+      }
+    }
 	}
 	limit_torque_by_power(&can_data, &torque_rl, &torque_rr);
 

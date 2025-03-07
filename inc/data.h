@@ -30,6 +30,9 @@ typedef struct {
 	double lv_min_cell_voltage;
 	double lv_total_current;
 	double lv_mean_temp;
+  bool steer_enabled;
+  bool throttle_enabled;
+  bool brake_enabled;
 } can_data_t;
 
 typedef enum {
