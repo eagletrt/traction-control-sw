@@ -172,11 +172,11 @@ static inline void can_messages_parse_primary(can_message_t *message, can_data_t
 		CAN_RECEIVED_SET(*can_received, CAN_REC_LV)
 		break;
 	}
-  case PRIMARY_AS_COMMANDS_SET_STATUS_FRAME_ID: {
-      primary_as_commands_set_status_converted_t *as_commands_set_status = (primary_as_commands_set_status_converted_t *)can_devices.message;
-      can_data->steer_enabled = as_commands_set_status->steerstatus;
-      can_data->throttle_enabled = as_commands_set_status->throttlestatus;
-      can_data->brake_enabled = as_commands_set_status->brakestatus;
+  case PRIMARY_AS_COMMANDS_STATUS_FRAME_ID: {
+      primary_as_commands_status_converted_t *as_commands_status = (primary_as_commands_status_converted_t *)can_devices.message;
+      can_data->steer_enabled = as_commands_status->steerstatus;
+      can_data->throttle_enabled = as_commands_status->throttlestatus;
+      can_data->brake_enabled = as_commands_status->brakestatus;
       break;
     }
   case PRIMARY_AS_COMMANDS_SET_VALUE_FRAME_ID: {
