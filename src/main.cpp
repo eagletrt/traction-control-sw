@@ -1,6 +1,7 @@
 #include "inc/main.hpp"
 #include "exported/Regen/Regen.h"
 #include "exported/Slip_Control/SLIP.h"
+#include "external/can/lib/simulator/simulator_network.h"
 #include "inc/data.h"
 #include <pthread.h>
 extern "C" {
@@ -52,13 +53,13 @@ int main(void) {
 	kill_can_thread = false;
 	pthread_mutex_init(&model_mutex, NULL);
 
-	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
+	can_init(&can[CAN_SOCKET_PRIMARY], "vcan0");
 	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
 		return EXIT_FAILURE;
 	}
 	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, can_thread, &can[CAN_SOCKET_PRIMARY]);
-	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
+	can_init(&can[CAN_SOCKET_SECONDARY], "vcan1");
 	if (can_open_socket(&can[CAN_SOCKET_SECONDARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_SECONDARY].device);
 		return EXIT_FAILURE;
@@ -347,7 +348,7 @@ void can_send_data(can_data_t can_data) {
 
 #if 1 == SIMULATOR
 		static simulator_control_output_converted_t out_src;
-		out_src.estimated_velocity = u_bar;
+		out_src.estimated_velocity = can_data.u;
 		out_src.torque_max_l = tmax_rl;
 		out_src.torque_max_r = tmax_rr;
 		out_src.torque_l = torque_rl;
@@ -385,14 +386,15 @@ void can_send_data(can_data_t can_data) {
 		state_timestamp = timestamp;
 
 #if 1 == SIMULATOR
-		static simulator_control_state_converted_t state_src;
-		state_src.map_pw = can_data.map_pw;
-		state_src.map_sc = map_sc;
-		state_src.map_tv = map_tv;
-		static simulator_control_state_t state_src_raw;
-		simulator_control_state_conversion_to_raw_struct(&state_src_raw, &state_src);
-		simulator_control_state_pack(data, &state_src_raw, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
-		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_STATE_FRAME_ID, data, SIMULATOR_CONTROL_STATE_BYTE_SIZE);
+		static simulator_control_status_converted_t state_src;
+		state_src.map_pw = can_data.map_power;
+		state_src.sc_state = (simulator_control_status_sc_state)can_data.sc_state;
+		state_src.tv_state = (simulator_control_status_tv_state)can_data.tv_state;
+    state_src.reg_state = (simulator_control_status_reg_state)can_data.reg_state;
+		static simulator_control_status_t state_src_raw;
+		simulator_control_status_conversion_to_raw_struct(&state_src_raw, &state_src);
+		simulator_control_status_pack(data, &state_src_raw, SIMULATOR_CONTROL_STATUS_BYTE_SIZE);
+		can_send(&can[CAN_SOCKET_PRIMARY], SIMULATOR_CONTROL_STATUS_FRAME_ID, data, SIMULATOR_CONTROL_STATUS_BYTE_SIZE);
 #else
 		static primary_control_status_converted_t state_src;
 		state_src.map_power = can_data.map_power;

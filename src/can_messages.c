@@ -45,13 +45,13 @@ void can_messages_init() {
 void can_messages_parse(can_message_t *message, can_data_t *can_data, can_received_bitset_t *can_received) {
 	assert(message && can_data);
 
-	// #if SIMULATOR == 1
-	// 	if (message->socket == CAN_SOCKET_PRIMARY) {
-	// 		if (simulator_id_is_message(message->frame.can_id)) {
-	// 			can_messages_parse_simulator(message, can_data, can_received);
-	// 		}
-	// 	}
-	// #else
+	#if SIMULATOR == 1
+		if (message->socket == CAN_SOCKET_PRIMARY) {
+			if (simulator_id_is_message(message->frame.can_id)) {
+				can_messages_parse_simulator(message, can_data, can_received);
+			}
+		}
+	#else
 	if (message->socket == CAN_SOCKET_PRIMARY) {
 		if (inverters_id_is_message(message->frame.can_id)) {
 			can_messages_parse_inverters(message, can_data, can_received);
@@ -63,7 +63,7 @@ void can_messages_parse(can_message_t *message, can_data_t *can_data, can_receiv
 			can_messages_parse_secondary(message, can_data, can_received);
 		}
 	}
-	// #endif // SIMULATOR
+	#endif // SIMULATOR
 }
 
 #if SIMULATOR == 1
@@ -80,6 +80,7 @@ static inline void can_messages_parse_simulator(can_message_t *message, can_data
       can_data->gyro_x = convert_gyro(angular_rate->x);
       can_data->gyro_y = convert_gyro(angular_rate->y);
       can_data->gyro_z = convert_gyro(angular_rate->z);
+      CAN_RECEIVED_SET(*can_received, CAN_REC_GYRO);
       break;
     }
     case SIMULATOR_IMU_ACCELERATION_FRAME_ID: {
@@ -88,12 +89,14 @@ static inline void can_messages_parse_simulator(can_message_t *message, can_data
       can_data->accel_x = convert_accel(acceleration->x);
       can_data->accel_y = convert_accel(acceleration->y);
       can_data->accel_z = convert_accel(acceleration->z);
+      CAN_RECEIVED_SET(*can_received, CAN_REC_ACCEL);
       break;
     }
     case SIMULATOR_PEDAL_THROTTLE_FRAME_ID: {
       if(!can_data->throttle_enabled){
         simulator_pedal_throttle_converted_t *pedals = (simulator_pedal_throttle_converted_t *)can_devices.message;
         can_data->throttle = convert_throttle(pedals->throttle);
+        CAN_RECEIVED_SET(*can_received, CAN_REC_THROTTLE);
       }
       break;
     }
@@ -103,18 +106,21 @@ static inline void can_messages_parse_simulator(can_message_t *message, can_data
             (simulator_pedal_brakes_pressure_converted_t *)can_devices.message;
         can_data->brake_f = convert_brake(brakes->front);
         can_data->brake_r = convert_brake(brakes->rear);
+        CAN_RECEIVED_SET(*can_received, CAN_REC_BRAKE);
       }
       break;
     }
     case SIMULATOR_STEER_ANGLE_FRAME_ID: {
       simulator_steer_angle_converted_t *steer_angle = (simulator_steer_angle_converted_t *)can_devices.message;
       can_data->steering_angle = convert_steering_angle(steer_angle->angle);
+      CAN_RECEIVED_SET(*can_received, CAN_REC_STEER_ANGLE);
       break;
     }
     case SIMULATOR_FRONT_ANGULAR_VELOCITY_FRAME_ID: {
       simulator_front_angular_velocity_converted_t *speed = (simulator_front_angular_velocity_converted_t *)can_devices.message;
       can_data->omega_fl = speed->fl;
       can_data->omega_fr = speed->fr;
+      CAN_RECEIVED_SET(*can_received, CAN_REC_OMEGA_F);
       break;
     }
     case SIMULATOR_AS_COMMANDS_STATUS_FRAME_ID: {
@@ -136,6 +142,24 @@ static inline void can_messages_parse_simulator(can_message_t *message, can_data
         can_data->brake_r = total_brake * (1.0 - IDEAL_BRAKE_BALANCE);
         CAN_RECEIVED_SET(*can_received, CAN_REC_BRAKE);
       }
+      break;
+    }
+    case SIMULATOR_VEHICLE_SPEED_FRAME_ID: {
+      simulator_vehicle_speed_converted_t *speed = (simulator_vehicle_speed_converted_t *)can_devices.message;
+      can_data->u = speed->u;
+      CAN_RECEIVED_SET(*can_received, CAN_REC_U);
+      break;
+    }
+    case SIMULATOR_INV_L_RCV_FRAME_ID: {
+      simulator_inv_l_rcv_converted_t *speed = (simulator_inv_l_rcv_converted_t *)can_devices.message;
+      can_data->omega_rl = speed->n_actual_filt;
+      CAN_RECEIVED_SET(*can_received, CAN_REC_OMEGA_R);
+      break;
+    }
+    case SIMULATOR_INV_R_RCV_FRAME_ID: {
+      simulator_inv_r_rcv_converted_t *speed = (simulator_inv_r_rcv_converted_t *)can_devices.message;
+      can_data->omega_rr = speed->n_actual_filt;
+      CAN_RECEIVED_SET(*can_received, CAN_REC_OMEGA_R);
       break;
     }
 	}
