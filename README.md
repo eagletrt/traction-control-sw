@@ -15,6 +15,8 @@ First enable simulator mode, this is line in `inc/defines.h`:
 ```
 make sure that there is `SIMULATOR 1` and not `SIMULATOR 0`.
 
+> **NOTE:**  When using this repo for the simulation with [vehicle-simulator-wrapper](https://github.com/eagletrt/vehicle-simulator-wrapper) keep `SIMULATOR 0`
+
 Then in `src/main.cpp` you should change the CAN interfaces:  
 In the initial part of main.cpp the function `can_init` is called with a string specifying the name of the CAN socket that should be opened. make sure that the sockets are:
 - "vcan0"
