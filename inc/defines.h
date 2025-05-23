@@ -11,7 +11,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define SIMULATOR 1
+#define SIMULATOR 0
 #define USE_TLM_VELOCITY_ESTIMATION 1
 #define USE_INVERTERS_SPEED 1
 

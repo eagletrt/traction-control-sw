@@ -53,13 +53,13 @@ int main(void) {
 	kill_can_thread = false;
 	pthread_mutex_init(&model_mutex, NULL);
 
-	can_init(&can[CAN_SOCKET_PRIMARY], "vcan0");
+	can_init(&can[CAN_SOCKET_PRIMARY], "can0");
 	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
 		return EXIT_FAILURE;
 	}
 	pthread_create(&can_threads[CAN_SOCKET_PRIMARY], NULL, can_thread, &can[CAN_SOCKET_PRIMARY]);
-	can_init(&can[CAN_SOCKET_SECONDARY], "vcan1");
+	can_init(&can[CAN_SOCKET_SECONDARY], "can1");
 	if (can_open_socket(&can[CAN_SOCKET_SECONDARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_SECONDARY].device);
 		return EXIT_FAILURE;
@@ -382,7 +382,7 @@ void can_send_data(can_data_t can_data) {
 		can_send(&can[CAN_SOCKET_PRIMARY], PRIMARY_DEBUG_SIGNAL_1_FRAME_ID, data, PRIMARY_DEBUG_SIGNAL_1_BYTE_SIZE);
 	}
 
-	if (received_controls_data && timestamp - state_timestamp > 1e4) {
+	if (timestamp - state_timestamp > 1e4) {
 		state_timestamp = timestamp;
 
 #if 1 == SIMULATOR
