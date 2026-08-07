@@ -5,3 +5,6 @@
 [submodule "external/soc"]
 	path = external/soc
 	url = git@github.com:eagletrt/soc.git
+[submodule "external/libcan-sw"]
+	path = external/libcan-sw
+	url = git@github.com:eagletrt/libcan-sw.git
