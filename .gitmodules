@@ -8,3 +8,6 @@
 [submodule "external/libcan-sw"]
 	path = external/libcan-sw
 	url = git@github.com:eagletrt/libcan-sw.git
+[submodule "external/libeagletrt-sw"]
+	path = external/libeagletrt-sw
+	url = git@github.com:eagletrt/libeagletrt-sw.git
