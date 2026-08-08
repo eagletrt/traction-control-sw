@@ -13,7 +13,6 @@
 
 static inline void can_messages_parse_primary(can_message_t *message, can_data_t *can_data,
 																							can_received_bitset_t *can_received);
-#endif
 uint8_t raw_mem[512];
 uint8_t converted_mem[512];
 device_t can_devices;

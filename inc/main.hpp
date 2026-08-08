@@ -14,6 +14,8 @@ extern "C" {
 
 #include "external/can/lib/primary/primary_network.h"
 #include "external/can/lib/primary/primary_watchdog.h"
+#include "include/primary/can-primary.h"
+#include "include/primary/can-primary-api.h"
 }
 
 bool running;

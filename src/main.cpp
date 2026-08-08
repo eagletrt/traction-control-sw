@@ -1,6 +1,10 @@
 #include "inc/main.hpp"
+#include "can-networks.h"
+#include "can-primary-api.h"
+#include "can-primary.h"
 #include "inc/data.h"
 #include <pthread.h>
+#include <string>
 extern "C" {
 #include "inc/defines.h"
 #include "inc/can_messages.h"
@@ -131,75 +135,98 @@ void check_received_messages(can_received_bitset_t *bitset) {
 }
 
 void can_send_data(can_data_t can_data) {
+  (void) can_data;
 	static uint8_t data[8];
+	static uint8_t msgSize;
 	uint64_t timestamp = get_timestamp_u();
-	static uint64_t out_timestamp = 0;
-	static uint64_t state_timestamp = 0;
-	static uint64_t debug_state_timestamp = 0;
 	// static uint64_t debug_timestamp = 0;
+	// static uint64_t controls_version_timestamp = 0;
+	// static uint64_t controls_version_info_timestamp = 0;
+	static uint64_t controls_libcanversion_timestamp = 0;
+	static uint64_t controls_libcanversion_info_timestamp = 0;
 	static uint64_t hv_soc_state_timestamp = 0;
 	static uint64_t hv_soc_cov_timestamp = 0;
 	static uint64_t lv_soc_state_timestamp = 0;
 	static uint64_t lv_soc_cov_timestamp = 0;
+	CanNetworkMessage networkMessage;
+	if (timestamp - controls_libcanversion_timestamp > can_primary_cycle_time_controlslibcanversion) {
+		CanPrimaryControlslibcanversion libcanVersion;
+		libcanVersion.major = can_version_major;
+		libcanVersion.minor = can_version_minor;
+		libcanVersion.patch = can_version_patch;
+		networkMessage.can_primary_message.controlslibcanversion = libcanVersion;
+		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSION,
+																								&networkMessage.can_primary_message, data);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSION, data,
+						 msgSize);
+	}
+	if (timestamp - controls_libcanversion_info_timestamp > can_primary_cycle_time_controlslibcanversioninfo) {
+		CanPrimaryControlslibcanversioninfo libcanVersionInfo;
+		libcanVersionInfo.generationtime = can_generation_time;
+		libcanVersionInfo.commithash = std::stoul(CAN_SUBMODULE_COMMIT_HASH);
+		libcanVersionInfo.dirty = std::stoul(CAN_SUBMODULE_COMMIT_STATUS_VALUE);
+		networkMessage.can_primary_message.controlslibcanversioninfo = libcanVersionInfo;
+		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSIONINFO,
+																								&networkMessage.can_primary_message, data);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSIONINFO, data,
+						 msgSize);
+	}
 
-	if (received_hv_soc_data && timestamp - hv_soc_state_timestamp > 1e5) {
+	if (received_hv_soc_data && timestamp - hv_soc_state_timestamp > can_primary_cycle_time_tsacmainboardestimatedsoc) {
 		hv_soc_state_timestamp = timestamp;
 		const auto &state = hvSOC.getState();
-		static secondary_hv_soc_estimation_state_converted_t hv_soc_estimation_state;
+		CanPrimaryTsacmainboardestimatedsoc hv_soc_estimation_state;
 		hv_soc_estimation_state.soc = state(_SOC);
-		hv_soc_estimation_state.rc1 = state(_RC1);
-		hv_soc_estimation_state.rc2 = state(_RC2);
-
-		secondary_hv_soc_estimation_state_t raw;
-		secondary_hv_soc_estimation_state_conversion_to_raw_struct(&raw, &hv_soc_estimation_state);
-		secondary_hv_soc_estimation_state_pack(data, &raw, SECONDARY_HV_SOC_ESTIMATION_STATE_BYTE_SIZE);
-		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_HV_SOC_ESTIMATION_STATE_FRAME_ID, data,
-						 SECONDARY_HV_SOC_ESTIMATION_STATE_BYTE_SIZE);
+		hv_soc_estimation_state.vrc1 = state(_RC1);
+		hv_soc_estimation_state.vrc2 = state(_RC2);
+		networkMessage.can_primary_message.tsacmainboardestimatedsoc = hv_soc_estimation_state;
+		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDSOC,
+																								&networkMessage.can_primary_message, data);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDSOC, data,
+						 msgSize);
 	}
-	if (received_hv_soc_data && timestamp - hv_soc_cov_timestamp > 1e5) {
+	if (received_hv_soc_data &&
+			timestamp - hv_soc_cov_timestamp > can_primary_cycle_time_tsacmainboardestimatedcovariance) {
 		hv_soc_cov_timestamp = timestamp;
 		const auto &covariance = hvSOC.getCovariance();
-		static secondary_hv_soc_estimation_covariance_converted_t hv_soc_estimation_covariance;
+		CanPrimaryTsacmainboardestimatedcovariance hv_soc_estimation_covariance;
 		hv_soc_estimation_covariance.soc = covariance(_SOC, _SOC);
-		hv_soc_estimation_covariance.rc1 = covariance(_RC1, _RC1);
-		hv_soc_estimation_covariance.rc2 = covariance(_RC2, _RC2);
-
-		secondary_hv_soc_estimation_covariance_t raw;
-		secondary_hv_soc_estimation_covariance_conversion_to_raw_struct(&raw, &hv_soc_estimation_covariance);
-		secondary_hv_soc_estimation_covariance_pack(data, &raw, SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
-		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_FRAME_ID, data,
-						 SECONDARY_HV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
+		hv_soc_estimation_covariance.vrc1 = covariance(_RC1, _RC1);
+		hv_soc_estimation_covariance.vrc2 = covariance(_RC2, _RC2);
+		networkMessage.can_primary_message.tsacmainboardestimatedcovariance = hv_soc_estimation_covariance;
+		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDCOVARIANCE,
+																								&networkMessage.can_primary_message, data);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDCOVARIANCE, data,
+						 msgSize);
 	}
-	if (received_lv_soc_data && timestamp - lv_soc_state_timestamp > 1e5) {
+	if (received_lv_soc_data && timestamp - lv_soc_state_timestamp > can_primary_cycle_time_lvacestimatedcovariance) {
 		lv_soc_state_timestamp = timestamp;
 		const auto &state = lvSOC.getState();
-		static secondary_lv_soc_estimation_state_converted_t lv_soc_estimation_state;
+		CanPrimaryLvacestimatedsoc lv_soc_estimation_state;
 
 		constexpr float realMinSoc = 0.1;
 		float soc = (state(_SOC) - realMinSoc) / (1.0 - realMinSoc);
 		lv_soc_estimation_state.soc = soc;
-		lv_soc_estimation_state.rc1 = state(_RC1);
-		lv_soc_estimation_state.rc2 = state(_RC2);
-
-		secondary_lv_soc_estimation_state_t raw;
-		secondary_lv_soc_estimation_state_conversion_to_raw_struct(&raw, &lv_soc_estimation_state);
-		secondary_lv_soc_estimation_state_pack(data, &raw, SECONDARY_LV_SOC_ESTIMATION_STATE_BYTE_SIZE);
-		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_LV_SOC_ESTIMATION_STATE_FRAME_ID, data,
-						 SECONDARY_LV_SOC_ESTIMATION_STATE_BYTE_SIZE);
+		lv_soc_estimation_state.vrc1 = state(_RC1);
+		lv_soc_estimation_state.vrc2 = state(_RC2);
+		networkMessage.can_primary_message.lvacestimatedsoc = lv_soc_estimation_state;
+		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDSOC,
+																								&networkMessage.can_primary_message, data);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDSOC, data,
+						 msgSize);
 	}
 	if (received_lv_soc_data && timestamp - lv_soc_cov_timestamp > 1e5) {
 		lv_soc_cov_timestamp = timestamp;
 		const auto &covariance = lvSOC.getCovariance();
-		static secondary_lv_soc_estimation_covariance_converted_t lv_soc_estimation_covariance;
+		CanPrimaryLvacestimatedcovariance lv_soc_estimation_covariance;
 		lv_soc_estimation_covariance.soc = covariance(_SOC, _SOC);
-		lv_soc_estimation_covariance.rc1 = covariance(_RC1, _RC1);
-		lv_soc_estimation_covariance.rc2 = covariance(_RC2, _RC2);
-
-		secondary_lv_soc_estimation_covariance_t raw;
-		secondary_lv_soc_estimation_covariance_conversion_to_raw_struct(&raw, &lv_soc_estimation_covariance);
-		secondary_lv_soc_estimation_covariance_pack(data, &raw, SECONDARY_LV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
-		can_send(&can[CAN_SOCKET_SECONDARY], SECONDARY_LV_SOC_ESTIMATION_COVARIANCE_FRAME_ID, data,
-						 SECONDARY_LV_SOC_ESTIMATION_COVARIANCE_BYTE_SIZE);
+		lv_soc_estimation_covariance.vrc1 = covariance(_RC1, _RC1);
+		lv_soc_estimation_covariance.vrc2 = covariance(_RC2, _RC2);
+		networkMessage.can_primary_message.lvacestimatedcovariance = lv_soc_estimation_covariance;
+		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDCOVARIANCE,
+																								&networkMessage.can_primary_message, data);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDCOVARIANCE, data,
+						 msgSize);
 	}
 }
 
