@@ -7,15 +7,12 @@
 
 typedef enum {
 	NETWORK_PRIMARY,
-	NETWORK_SECONDARY,
-	NETWORK_INVERTERS,
 
 	NETWORK_COUNT
 } can_network_t;
 
 typedef enum {
 	CAN_SOCKET_PRIMARY,
-	CAN_SOCKET_SECONDARY,
 
 	CAN_SOCKET_COUNT
 } can_socket_t;

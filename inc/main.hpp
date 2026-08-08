@@ -14,13 +14,6 @@ extern "C" {
 
 #include "external/can/lib/primary/primary_network.h"
 #include "external/can/lib/primary/primary_watchdog.h"
-#include "external/can/lib/secondary/secondary_network.h"
-#include "external/can/lib/secondary/secondary_watchdog.h"
-#include "external/can/lib/simulator/simulator_network.h"
-
-#include "exported/Regen/Regen.h"
-#include "exported/Slip_Control/SLIP.h"
-#include "exported/Traction_Control/TV.h"
 }
 
 bool running;
@@ -32,24 +25,9 @@ bool received_controls_data;
 bool received_hv_soc_data;
 bool received_lv_soc_data;
 
-DW_TV torque_rtDW;
-RT_MODEL_TV torque_model;
-
-DW_SLIP slip_rtDW;
-RT_MODEL_SLIP slip_model;
-
-RT_MODEL_Regen regen_model;
-
 SOC hvSOC;
 SOC lvSOC;
 
-bool init_model(void);
-double torque_max(can_data_t *can_data);
-void velocity_estimation(can_data_t *can_data);
-void torque_model_set_data(can_data_t *can_data);
-void regen_model_set_data(can_data_t *can_data);
-void slip_model_set_data(can_data_t *can_data);
-bool regen_enable(double brake_front, double throttle, double hvSOC);
 void check_received_messages(can_received_bitset_t *bitset);
 
 bool load_soc_state(const char *path, Eigen::VectorXd &state);
