@@ -1,7 +1,3 @@
-[submodule "lib/can"]
-	path = external/can
-	url = git@github.com:eagletrt/can.git
-	branch = build-evo
 [submodule "external/soc"]
 	path = external/soc
 	url = git@github.com:eagletrt/soc.git
