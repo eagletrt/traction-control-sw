@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(traction-control)
 
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options(-Wall -Wextra -Werror -O3 -g)
@@ -43,7 +45,10 @@ add_definitions(-DCAN_SUBMODULE_COMMIT_STATUS=\"${CAN_STATUS}\")
 add_definitions(-DCAN_SUBMODULE_COMMIT_STATUS_VALUE=\"${CAN_STATUS_VALUE}\")
 
 file(GLOB traction-control-lib-src ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
-file(GLOB_RECURSE can-lib-src ${CMAKE_CURRENT_LIST_DIR}/external/can/lib/*.c)
+set_source_files_properties(
+    ${traction-control-lib-src}
+    PROPERTIES LANGUAGE CXX
+)
 
 file(GLOB_RECURSE canlib_lib_c ${CDIR}/external/libcan-sw/src/*.c)
 add_library(can-lib
@@ -90,7 +95,7 @@ add_library(
     STATIC
     ${traction-control-lib-src}
 )
-target_link_libraries(traction-control-lib can-lib m pthread)
+target_link_libraries(traction-control-lib PUBLIC can-lib m pthread)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
 

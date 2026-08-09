@@ -1,16 +1,14 @@
 #include "inc/main.hpp"
+#include <pthread.h>
+#include <string>
+#include "inc/data.h"
 #include "can-networks.h"
 #include "can-primary-api.h"
 #include "can-primary.h"
-#include "inc/data.h"
-#include <pthread.h>
-#include <string>
-extern "C" {
 #include "inc/defines.h"
 #include "inc/can_messages.h"
 #include "inc/benchmark.h"
 #include "inc/utils.h"
-}
 #include "external/soc/core/src/soc/soc.hpp"
 
 #include <math.h>

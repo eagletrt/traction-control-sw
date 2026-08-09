@@ -7,16 +7,12 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-extern "C" {
 #include "inc/can.h"
 #include "inc/data.h"
 #include "inc/can_messages.h"
 
-#include "external/can/lib/primary/primary_network.h"
-#include "external/can/lib/primary/primary_watchdog.h"
 #include "include/primary/can-primary.h"
 #include "include/primary/can-primary-api.h"
-}
 
 bool running;
 can_t can[CAN_SOCKET_COUNT];

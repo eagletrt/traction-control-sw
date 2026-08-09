@@ -4,6 +4,7 @@
 #include "can.h"
 #include "data.h"
 #include "defines.h"
+#include "primary/can-primary-api.h"
 
 typedef enum {
 	NETWORK_PRIMARY,
