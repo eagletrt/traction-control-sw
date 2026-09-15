@@ -81,14 +81,14 @@ include_directories(
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/external/soc)
 
-add_library(
-    exported
-    STATIC
-
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Regen/Regen.c
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SLIP.c
-    ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/TV.c
-)
+# add_library(
+#     exported
+#     STATIC
+#
+#     ${CMAKE_CURRENT_LIST_DIR}/exported/Regen/Regen.c
+#     ${CMAKE_CURRENT_LIST_DIR}/exported/Slip_Control/SLIP.c
+#     ${CMAKE_CURRENT_LIST_DIR}/exported/Traction_Control/TV.c
+# )
 
 add_library(
     traction-control-lib
@@ -100,4 +100,5 @@ target_link_libraries(traction-control-lib PUBLIC can-lib m pthread)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
 
 add_executable(traction-control src/main.cpp)
-target_link_libraries(traction-control exported traction-control-lib soclib)
+# target_link_libraries(traction-control exported traction-control-lib soclib)
+target_link_libraries(traction-control traction-control-lib soclib)

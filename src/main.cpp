@@ -213,7 +213,7 @@ void can_send_data(can_data_t can_data) {
 		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDSOC, data,
 						 msgSize);
 	}
-	if (received_lv_soc_data && timestamp - lv_soc_cov_timestamp > 1e5) {
+	if (received_lv_soc_data && timestamp - lv_soc_cov_timestamp > can_primary_cycle_time_lvacestimatedcovariance) {
 		lv_soc_cov_timestamp = timestamp;
 		const auto &covariance = lvSOC.getCovariance();
 		CanPrimaryLvacestimatedcovariance lv_soc_estimation_covariance;
