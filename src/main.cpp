@@ -161,7 +161,8 @@ void can_send_data(can_data_t can_data) {
 	if (timestamp - controls_libcanversion_info_timestamp > can_primary_cycle_time_controlslibcanversioninfo) {
 		CanPrimaryControlslibcanversioninfo libcanVersionInfo;
 		libcanVersionInfo.generationtime = can_generation_time;
-		libcanVersionInfo.commithash = std::stoul(CAN_SUBMODULE_COMMIT_HASH);
+		libcanVersionInfo.commithash = static_cast<uint32_t>(
+			std::stoul(std::string(CAN_SUBMODULE_COMMIT_HASH).substr(0, 8), nullptr, 16));
 		libcanVersionInfo.dirty = std::stoul(CAN_SUBMODULE_COMMIT_STATUS_VALUE);
 		networkMessage.can_primary_message.controlslibcanversioninfo = libcanVersionInfo;
 		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSIONINFO,
