@@ -31,7 +31,7 @@ int main(void) {
 	kill_can_thread = false;
 	pthread_mutex_init(&model_mutex, NULL);
 
-	can_init(&can[CAN_SOCKET_PRIMARY], "can2");
+	can_init(&can[CAN_SOCKET_PRIMARY], "can1");
 	if (can_open_socket(&can[CAN_SOCKET_PRIMARY]) < 0) {
 		eprintf("Error opening socket %s\n", can[CAN_SOCKET_PRIMARY].device);
 		return EXIT_FAILURE;
