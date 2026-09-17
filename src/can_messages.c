@@ -42,7 +42,7 @@ static inline void can_messages_parse_primary(can_message_t *message, can_data_t
 		break;
 	}
 	case CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDTEMPERATUREINFO: {
-		can_data->hv_mean_temp = networkMessage.can_primary_message.tsacmainboardtemperatureinfo.avg;
+		can_data->hv_mean_temp = networkMessage.can_primary_message.tsacmainboardtemperatureinfo.average;
 		CAN_RECEIVED_SET(*can_received, CAN_REC_HV)
 		break;
 	}
