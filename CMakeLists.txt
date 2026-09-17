@@ -46,8 +46,8 @@ add_definitions(-DCAN_SUBMODULE_COMMIT_STATUS_VALUE=\"${CAN_STATUS_VALUE}\")
 
 file(GLOB traction-control-lib-src ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
 set_source_files_properties(
-    ${traction-control-lib-src}
-    PROPERTIES LANGUAGE CXX
+  ${traction-control-lib-src}
+  PROPERTIES LANGUAGE CXX COMPILE_OPTIONS "-x;c++"
 )
 
 file(GLOB_RECURSE canlib_lib_c ${CDIR}/external/libcan-sw/src/*.c)
@@ -55,8 +55,8 @@ add_library(can-lib
     ${canlib_lib_c}
 )
 set_source_files_properties(
-    ${canlib_lib_c}
-    PROPERTIES LANGUAGE CXX
+  ${canlib_lib_c}
+  PROPERTIES LANGUAGE CXX COMPILE_OPTIONS "-x;c++"
 )
 target_compile_options(can-lib PRIVATE -w)
 include_directories(

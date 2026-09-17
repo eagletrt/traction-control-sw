@@ -133,7 +133,7 @@ void check_received_messages(can_received_bitset_t *bitset) {
 }
 
 void can_send_data(can_data_t can_data) {
-  (void) can_data;
+	(void)can_data;
 	static uint8_t data[8];
 	static uint8_t msgSize;
 	uint64_t timestamp = get_timestamp_u();
@@ -155,20 +155,18 @@ void can_send_data(can_data_t can_data) {
 		networkMessage.can_primary_message.controlslibcanversion = libcanVersion;
 		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSION,
 																								&networkMessage.can_primary_message, data);
-		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSION, data,
-						 msgSize);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSION, data, msgSize);
 	}
 	if (timestamp - controls_libcanversion_info_timestamp > can_primary_cycle_time_controlslibcanversioninfo) {
 		CanPrimaryControlslibcanversioninfo libcanVersionInfo;
 		libcanVersionInfo.generationtime = can_generation_time;
-		libcanVersionInfo.commithash = static_cast<uint32_t>(
-			std::stoul(std::string(CAN_SUBMODULE_COMMIT_HASH).substr(0, 8), nullptr, 16));
+		libcanVersionInfo.commithash =
+				static_cast<uint32_t>(std::stoul(std::string(CAN_SUBMODULE_COMMIT_HASH).substr(0, 8), nullptr, 16));
 		libcanVersionInfo.dirty = std::stoul(CAN_SUBMODULE_COMMIT_STATUS_VALUE);
 		networkMessage.can_primary_message.controlslibcanversioninfo = libcanVersionInfo;
 		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSIONINFO,
 																								&networkMessage.can_primary_message, data);
-		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSIONINFO, data,
-						 msgSize);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSIONINFO, data, msgSize);
 	}
 
 	if (received_hv_soc_data && timestamp - hv_soc_state_timestamp > can_primary_cycle_time_tsacmainboardestimatedsoc) {
@@ -181,8 +179,7 @@ void can_send_data(can_data_t can_data) {
 		networkMessage.can_primary_message.tsacmainboardestimatedsoc = hv_soc_estimation_state;
 		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDSOC,
 																								&networkMessage.can_primary_message, data);
-		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDSOC, data,
-						 msgSize);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDSOC, data, msgSize);
 	}
 	if (received_hv_soc_data &&
 			timestamp - hv_soc_cov_timestamp > can_primary_cycle_time_tsacmainboardestimatedcovariance) {
@@ -195,10 +192,9 @@ void can_send_data(can_data_t can_data) {
 		networkMessage.can_primary_message.tsacmainboardestimatedcovariance = hv_soc_estimation_covariance;
 		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDCOVARIANCE,
 																								&networkMessage.can_primary_message, data);
-		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDCOVARIANCE, data,
-						 msgSize);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDCOVARIANCE, data, msgSize);
 	}
-	if (received_lv_soc_data && timestamp - lv_soc_state_timestamp > can_primary_cycle_time_lvacestimatedcovariance) {
+	if (received_lv_soc_data && timestamp - lv_soc_state_timestamp > can_primary_cycle_time_lvacestimatedsoc) {
 		lv_soc_state_timestamp = timestamp;
 		const auto &state = lvSOC.getState();
 		CanPrimaryLvacestimatedsoc lv_soc_estimation_state;
@@ -211,8 +207,7 @@ void can_send_data(can_data_t can_data) {
 		networkMessage.can_primary_message.lvacestimatedsoc = lv_soc_estimation_state;
 		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDSOC,
 																								&networkMessage.can_primary_message, data);
-		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDSOC, data,
-						 msgSize);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDSOC, data, msgSize);
 	}
 	if (received_lv_soc_data && timestamp - lv_soc_cov_timestamp > can_primary_cycle_time_lvacestimatedcovariance) {
 		lv_soc_cov_timestamp = timestamp;
@@ -224,8 +219,7 @@ void can_send_data(can_data_t can_data) {
 		networkMessage.can_primary_message.lvacestimatedcovariance = lv_soc_estimation_covariance;
 		msgSize = can_primary_api_serialize_from_id(CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDCOVARIANCE,
 																								&networkMessage.can_primary_message, data);
-		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDCOVARIANCE, data,
-						 msgSize);
+		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDCOVARIANCE, data, msgSize);
 	}
 }
 

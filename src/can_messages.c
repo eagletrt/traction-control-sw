@@ -28,7 +28,7 @@ static inline void can_messages_parse_primary(can_message_t *message, can_data_t
 	union CanNetworkMessage networkMessage;
 	int msgSize = can_primary_api_deserialize_from_id((enum CanPrimaryMessageFrameId)message->frame.can_id,
 																										message->frame.data, &networkMessage.can_primary_message);
-  (void) msgSize;
+	(void)msgSize;
 	switch (message->frame.can_id) {
 
 	case CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDCURRENTINFO: {
@@ -42,7 +42,7 @@ static inline void can_messages_parse_primary(can_message_t *message, can_data_t
 		break;
 	}
 	case CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDTEMPERATUREINFO: {
-		can_data->hv_mean_temp = networkMessage.can_primary_message.tsacmainboardtemperatureinfo.min;
+		can_data->hv_mean_temp = networkMessage.can_primary_message.tsacmainboardtemperatureinfo.avg;
 		CAN_RECEIVED_SET(*can_received, CAN_REC_HV)
 		break;
 	}
