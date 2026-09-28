@@ -149,6 +149,7 @@ void can_send_data(can_data_t can_data) {
 	CanNetworkMessage networkMessage;
 	if (timestamp - controls_libcanversion_timestamp > can_primary_cycle_time_controlslibcanversion) {
 		CanPrimaryControlslibcanversion libcanVersion;
+		controls_libcanversion_timestamp = timestamp;
 		libcanVersion.major = can_version_major;
 		libcanVersion.minor = can_version_minor;
 		libcanVersion.patch = can_version_patch;
@@ -158,6 +159,7 @@ void can_send_data(can_data_t can_data) {
 		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSION, data, msgSize);
 	}
 	if (timestamp - controls_libcanversion_info_timestamp > can_primary_cycle_time_controlslibcanversioninfo) {
+		controls_libcanversion_info_timestamp = timestamp;
 		CanPrimaryControlslibcanversioninfo libcanVersionInfo;
 		libcanVersionInfo.generationtime = can_generation_time;
 		libcanVersionInfo.commithash =
