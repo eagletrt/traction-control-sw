@@ -147,7 +147,7 @@ void can_send_data(can_data_t can_data) {
 	static uint64_t lv_soc_state_timestamp = 0;
 	static uint64_t lv_soc_cov_timestamp = 0;
 	CanNetworkMessage networkMessage;
-	if (timestamp - controls_libcanversion_timestamp > can_primary_cycle_time_controlslibcanversion) {
+	if (timestamp - controls_libcanversion_timestamp > can_primary_cycle_time_controlslibcanversion * 1000) {
 		CanPrimaryControlslibcanversion libcanVersion;
 		controls_libcanversion_timestamp = timestamp;
 		libcanVersion.major = can_version_major;
@@ -158,7 +158,7 @@ void can_send_data(can_data_t can_data) {
 																								&networkMessage.can_primary_message, data);
 		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSION, data, msgSize);
 	}
-	if (timestamp - controls_libcanversion_info_timestamp > can_primary_cycle_time_controlslibcanversioninfo) {
+	if (timestamp - controls_libcanversion_info_timestamp > can_primary_cycle_time_controlslibcanversioninfo * 1000) {
 		controls_libcanversion_info_timestamp = timestamp;
 		CanPrimaryControlslibcanversioninfo libcanVersionInfo;
 		libcanVersionInfo.generationtime = can_generation_time;
@@ -171,7 +171,7 @@ void can_send_data(can_data_t can_data) {
 		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_CONTROLSLIBCANVERSIONINFO, data, msgSize);
 	}
 
-	if (received_hv_soc_data && timestamp - hv_soc_state_timestamp > can_primary_cycle_time_tsacmainboardestimatedsoc) {
+	if (received_hv_soc_data && timestamp - hv_soc_state_timestamp > can_primary_cycle_time_tsacmainboardestimatedsoc * 1000) {
 		hv_soc_state_timestamp = timestamp;
 		const auto &state = hvSOC.getState();
 		CanPrimaryTsacmainboardestimatedsoc hv_soc_estimation_state;
@@ -184,7 +184,7 @@ void can_send_data(can_data_t can_data) {
 		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDSOC, data, msgSize);
 	}
 	if (received_hv_soc_data &&
-			timestamp - hv_soc_cov_timestamp > can_primary_cycle_time_tsacmainboardestimatedcovariance) {
+			timestamp - hv_soc_cov_timestamp > can_primary_cycle_time_tsacmainboardestimatedcovariance * 1000) {
 		hv_soc_cov_timestamp = timestamp;
 		const auto &covariance = hvSOC.getCovariance();
 		CanPrimaryTsacmainboardestimatedcovariance hv_soc_estimation_covariance;
@@ -196,7 +196,7 @@ void can_send_data(can_data_t can_data) {
 																								&networkMessage.can_primary_message, data);
 		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_TSACMAINBOARDESTIMATEDCOVARIANCE, data, msgSize);
 	}
-	if (received_lv_soc_data && timestamp - lv_soc_state_timestamp > can_primary_cycle_time_lvacestimatedsoc) {
+	if (received_lv_soc_data && timestamp - lv_soc_state_timestamp > can_primary_cycle_time_lvacestimatedsoc * 1000) {
 		lv_soc_state_timestamp = timestamp;
 		const auto &state = lvSOC.getState();
 		CanPrimaryLvacestimatedsoc lv_soc_estimation_state;
@@ -211,7 +211,7 @@ void can_send_data(can_data_t can_data) {
 																								&networkMessage.can_primary_message, data);
 		can_send(&can[CAN_SOCKET_PRIMARY], CAN_PRIMARY_MESSAGE_FRAME_ID_LVACESTIMATEDSOC, data, msgSize);
 	}
-	if (received_lv_soc_data && timestamp - lv_soc_cov_timestamp > can_primary_cycle_time_lvacestimatedcovariance) {
+	if (received_lv_soc_data && timestamp - lv_soc_cov_timestamp > can_primary_cycle_time_lvacestimatedcovariance * 1000) {
 		lv_soc_cov_timestamp = timestamp;
 		const auto &covariance = lvSOC.getCovariance();
 		CanPrimaryLvacestimatedcovariance lv_soc_estimation_covariance;
